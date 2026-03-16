@@ -35,8 +35,8 @@ public class CommentService {
     @Transactional
     public CommentResponse addComment(UUID postId, CommentRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email).orElseThrow();
-        Post post = postRepository.findById(postId).orElseThrow();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
 
         Comment comment = Comment.builder()
                 .content(request.getContent())
@@ -45,7 +45,7 @@ public class CommentService {
                 .build();
 
         if (request.getParentId() != null) {
-            Comment parent = commentRepository.findById(request.getParentId()).orElseThrow();
+            Comment parent = commentRepository.findById(request.getParentId()).orElseThrow(() -> new RuntimeException("Parent comment not found"));
             if (parent.getParent() != null) {
                 throw new RuntimeException("Cannot reply to a reply");
             }
@@ -61,9 +61,9 @@ public class CommentService {
     }
 
     public void deleteComment(UUID id) {
-        Comment comment = commentRepository.findById(id).orElseThrow();
+        Comment comment = commentRepository.findById(id).orElseThrow(() -> new RuntimeException("Comment not found"));
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
         boolean isAuthorOfPost = comment.getPost().getAuthor().getId().equals(currentUser.getId());
         boolean isAuthorOfComment = comment.getUser().getId().equals(currentUser.getId());

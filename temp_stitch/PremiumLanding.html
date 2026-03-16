@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BlogSpace | Write, Publish, Grow</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: '#0a0a0f',
+            accent: '#6366f1',
+          },
+          animation: {
+            'fade-up': 'fadeUp 0.8s ease-out forwards',
+            'float': 'float 6s ease-in-out infinite',
+            'pulse-slow': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            fadeUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-20px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="glassmorphism">
+    .glass {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .glass-nav {
+      background: rgba(10, 10, 15, 0.7);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+  </style>
+<style data-purpose="ambient-orbs">
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      z-index: -1;
+      opacity: 0.4;
+    }
+    .orb-1 { width: 400px; height: 400px; background: #6366f1; top: -100px; left: -100px; }
+    .orb-2 { width: 350px; height: 350px; background: #a855f7; bottom: 10%; right: -50px; }
+  </style>
+<style data-purpose="typography">
+    .gradient-text {
+      background: linear-gradient(135deg, #fff 0%, #6366f1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .glow-button {
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+      transition: all 0.3s ease;
+    }
+    .glow-button:hover {
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.6);
+      transform: translateY(-1px);
+    }
+  </style>
+<!-- END: Custom Styles -->
+</head>
+<body class="bg-dark text-slate-300 font-sans selection:bg-accent/30 overflow-x-hidden">
+<!-- Ambient Background Orbs -->
+<div class="orb orb-1 animate-pulse-slow"></div>
+<div class="orb orb-2 animate-pulse-slow" style="animation-delay: 2s;"></div>
+<!-- BEGIN: MainHeader -->
+<header class="fixed top-0 w-full z-50 glass-nav">
+<nav class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between" data-purpose="navigation-container">
+<!-- Logo -->
+<div class="flex items-center space-x-2">
+<div class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+<span class="text-white font-bold text-xl">B</span>
+</div>
+<span class="text-white font-bold text-xl tracking-tight">BlogSpace</span>
+</div>
+<!-- Links -->
+<div class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-400">
+<a class="hover:text-white transition-colors" href="#">Features</a>
+<a class="hover:text-white transition-colors" href="#">Resources</a>
+<a class="hover:text-white transition-colors" href="#">Pricing</a>
+<a class="hover:text-white transition-colors" href="#">Enterprise</a>
+</div>
+<!-- CTA Button -->
+<div>
+<button class="bg-accent text-white px-5 py-2.5 rounded-full text-sm font-semibold glow-button">
+          Start writing
+        </button>
+</div>
+</nav>
+</header>
+<!-- END: MainHeader -->
+<main class="relative">
+<!-- BEGIN: HeroSection -->
+<section class="pt-40 pb-20 px-6 overflow-hidden" data-purpose="hero">
+<div class="max-w-7xl mx-auto flex flex-col items-center text-center">
+<!-- Announcement Badge -->
+<div class="animate-fade-up flex items-center space-x-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-xs font-medium text-accent mb-8">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+</span>
+<span>New: AI-Powered Editor is live</span>
+</div>
+<!-- Headline -->
+<h1 class="animate-fade-up text-5xl md:text-7xl font-bold text-white mb-6 max-w-4xl leading-[1.1]" style="animation-delay: 0.1s;">
+          Write. Publish. <br/>
+<span class="gradient-text">Build your audience.</span>
+</h1>
+<p class="animate-fade-up text-lg text-slate-400 max-w-2xl mb-12" style="animation-delay: 0.2s;">
+          The modern platform for professional writers. Seamless publishing, deep analytics, and community-first features built for the next generation of blogs.
+        </p>
+<!-- Hero Card Graphic -->
+<div class="relative w-full max-w-4xl mt-12 animate-fade-up" style="animation-delay: 0.3s;">
+<div class="glass p-4 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden">
+<!-- Mock Editor UI -->
+<div class="flex items-center justify-between mb-4 border-b border-white/5 pb-4">
+<div class="flex space-x-2">
+<div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+<div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+<div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+</div>
+<div class="text-xs text-slate-500">Draft saved: 2 mins ago</div>
+</div>
+<div class="h-64 bg-white/5 rounded-lg flex flex-col p-8 items-start space-y-4">
+<div class="h-8 w-2/3 bg-white/10 rounded-md"></div>
+<div class="h-4 w-full bg-white/5 rounded-md"></div>
+<div class="h-4 w-5/6 bg-white/5 rounded-md"></div>
+<div class="h-32 w-full border border-dashed border-white/10 rounded-lg flex items-center justify-center text-slate-600">
+                  Featured Image Canvas
+                </div>
+</div>
+</div>
+<!-- Floating Element -->
+<div class="absolute -right-10 -bottom-10 glass p-6 rounded-xl border border-white/20 animate-float hidden lg:block">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-full bg-gradient-to-tr from-accent to-purple-400"></div>
+<div>
+<p class="text-white text-sm font-bold">+12,400</p>
+<p class="text-xs text-slate-400">Subscribers today</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: HeroSection -->
+<!-- BEGIN: StatsBar -->
+<section class="py-12 border-y border-white/5 bg-white/[0.02]" data-purpose="stats">
+<div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
+<div class="text-center">
+<div class="text-3xl font-bold gradient-text">2M+</div>
+<div class="text-sm text-slate-500 mt-1 uppercase tracking-widest">Writers</div>
+</div>
+<div class="text-center">
+<div class="text-3xl font-bold gradient-text">450M</div>
+<div class="text-sm text-slate-500 mt-1 uppercase tracking-widest">Views/mo</div>
+</div>
+<div class="text-center">
+<div class="text-3xl font-bold gradient-text">120+</div>
+<div class="text-sm text-slate-500 mt-1 uppercase tracking-widest">Countries</div>
+</div>
+<div class="text-center">
+<div class="text-3xl font-bold gradient-text">$15M</div>
+<div class="text-sm text-slate-500 mt-1 uppercase tracking-widest">Creator Payouts</div>
+</div>
+</div>
+</section>
+<!-- END: StatsBar -->
+<!-- BEGIN: FeaturesGrid -->
+<section class="py-24 px-6 relative" id="features">
+<div class="max-w-7xl mx-auto">
+<div class="mb-16">
+<h2 class="text-3xl font-bold text-white mb-4">Everything you need to grow.</h2>
+<p class="text-slate-400 max-w-xl">Built by creators for creators. We've removed the technical hurdles so you can focus on what matters: the content.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Card 1 -->
+<div class="glass p-8 rounded-2xl hover:bg-white/[0.05] transition-all group">
+<div class="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<svg class="h-6 w-6 text-accent" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<h3 class="text-white font-semibold text-lg mb-2">Editor V2</h3>
+<p class="text-slate-400 text-sm leading-relaxed">Distraction-free writing experience with markdown support and live previews.</p>
+</div>
+<!-- Card 2 -->
+<div class="glass p-8 rounded-2xl hover:bg-white/[0.05] transition-all group">
+<div class="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<svg class="h-6 w-6 text-accent" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<h3 class="text-white font-semibold text-lg mb-2">Deep Analytics</h3>
+<p class="text-slate-400 text-sm leading-relaxed">Understand your audience better with heatmaps, drop-off rates and regional data.</p>
+</div>
+<!-- Card 3 -->
+<div class="glass p-8 rounded-2xl hover:bg-white/[0.05] transition-all group">
+<div class="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<svg class="h-6 w-6 text-accent" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<h3 class="text-white font-semibold text-lg mb-2">Monetization</h3>
+<p class="text-slate-400 text-sm leading-relaxed">Built-in subscriptions, digital products, and tip jars with zero setup required.</p>
+</div>
+<!-- Card 4 -->
+<div class="glass p-8 rounded-2xl hover:bg-white/[0.05] transition-all group">
+<div class="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<svg class="h-6 w-6 text-accent" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<h3 class="text-white font-semibold text-lg mb-2">Custom Domains</h3>
+<p class="text-slate-400 text-sm leading-relaxed">Connect your own domain with free SSL certificates and worldwide CDN delivery.</p>
+</div>
+<!-- Card 5 -->
+<div class="glass p-8 rounded-2xl hover:bg-white/[0.05] transition-all group">
+<div class="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<svg class="h-6 w-6 text-accent" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<h3 class="text-white font-semibold text-lg mb-2">Collaborative Teams</h3>
+<p class="text-slate-400 text-sm leading-relaxed">Manage publications with multiple authors, editors, and granular permission sets.</p>
+</div>
+<!-- Card 6 -->
+<div class="glass p-8 rounded-2xl hover:bg-white/[0.05] transition-all group">
+<div class="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<svg class="h-6 w-6 text-accent" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<h3 class="text-white font-semibold text-lg mb-2">Instant SEO</h3>
+<p class="text-slate-400 text-sm leading-relaxed">Automatic meta tags, sitemaps, and optimized markup to rank higher instantly.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- END: FeaturesGrid -->
+<!-- BEGIN: RolesSection -->
+<section class="py-24 px-6 bg-white/[0.01]" data-purpose="roles">
+<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+<div>
+<h2 class="text-4xl font-bold text-white mb-6">Built for every type of storyteller.</h2>
+<p class="text-slate-400 text-lg mb-8">Whether you're just starting your journey or managing a global newsroom, BlogSpace adapts to your workflow.</p>
+<ul class="space-y-4">
+<li class="flex items-center space-x-3 text-slate-300">
+<svg class="h-5 w-5 text-accent" fill="currentColor" viewbox="0 0 20 20"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd"></path></svg>
+<span>Scale from 1 to 1M subscribers</span>
+</li>
+<li class="flex items-center space-x-3 text-slate-300">
+<svg class="h-5 w-5 text-accent" fill="currentColor" viewbox="0 0 20 20"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd"></path></svg>
+<span>Native newsletter delivery</span>
+</li>
+<li class="flex items-center space-x-3 text-slate-300">
+<svg class="h-5 w-5 text-accent" fill="currentColor" viewbox="0 0 20 20"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd"></path></svg>
+<span>Open-source community themes</span>
+</li>
+</ul>
+</div>
+<div class="space-y-6">
+<!-- Role Card 1 -->
+<div class="glass p-6 rounded-2xl border-l-4 border-l-accent flex items-start space-x-4">
+<div class="p-3 rounded-full bg-accent/10">
+<svg class="h-6 w-6 text-accent" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<h4 class="text-white font-bold mb-1">Independent Writers</h4>
+<p class="text-sm text-slate-400">Launch your career, build a newsletter, and own your audience data from day one.</p>
+</div>
+</div>
+<!-- Role Card 2 -->
+<div class="glass p-6 rounded-2xl border-l-4 border-l-purple-500 flex items-start space-x-4">
+<div class="p-3 rounded-full bg-purple-500/10">
+<svg class="h-6 w-6 text-purple-500" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<h4 class="text-white font-bold mb-1">Newsrooms &amp; Media</h4>
+<p class="text-sm text-slate-400">Scalable infrastructure for high-traffic publications with robust collaborative tools.</p>
+</div>
+</div>
+<!-- Role Card 3 -->
+<div class="glass p-6 rounded-2xl border-l-4 border-l-blue-400 flex items-start space-x-4">
+<div class="p-3 rounded-full bg-blue-400/10">
+<svg class="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<h4 class="text-white font-bold mb-1">Developer Blogs</h4>
+<p class="text-sm text-slate-400">Syntax highlighting, Git-sync, and API-first approach for technical storytellers.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: RolesSection -->
+<!-- BEGIN: CTASection -->
+<section class="py-32 px-6 relative overflow-hidden" data-purpose="cta">
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-96 h-96 bg-accent rounded-full opacity-20 blur-[120px]"></div>
+</div>
+<div class="max-w-4xl mx-auto glass p-12 rounded-[2rem] border border-white/10 text-center relative z-10">
+<h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Ready to share your story?</h2>
+<p class="text-slate-400 text-lg mb-10 max-w-xl mx-auto">Join 2 million+ writers who have found their home on BlogSpace. Start your publication in under 2 minutes.</p>
+<div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+<button class="w-full sm:w-auto px-8 py-4 bg-accent text-white font-bold rounded-xl glow-button">Get Started Free</button>
+<button class="w-full sm:w-auto px-8 py-4 bg-white/5 text-white font-bold rounded-xl border border-white/10 hover:bg-white/10 transition-colors">Book a Demo</button>
+</div>
+<p class="text-slate-500 text-xs mt-6">No credit card required • Unlimited free trial</p>
+</div>
+</section>
+<!-- END: CTASection -->
+</main>
+<!-- BEGIN: MainFooter -->
+<footer class="py-12 border-t border-white/5 bg-dark" data-purpose="footer">
+<div class="max-w-7xl mx-auto px-6">
+<div class="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
+<div class="flex items-center space-x-2">
+<div class="w-6 h-6 bg-accent rounded flex items-center justify-center">
+<span class="text-white font-bold text-sm">B</span>
+</div>
+<span class="text-white font-bold text-lg tracking-tight">BlogSpace</span>
+</div>
+<div class="flex space-x-8 text-sm text-slate-500">
+<a class="hover:text-white" href="#">Terms</a>
+<a class="hover:text-white" href="#">Privacy</a>
+<a class="hover:text-white" href="#">Status</a>
+<a class="hover:text-white" href="#">Changelog</a>
+</div>
+<div class="text-sm text-slate-600">
+          © 2023 BlogSpace Inc. All rights reserved.
+        </div>
+</div>
+</div>
+</footer>
+<!-- END: MainFooter -->
+</body></html>

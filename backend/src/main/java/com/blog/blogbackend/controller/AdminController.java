@@ -3,6 +3,7 @@ package com.blog.blogbackend.controller;
 import com.blog.blogbackend.dto.UserResponse;
 import com.blog.blogbackend.entity.Role;
 import com.blog.blogbackend.entity.User;
+import com.blog.blogbackend.repository.CommentRepository;
 import com.blog.blogbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,9 @@ public class AdminController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private CommentRepository commentRepository;
+
     @GetMapping("/users")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(userRepository.findAll().stream()
@@ -37,9 +41,18 @@ public class AdminController {
 
     @PatchMapping("/users/{id}/role")
     public ResponseEntity<Void> updateUserRole(@PathVariable UUID id, @RequestBody Map<String, String> request) {
-        User user = userRepository.findById(id).orElseThrow();
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         user.setRole(Role.valueOf(request.get("role")));
         userRepository.save(user);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/comments/{id}")
+    public ResponseEntity<Void> forceDeleteComment(@PathVariable UUID id) {
+        if (!commentRepository.existsById(id)) {
+            throw new RuntimeException("Comment not found");
+        }
+        commentRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }

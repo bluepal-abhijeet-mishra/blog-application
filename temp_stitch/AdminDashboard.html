@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2463eb",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#111621",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex min-h-screen w-full flex-col">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-6 lg:px-10">
+<div class="flex items-center gap-3">
+<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white">
+<span class="material-symbols-outlined">auto_stories</span>
+</div>
+<div class="flex flex-col">
+<h2 class="text-lg font-bold leading-none tracking-tight">BlogSpace</h2>
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400">Admin Panel</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center gap-2">
+<button class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<button class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</button>
+</div>
+<div class="h-8 w-[1px] bg-slate-200 dark:border-slate-700 hidden md:block"></div>
+<div class="flex items-center gap-3">
+<div class="flex flex-col items-end hidden sm:flex">
+<p class="text-sm font-semibold">Alex Rivera</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Super Admin</p>
+</div>
+<div class="h-10 w-10 rounded-full border-2 border-primary/20 bg-slate-200 dark:bg-slate-700 bg-cover bg-center" data-alt="Admin user profile avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBv9K92wK9gubOoTZ6umhDhVC2uSbimWaP0kTPNv2be5R0BRuelB63KCiLquKmRW4S2hzNkHFwu8tF9S0TmmDrYcONdxUixmkmJeteiebwE8CVj3HVIGfNF8bwMaUrIYoCeve9ebLC7vORQTI8AK-8-mpLs5ZRlvc0mLoiFjrI21FL7xVXBLU13C6Vdr_gIi8gC_5TrH4vmxuo93BzrkdM1l_NNm_eNbHaJgPwZbXlMSti0u-JVSb3XsnuoVIk0RoO53ZTJsf_oWzg')"></div>
+</div>
+</div>
+</header>
+<div class="flex flex-1">
+<!-- Left Sidebar -->
+<aside class="hidden lg:flex w-64 flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark p-6">
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary font-semibold" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Users</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" href="#">
+<span class="material-symbols-outlined">description</span>
+<span>Posts</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" href="#">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span>Comments</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" href="#">
+<span class="material-symbols-outlined">insights</span>
+<span>Analytics</span>
+</a>
+<div class="my-4 border-t border-slate-100 dark:border-slate-800"></div>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-colors mt-auto" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Sign Out</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto p-6 lg:p-10">
+<div class="mx-auto max-w-7xl">
+<div class="mb-8 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+<div>
+<h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">User Management</h1>
+<p class="text-slate-500 dark:text-slate-400">View and manage all registered users and their permissions.</p>
+</div>
+<button class="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all">
+<span class="material-symbols-outlined text-lg">person_add</span>
+                            Add New User
+                        </button>
+</div>
+<!-- Stats Cards -->
+<div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+<div class="flex flex-col gap-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+<span class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Users</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold">12,840</span>
+<span class="text-xs font-medium text-emerald-500">+2.5%</span>
+</div>
+</div>
+<div class="flex flex-col gap-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+<span class="text-sm font-medium text-slate-500 dark:text-slate-400">Authors</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold">156</span>
+<span class="text-xs font-medium text-slate-400">Growth: 12%</span>
+</div>
+</div>
+<div class="flex flex-col gap-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+<span class="text-sm font-medium text-slate-500 dark:text-slate-400">Readers</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold">12,500</span>
+<span class="text-xs font-medium text-primary">High Retention</span>
+</div>
+</div>
+<div class="flex flex-col gap-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+<span class="text-sm font-medium text-slate-500 dark:text-slate-400">Admins</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold">184</span>
+<span class="text-xs font-medium text-slate-400">Verified</span>
+</div>
+</div>
+</div>
+<!-- User Table -->
+<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm">
+<thead class="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+<tr>
+<th class="px-6 py-4 font-semibold text-slate-900 dark:text-slate-200">User</th>
+<th class="px-6 py-4 font-semibold text-slate-900 dark:text-slate-200">Email</th>
+<th class="px-6 py-4 font-semibold text-slate-900 dark:text-slate-200">Role</th>
+<th class="px-6 py-4 font-semibold text-slate-900 dark:text-slate-200">Joined Date</th>
+<th class="px-6 py-4 font-semibold text-slate-900 dark:text-slate-200 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Alice Johnson user avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA2T_OMXJ-BprB51zlTyuhiOX4wTzs2dD881UakvxowTEKrzxhevcxXVGt1Qhd6xYYdf2FRIcKjZRSqXQ5brbXpIfAe1znLRAz605sbDhrhTFEP5rVP1xWwiybE70Qeqk3a72ZrYmiOUyquUpAkswy0OA9vEQaXvVgS_JFJAJCLoIni-x2Mc9bGxhdedTxJaZwQpaBSFhR4WNhLsZfa4hl-FI4gAuR74EJKjWifdj-WhkdyvNfTpAe_Vku-bf4eBUvUrEtl0P2aF3Q')"></div>
+<span class="font-medium">Alice Johnson</span>
+</div>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">alice@blogspace.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-purple-100 dark:bg-purple-900/30 px-2.5 py-0.5 text-xs font-bold text-purple-700 dark:text-purple-400">ADMIN</span>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">Oct 12, 2023</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2">
+<button class="text-primary hover:underline font-semibold">View</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Bob Smith user avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAGT-QMw3tLglF3Dinr-ze7ZK8511qk-XYryey9Dvh46cVdOJlMyc4ZdKM-Nc-EWBoiJOnga26dIpepXX2P8EZ1l_023AhoqK-h3yyOeZTyvFWR5VrnTMTmAmvV2NVzOtQJjUOwz-GGrLJDI7MUNTr2e8HY6GRsce6rVJmEQ2-uhGlDT3dkm-6BmuJ1EiNFD8EHo_z5YecGCXp7im7f1fuSgmpavx29Iil8xPZbTwXXnyYKYz9emB1zPjJkiaMhpH55yyQZ62rDGb0')"></div>
+<span class="font-medium">Bob Smith</span>
+</div>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">bob@blogspace.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-400">AUTHOR</span>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">Nov 05, 2023</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2">
+<button class="text-primary hover:underline font-semibold">View</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Charlie Davis user avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCApaNf0nredsS6Ejo_0BYHUPGbXiqPw0VB6XRPENlrjsPTrTNIclR8TYijFJ5mPA4mtlWoducblpMJJ4sys34iWF6eYzK69e_mLlaybi649Gn_MW0n239qPhCXbXTOTqxHkn3NnW_BmEm6jR3gCo5Mg5ouVXn4oO23azC6S4wYaaq2dYF1G5g8sfLhu2e3-3fSfrWDfucLY-sQftA7BMXxQqYLzeElPAkigthHy9DV1pSK_1aaKx8sc3rd6vCasJQQSzZd193cTy8')"></div>
+<span class="font-medium">Charlie Davis</span>
+</div>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">charlie@blogspace.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">READER</span>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">Dec 01, 2023</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-3">
+<button class="text-emerald-600 hover:text-emerald-700 font-semibold text-xs border border-emerald-200 rounded px-2 py-1">Promote to Author</button>
+<button class="text-primary hover:underline font-semibold">View</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Diana Prince user avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBt0ZNYARK-V3y6U9hhB36wqogo3qTcoP92MyjmMEqGyxn-1MUdIpqb732myMQPv2V0OLSpM8nVqoXhqMTluxmzs7m4myC4W9QDNVrCazJyGnMxCZbmUgVPw0-Sx_WtXfCiIHeaA9A3Nn9FEHf_jbFfbGI_LY3AMTN-UqLOvFAG9F_2__T8k6WPNkPDVxfR5Vh5WJsrmtBepbC3kZUG-oix89bIaamhgTNhlH3m5WJArCva_w3KLLn_V5Qyv4UkIUiVqdzmM-H_PyA')"></div>
+<span class="font-medium">Diana Prince</span>
+</div>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">diana@blogspace.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">READER</span>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">Dec 15, 2023</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-3">
+<button class="text-emerald-600 hover:text-emerald-700 font-semibold text-xs border border-emerald-200 rounded px-2 py-1">Promote to Author</button>
+<button class="text-primary hover:underline font-semibold">View</button>
+</div>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Edward Norton user avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCfdTwqH7VAcLhZsizLjYx4ftM3Ew_ZZSrZS-QEWg17dJWEucA59khufQlDFSgzFAaB85VHuLPKq6W8Ae9in2xZ7MAcfzSjOqJDYRgB-KPRH2aes8a9me0vJXVeMNHG09_uAILlDVtn6niyevQGlElNrKycYX88OJNC2FtGb0j3NJLgbzuj9DNam0D4d7aAlUtsEOft_7g22cgunJ3qM7G-voAXSW8WBDlzcJu8OoNOMLwdrdsCF51aKtycaA1glJFFEfc9LTqlB-w')"></div>
+<span class="font-medium">Edward Norton</span>
+</div>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">edward@blogspace.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-400">AUTHOR</span>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">Jan 02, 2024</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2">
+<button class="text-primary hover:underline font-semibold">View</button>
+</div>
+</td>
+</tr>
+<!-- Row 6 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Fiona Gallagher user avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCNkIceMYpHm_6UdfcDgVkges5wYoS1iULvyAKtUNovy1JFBomjE4yzo3oDUQ7mkurHAo6Jgfhjz7C_iPHciYV9w9VP5GXrMQ2nSH_LGXvHeZgyoUR19-vGKiX-fqbkLI1iZOaa12Hl9vGbqXKSgW4sBbgA-QWxnIfXHtAihfUFca3IID-_KJsTz5LlyyZCwiW9vLn0c3deO2_JHO6TQHhvCWbSYUkvbzxr6CKbw9TtCMSpowI_q6wLPmOn1I58OV4Vw_CdAaiIw_I')"></div>
+<span class="font-medium">Fiona Gallagher</span>
+</div>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">fiona@blogspace.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">READER</span>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">Jan 10, 2024</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-3">
+<button class="text-emerald-600 hover:text-emerald-700 font-semibold text-xs border border-emerald-200 rounded px-2 py-1">Promote to Author</button>
+<button class="text-primary hover:underline font-semibold">View</button>
+</div>
+</td>
+</tr>
+<!-- Row 7 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-slate-200 bg-cover bg-center" data-alt="George Miller user avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDVJW9zOO_pUdH_OcTKUGPWCTnXjOAGBNDkzCagEx3ilcGLHRgOT8z82dKi0HvXhjBS8O_oUswgHMfmPqD-es5g9E7Q7ruSODQ4qUGok38scbn_4NRUpZo9H_UpNESn1R_duuzEQ7LYHSMvol5D5WFQcR0lMoy7rpuzOqQ6GYH4Zrue-wZoLGLrBjf5BdxM4C-nmBu2dtbtJ6uPAtxvSHb0FXj8N3_iYOY_8fyEAtIj6_zGF-k1I_t8Gs9bt0PGIj2PD8HwvfZQkZA')"></div>
+<span class="font-medium">George Miller</span>
+</div>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">george@blogspace.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-purple-100 dark:bg-purple-900/30 px-2.5 py-0.5 text-xs font-bold text-purple-700 dark:text-purple-400">ADMIN</span>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">Jan 22, 2024</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2">
+<button class="text-primary hover:underline font-semibold">View</button>
+</div>
+</td>
+</tr>
+<!-- Row 8 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Hannah Abbott user avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAmvQht7TaovGPF57YEdVVJYyjxGnXr4cCOjMZIAXA8kimJsXj-Ow55cMuY3eMLAu5Lj-bJapsb0smI_Sv9k6XpgLuHALkWOfObC8vwai2-Y5-hWKfGYSQn3SM_iLtvx0e3OfvI69GO5y0G-bkZMGkylLoJa5ltm14eLFYKi0hxQmnRzI3QRDkkxyHfINglhc1-F6zqHzODcEhRQVar-hSdd54DY3VNnrche-DFEa1TBrVOWfTT09xq8VJlOgB5KBODCrRdzbkpBVk')"></div>
+<span class="font-medium">Hannah Abbott</span>
+</div>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">hannah@blogspace.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">READER</span>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-400">Feb 05, 2024</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-3">
+<button class="text-emerald-600 hover:text-emerald-700 font-semibold text-xs border border-emerald-200 rounded px-2 py-1">Promote to Author</button>
+<button class="text-primary hover:underline font-semibold">View</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 px-6 py-4">
+<span class="text-xs text-slate-500 dark:text-slate-400">Showing 1-8 of 12,840 users</span>
+<div class="flex gap-2">
+<button class="flex h-8 w-8 items-center justify-center rounded border border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="flex h-8 w-8 items-center justify-center rounded bg-primary text-xs font-bold text-white">1</button>
+<button class="flex h-8 w-8 items-center justify-center rounded border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-600 hover:bg-slate-50">2</button>
+<button class="flex h-8 w-8 items-center justify-center rounded border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-600 hover:bg-slate-50">3</button>
+<span class="px-1 text-slate-400">...</span>
+<button class="flex h-8 w-8 items-center justify-center rounded border border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

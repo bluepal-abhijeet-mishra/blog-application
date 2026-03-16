@@ -44,7 +44,7 @@ public class PostService {
     @Transactional
     public PostResponse createPost(PostRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User author = userRepository.findByEmail(email).orElseThrow();
+        User author = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
         Post post = Post.builder()
                 .title(request.getTitle())
@@ -76,11 +76,11 @@ public class PostService {
 
     @Transactional
     public PostResponse updatePost(UUID id, PostRequest request) {
-        Post post = postRepository.findById(id).orElseThrow();
+        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
 
         // Authorization check
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         if (!post.getAuthor().getId().equals(currentUser.getId()) && currentUser.getRole() != Role.ADMIN) {
             throw new RuntimeException("Unauthorized");
         }
@@ -113,9 +113,9 @@ public class PostService {
 
     @Transactional
     public PostResponse publishPost(UUID id) {
-        Post post = postRepository.findById(id).orElseThrow();
+        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         if (!post.getAuthor().getId().equals(currentUser.getId()) && currentUser.getRole() != Role.ADMIN) {
             throw new RuntimeException("Unauthorized");
         }
@@ -126,9 +126,9 @@ public class PostService {
     }
 
     public void deletePost(UUID id) {
-        Post post = postRepository.findById(id).orElseThrow();
+        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         if (!post.getAuthor().getId().equals(currentUser.getId()) && currentUser.getRole() != Role.ADMIN) {
             throw new RuntimeException("Unauthorized");
         }
@@ -136,12 +136,12 @@ public class PostService {
     }
 
     public PostResponse getPostBySlug(String slug) {
-        Post post = postRepository.findBySlug(slug).orElseThrow();
+        Post post = postRepository.findBySlug(slug).orElseThrow(() -> new RuntimeException("Post not found"));
         // If draft, only author/admin can see
         if (post.getStatus() == PostStatus.DRAFT) {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
             if (email.equals("anonymousUser")) throw new RuntimeException("Post not found");
-            User currentUser = userRepository.findByEmail(email).orElseThrow();
+            User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
             if (!post.getAuthor().getId().equals(currentUser.getId()) && currentUser.getRole() != Role.ADMIN) {
                 throw new RuntimeException("Post not found");
             }
@@ -167,7 +167,7 @@ public class PostService {
 
     public List<PostResponse> getAuthorPosts() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User author = userRepository.findByEmail(email).orElseThrow();
+        User author = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         return postRepository.findByAuthorId(author.getId()).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());

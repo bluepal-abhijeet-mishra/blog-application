@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BlogSpace - Explore Ideas</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2463eb",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#111621",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-size: 20px; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<header class="sticky top-0 z-50 w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+<div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+<div class="flex items-center gap-2 shrink-0">
+<div class="bg-primary text-white p-1.5 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined">auto_stories</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight">BlogSpace</h1>
+</div>
+<div class="flex-1 max-w-2xl hidden md:block">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm" placeholder="Search for stories, people, or tags..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-3 shrink-0">
+<button class="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                    Login
+                </button>
+<button class="px-5 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary/90 rounded-lg shadow-sm shadow-primary/20 transition-all">
+                    Register
+                </button>
+</div>
+</div>
+</header>
+<div class="max-w-7xl mx-auto px-4 py-8 flex gap-8">
+<aside class="w-[240px] shrink-0 hidden lg:block sticky top-24 h-fit">
+<div class="mb-8">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Categories</h3>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary font-medium" href="#">
+<span class="material-symbols-outlined">trending_up</span>
+<span>Popular</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">memory</span>
+<span>Technology</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span>Health</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">style</span>
+<span>Lifestyle</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance</span>
+<span>Finance</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">school</span>
+<span>Education</span>
+</a>
+</nav>
+</div>
+<div>
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Trending Tags</h3>
+<div class="flex flex-wrap gap-2">
+<a class="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-400 rounded-full hover:border-primary hover:text-primary transition-all" href="#">#react</a>
+<a class="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-400 rounded-full hover:border-primary hover:text-primary transition-all" href="#">#design</a>
+<a class="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-400 rounded-full hover:border-primary hover:text-primary transition-all" href="#">#webdev</a>
+<a class="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-400 rounded-full hover:border-primary hover:text-primary transition-all" href="#">#productivity</a>
+<a class="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-400 rounded-full hover:border-primary hover:text-primary transition-all" href="#">#career</a>
+<a class="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-400 rounded-full hover:border-primary hover:text-primary transition-all" href="#">#ai</a>
+</div>
+</div>
+</aside>
+<main class="flex-1">
+<div class="mb-6 flex items-center justify-between">
+<h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">Featured Stories</h2>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-500">
+<span class="material-symbols-outlined">grid_view</span>
+</button>
+<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-500">
+<span class="material-symbols-outlined">view_list</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Post Card 1 -->
+<article class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow group">
+<div class="h-48 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Modern workspace with laptop and coffee" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGv_H5L1oRcVPsRjsk93MF-zdxwrFaRFcRgSaKUYWdrAfsHbohBLPUzRP1Oboy2pgsBpJP0TFIYYpXdm5ryawZsMaigXqVRhgQqo1dmcbF4QrH-XZA5O8jzbezaeakdl3wOBOIanixf04fnMC4dWbOVNZw3PvBC6jRToWeIEmh3yNQwMNxa1nGAoLmOGbVqFhCHXgMIpO2ZtmUpLSNf3e5GBcskVGTMd-o5iQtXMowsEiIRBpIZCav0hVdso3CwmxMkwzs2uUF4RM"/>
+</div>
+<div class="p-5">
+<div class="flex items-center gap-2 mb-3">
+<span class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold uppercase rounded tracking-wider">Technology</span>
+<span class="text-slate-400 text-xs">• Oct 12, 2023</span>
+</div>
+<h3 class="text-lg font-bold mb-2 group-hover:text-primary transition-colors line-clamp-1">The Future of Web Development with Edge Computing</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm line-clamp-2 mb-4">
+                            Edge computing is revolutionizing how we build and deploy applications, bringing processing power closer to the user than ever before.
+                        </p>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="text-[11px] font-medium text-slate-500">#serverless</span>
+<span class="text-[11px] font-medium text-slate-500">#v8</span>
+</div>
+<div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-2">
+<div class="size-8 rounded-full bg-slate-200 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Author profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtmhP08T3kFZoH_PZgt2bYlBcpIggIHLBhWghMVekmI4XjDPR8Za0ISzSktcDl0dFqcRe9i7lVcqbg31l9BOFHPTNFVqHPrsuiB7BG0NtCO4yqDF9xF4_rhdRAjhUO2njHZ-dlKKj9kIqOqkRFC6jhKQA6E5V7-3pWGqydiqzrOgnQBHtaN3-uuk6xOkMjtv7iOrV6INRRfV-1BMzNFLCJS4iwwkKrFc0L9mcNpGjt8AnoVuVvWeRt7kXD_IlN7kplEePrnKWCPZo"/>
+</div>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Johnathan Doe</span>
+</div>
+</div>
+</div>
+</article>
+<!-- Post Card 2 -->
+<article class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow group">
+<div class="h-48 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Scientific laboratory research equipment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZNK6eZdemLnc3UT61Mniv_irqLj5RMGqP3yKRoTwSaWXZumf7uXdaYV7pAGSo8sd5vFQzpIPiWasLKFHWzpzWkvfdRh-9Xut5d5aZg12uh3Cujc5SMFOrlUqFGjLvP6Z1V-BHunJRHoclvfX4-BRSMcGyvH3bih1NZc4q_qxBg5az9T1a5PazbxbY_euM-jB8eI_cyS_yrYBD6iBp4iDJm7vCh5uEgjwjG4_nzwDLqnd6AkQQXJzOa-u05NousxZJv77_l1vCn7A"/>
+</div>
+<div class="p-5">
+<div class="flex items-center gap-2 mb-3">
+<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase rounded tracking-wider">Health</span>
+<span class="text-slate-400 text-xs">• Oct 10, 2023</span>
+</div>
+<h3 class="text-lg font-bold mb-2 group-hover:text-primary transition-colors line-clamp-1">AI in Modern Medicine: Beyond Diagnostics</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm line-clamp-2 mb-4">
+                            Exploring how machine learning algorithms are now assisting surgeons in high-precision procedures and personalized treatments.
+                        </p>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="text-[11px] font-medium text-slate-500">#medtech</span>
+<span class="text-[11px] font-medium text-slate-500">#ai</span>
+</div>
+<div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-2">
+<div class="size-8 rounded-full bg-slate-200 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Author profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-5pJ4BHmuvDVrJ9xRPXtiApWgpSgGfB3cSOXTMSJgHM8KLPyK6_bkxbHqkq4Qi8vDWrMg9OKTlBh80eZO6twMY36pjc5ASH_u9L8ZLEjMuFaHhzQnwoP8icHv7TjblRenZr7PCr50H4RLNohEDJtUnLrxWbbQvhO7BSfiR6akz9A2eGsUVt7UAARa4rATnMEYRrBJHXfNrQGdzE-MnZJY-0xF5Y4PFRVhICOsre2izfRt4IVXxCdOCJUcarkjuxmWopkM1lZ2hBQ"/>
+</div>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Sarah Jenkins</span>
+</div>
+</div>
+</div>
+</article>
+<!-- Post Card 3 -->
+<article class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow group">
+<div class="h-48 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Laptop screen showing code" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGS2EHtyo2ji9oH-rqh2Q9RdeVHifEf4fiWCTuY9rlYVOA035_skqn4OG60KjAJbtHuj4iKAWULWVPFtISV8ry24zBPOWMBhCyIo_2s2gxNzYVjRAQqnVFGPf394InrbIuoLFeNSQlc4L5yNSnNHM9yspyo0fxH6UsBfoD9KKVRvs6oJKX22Xc04kexsUeG5bZ3kRt9_6qRLFgMi5uBlJdrbha89x6y1a7DyYWmvO0FjLzrDrr0PCNUrmHd72j5ULc6OBhAxrt_-M"/>
+</div>
+<div class="p-5">
+<div class="flex items-center gap-2 mb-3">
+<span class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold uppercase rounded tracking-wider">Technology</span>
+<span class="text-slate-400 text-xs">• Oct 08, 2023</span>
+</div>
+<h3 class="text-lg font-bold mb-2 group-hover:text-primary transition-colors line-clamp-1">Mastering React Server Components</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm line-clamp-2 mb-4">
+                            A deep dive into why RSCs are the biggest shift in the React ecosystem since hooks and how to adopt them effectively.
+                        </p>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="text-[11px] font-medium text-slate-500">#react</span>
+<span class="text-[11px] font-medium text-slate-500">#frontend</span>
+</div>
+<div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-2">
+<div class="size-8 rounded-full bg-slate-200 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Author profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLObEJYeoxrgInKErokqCrspTTtTrJxW8fphwCBM6sRCOD6L23Z9eDsdENCVHQQV3CRGB6wH9N_Oupi33uUqz3npPlSEgeCtMvxtqeMxUWxFnYh1InMWJjXj4nFdlyGdSSbT83T_HHkfgsmNbTbz9TAN9vV73ynskaoTE83oFjJX61sr0lFBFmicWHIqpcbNfE5JvH92EmJfo96_fjUuszAKZ1fCXX-skXLHAFtbViX25C-grIB0fkBaGIbiofjJx_H2UxEvO9h9g"/>
+</div>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Alex Rivera</span>
+</div>
+</div>
+</div>
+</article>
+<!-- Post Card 4 -->
+<article class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow group">
+<div class="h-48 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Business professionals collaborating in an office" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9fN5H2Yiu61CDRRNaGtYh1YFuiTWrhn4PIB9vD5Em5ymAUzM2jTUNtW_4dLdUvb6WCtAkf5L6q62kZ7fkXmP8hfXHqcg6jvuAPU3twUmqfJDs4nCUe_UiH5lg61UTU3L8AtONCjSbjF1bdQ4NOUyviZhDdr7mrsINtEz7mq5_NqOIddgnGOtA1SVUfLZXJBpBKTrJuXHXm5U7CPWO61ssRp0H2xvNgch9vYyPTA_WdXj5ecIIMP2MB1knDn7U41RqCityn142ToA"/>
+</div>
+<div class="p-5">
+<div class="flex items-center gap-2 mb-3">
+<span class="px-2 py-0.5 bg-orange-100 text-orange-700 text-[10px] font-bold uppercase rounded tracking-wider">Lifestyle</span>
+<span class="text-slate-400 text-xs">• Oct 05, 2023</span>
+</div>
+<h3 class="text-lg font-bold mb-2 group-hover:text-primary transition-colors line-clamp-1">The Psychology of Remote Productivity</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm line-clamp-2 mb-4">
+                            Why working from home feels different and how to hack your environment for maximum mental focus and flow.
+                        </p>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="text-[11px] font-medium text-slate-500">#worklife</span>
+<span class="text-[11px] font-medium text-slate-500">#productivity</span>
+</div>
+<div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-2">
+<div class="size-8 rounded-full bg-slate-200 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Author profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHptu3VVRwqSXC4EpnYktMwzELvk_B1XUn-cQsi3x4ui_IOZrEhedmFOc_CsO09Qcgf7MfKLpAiErp-o98Ndq8tH3oclI4_fgdExRWz4GklNHQKmfz-yc4kET8P7_jxmFesI5tZBDDcANAZjiSK9A3pbdAnJ_nUtI_MN5cdRyaEHBuAReAAZgh-r2S1gyxioDaEtV8cQtOqKfLiGShbUub6SiqQHRnjS0LgP1sT9TH9On4YsgiPdrx4isIA0XYCuBtJzQ6L6Heqv0"/>
+</div>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Emily Chen</span>
+</div>
+</div>
+</div>
+</article>
+</div>
+<!-- Pagination -->
+<div class="mt-12 flex items-center justify-center gap-2">
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-primary hover:border-primary transition-all">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="size-10 flex items-center justify-center rounded-lg bg-primary text-white font-bold">1</button>
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-primary hover:border-primary transition-all font-medium">2</button>
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-primary hover:border-primary transition-all font-medium">3</button>
+<span class="text-slate-400 px-1">...</span>
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-primary hover:border-primary transition-all font-medium">12</button>
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-primary hover:border-primary transition-all">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</main>
+</div>
+<footer class="mt-20 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-12">
+<div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+<div class="col-span-1 md:col-span-1">
+<div class="flex items-center gap-2 mb-4">
+<div class="bg-primary text-white p-1 rounded-lg">
+<span class="material-symbols-outlined">auto_stories</span>
+</div>
+<span class="text-lg font-bold">BlogSpace</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400">
+                    A space for thinkers, creators, and doers to share their stories with the world.
+                </p>
+</div>
+<div>
+<h4 class="font-bold mb-4 text-sm">Product</h4>
+<ul class="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+<li><a class="hover:text-primary" href="#">Featured</a></li>
+<li><a class="hover:text-primary" href="#">Topics</a></li>
+<li><a class="hover:text-primary" href="#">Newsletters</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold mb-4 text-sm">Company</h4>
+<ul class="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+<li><a class="hover:text-primary" href="#">About Us</a></li>
+<li><a class="hover:text-primary" href="#">Careers</a></li>
+<li><a class="hover:text-primary" href="#">Contact</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold mb-4 text-sm">Legal</h4>
+<ul class="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+<li><a class="hover:text-primary" href="#">Privacy Policy</a></li>
+<li><a class="hover:text-primary" href="#">Terms of Service</a></li>
+<li><a class="hover:text-primary" href="#">Cookie Policy</a></li>
+</ul>
+</div>
+</div>
+<div class="max-w-7xl mx-auto px-4 mt-12 pt-8 border-t border-slate-100 dark:border-slate-800 text-center text-xs text-slate-400">
+            © 2023 BlogSpace Inc. All rights reserved.
+        </div>
+</footer>
+</body></html>
