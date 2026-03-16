@@ -1,5 +1,21 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence, useInView, useSpring, useTransform } from 'framer-motion';
+
+const CountUp = ({ value, precision = 0 }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
+  const spring = useSpring(0, { stiffness: 40, damping: 20 });
+  const displayValue = useTransform(spring, (current) => 
+    current.toFixed(precision).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+  );
+
+  useEffect(() => {
+    if (isInView) spring.set(value);
+  }, [isInView, spring, value]);
+
+  return <motion.span ref={ref}>{displayValue}</motion.span>;
+};
 
 const LandingPage = () => {
   const navRef = useRef(null);
@@ -78,7 +94,7 @@ const LandingPage = () => {
             <a 
               key={item} 
               href={`#${item.toLowerCase().replace(/\s+/g, '')}`}
-              className="text-[0.875rem] font-[600] text-[var(--navy)] no-underline relative pb-[2px] transition-colors duration-200 hover:text-[var(--green)] hover:after:w-full after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:height-[2px] after:bg-[var(--green)] after:transition-all after:duration-300 after:rounded-[2px]"
+              className="text-[0.875rem] font-[600] text-[var(--navy)] no-underline relative pb-[2px] transition-colors duration-200 hover:text-[var(--green)] hover:after:w-full after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-[var(--green)] after:transition-all after:duration-300 after:rounded-[2px]"
             >
               {item}
             </a>
@@ -96,19 +112,42 @@ const LandingPage = () => {
       <section className="overflow-hidden">
         <div className="px-12 pt-[9rem] pb-[6rem] max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-[4rem] items-center">
           <div>
-            <div className="inline-flex items-center gap-[8px] bg-[var(--mint)] border border-[rgba(16,185,129,0.3)] px-[14px] py-[6px] rounded-[999px] text-[0.75rem] font-[700] text-[var(--green)] tracking-[0.5px] uppercase animate-[fadeUp_0.5s_ease_both_0.1s] mb-[1.5rem]">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-[8px] bg-[var(--mint)] border border-[rgba(16,185,129,0.3)] px-[14px] py-[6px] rounded-[999px] text-[0.75rem] font-[700] text-[var(--green)] tracking-[0.5px] uppercase mb-[1.5rem]"
+            >
               <span className="w-[7px] h-[7px] bg-[var(--green)] rounded-full animate-[dotPulse_2s_ease-in-out_infinite]"></span>
               Open Platform for Writers
-            </div>
+            </motion.div>
             <h1 className="text-[clamp(3rem,5vw,4.8rem)] font-[900] text-[var(--navy)] leading-[1.08] tracking-[-2px] mb-[1.5rem]">
-              <span className="inline-block animate-[wordDrop_0.6s_cubic-bezier(0.22,1,0.36,1)_both] perspective-[400px]" style={{ animationDelay: '0.15s' }}>Write.&nbsp;</span>
-              <span className="inline-block animate-[wordDrop_0.6s_cubic-bezier(0.22,1,0.36,1)_both] perspective-[400px]" style={{ animationDelay: '0.3s' }}>Publish.&nbsp;</span><br />
-              <span className="inline-block animate-[wordDrop_0.6s_cubic-bezier(0.22,1,0.36,1)_both] perspective-[400px] text-[var(--green)]" style={{ animationDelay: '0.45s' }}>Grow.</span>
+              {["Write.", "Publish.", "Grow."].map((word, i) => (
+                <motion.span 
+                  key={word}
+                  initial={{ opacity: 0, y: 40, rotateX: -45 }}
+                  animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                  transition={{ duration: 0.8, delay: 0.2 + i * 0.15, ease: [0.22, 1, 0.36, 1] }}
+                  className={`inline-block whitespace-pre ${word === "Grow." ? "text-[var(--green)]" : ""}`}
+                >
+                  {word}{" "}
+                </motion.span>
+              ))}
             </h1>
-            <p className="text-[1.05rem] text-[var(--gray)] leading-[1.75] max-w-[480px] mb-[2.5rem] animate-[fadeUp_0.7s_ease_both_0.55s]">
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.6 }}
+              className="text-[1.1rem] text-[var(--gray)] leading-[1.75] max-w-[480px] mb-[2.5rem]"
+            >
               The professional multi-author blog platform. Rich editing, smart tagging, threaded comments, RSS feeds — and a community that reads.
-            </p>
-            <div className="flex gap-[1rem] flex-wrap animate-[fadeUp_0.7s_ease_both_0.7s]">
+            </motion.p>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.8 }}
+              className="flex gap-[1rem] flex-wrap"
+            >
               <Link to="/register" className="bg-[var(--green)] text-white px-[2rem] py-[1rem] rounded-[14px] text-[1rem] font-[700] border-none cursor-pointer transition-all duration-250 shadow-[0_8px_24px_rgba(16,185,129,0.4)] hover:bg-[var(--gd)] hover:translate-y-[-3px] hover:shadow-[0_16px_36px_rgba(16,185,129,0.45)]">
                 Start Writing Free
               </Link>
@@ -118,107 +157,148 @@ const LandingPage = () => {
                 </svg>
                 Watch Demo
               </button>
-            </div>
-            <div className="flex gap-[1.5rem] mt-[1.5rem] flex-wrap animate-[fadeUp_0.7s_ease_both_0.85s]">
-              {['Free forever plan', 'No credit card needed', 'Setup in 2 minutes'].map(text => (
-                <div key={text} className="flex items-center gap-[6px] text-[0.8rem] font-[600] text-[var(--gray)]">
+            </motion.div>
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="flex gap-[1.5rem] mt-[1.5rem] flex-wrap"
+            >
+              {['Free forever plan', 'No credit card needed', 'Setup in 2 minutes'].map((text, i) => (
+                <motion.div 
+                  key={text} 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.9 + i * 0.1 }}
+                  className="flex items-center gap-[6px] text-[0.8rem] font-[600] text-[var(--gray)] bg-white px-3 py-1.5 rounded-full shadow-sm border border-[var(--border)]"
+                >
                   <span className="w-[16px] h-[16px] bg-[var(--mint)] rounded-full flex items-center justify-center text-[var(--green)] text-[10px] font-[800]">✓</span>
                   {text}
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
           {/* Hero visual */}
-          <div className="relative hidden lg:block animate-[fadeUp_0.9s_ease_both_0.3s]">
-            <div className="bg-white rounded-[24px] shadow-[0_24px_80px_rgba(0,0,0,0.12),0_4px_20px_rgba(0,0,0,0.06)] border border-[var(--border)] animate-[float_6s_ease-in-out_infinite_1.2s] p-[1rem]">
-              <div className="bg-[var(--mint)] rounded-[16px] p-[1.25rem]">
-                <div className="flex items-center gap-[8px] mb-[1rem]">
-                  <div className="w-[26px] h-[26px] bg-[var(--green)] rounded-[8px] flex items-center justify-center">
-                    <svg width="13" height="13" fill="none" stroke="#fff" strokeWidth="2.5" viewBox="0 0 24 24">
+          <div className="relative hidden lg:block">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, rotateY: 20 }}
+              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+              className="bg-white rounded-[32px] shadow-[0_32px_96px_rgba(0,0,0,0.1),0_8px_32px_rgba(0,0,0,0.05)] border border-[var(--border)] p-[1.25rem] relative z-10"
+            >
+              <div className="bg-[var(--mint)] rounded-[24px] p-[1.5rem] relative overflow-hidden group">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.1),transparent)] pointer-events-none"></div>
+                <div className="flex items-center gap-[8px] mb-[1.5rem]">
+                  <motion.div 
+                    animate={{ rotate: [0, -10, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    className="w-[32px] h-[32px] bg-[var(--green)] rounded-[10px] flex items-center justify-center"
+                  >
+                    <svg width="16" height="16" fill="none" stroke="#fff" strokeWidth="2.5" viewBox="0 0 24 24">
                       <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                  </div>
-                  <span className="text-[0.8rem] font-[900] text-[var(--navy)]">BlogSpace</span>
-                  <div className="ml-auto flex gap-[5px]">
-                    <div className="w-[6px] h-[6px] rounded-full bg-[#ef4444]"></div>
-                    <div className="w-[6px] h-[6px] rounded-full bg-[#f59e0b]"></div>
-                    <div className="w-[6px] h-[6px] rounded-full bg-[#10b981]"></div>
+                  </motion.div>
+                  <span className="text-[0.9rem] font-[900] text-[var(--navy)]">BlogSpace</span>
+                  <div className="ml-auto flex gap-[6px]">
+                    <div className="w-[8px] h-[8px] rounded-full bg-[#ef4444]"></div>
+                    <div className="w-[8px] h-[8px] rounded-full bg-[#f59e0b]"></div>
+                    <div className="w-[8px] h-[8px] rounded-full bg-[#10b981]"></div>
                   </div>
                 </div>
-                <div className="flex flex-col gap-[8px]">
-                  <div className="bg-white rounded-[12px] p-[12px_14px] border border-[var(--border)]">
-                    <div className="flex gap-[5px] mb-[6px]">
-                      <span className="bg-[#d1fae5] text-[#065f46] text-[0.62rem] font-[700] px-[8px] py-[2px] rounded-[999px]">React 18</span>
-                      <span className="bg-[#fef3c7] text-[#92400e] text-[0.62rem] font-[700] px-[8px] py-[2px] rounded-[999px]">Frontend</span>
+                <div className="flex flex-col gap-[12px]">
+                  <motion.div 
+                    whileHover={{ scale: 1.02, x: 5 }}
+                    className="bg-white rounded-[16px] p-[16px_20px] border border-[var(--border)] shadow-sm cursor-pointer transition-shadow hover:shadow-md"
+                  >
+                    <div className="flex gap-[6px] mb-[8px]">
+                      <span className="bg-[#d1fae5] text-[#065f46] text-[0.65rem] font-[800] px-[10px] py-[3px] rounded-[999px]">React 18</span>
+                      <span className="bg-[#fef3c7] text-[#92400e] text-[0.65rem] font-[800] px-[10px] py-[3px] rounded-[999px]">Frontend</span>
                     </div>
-                    <div className="text-[0.78rem] font-[800] text-[var(--navy)] leading-[1.3]">Building UIs with React 18 Concurrent Mode</div>
-                    <div className="flex items-center gap-[8px] mt-[6px]">
-                      <div className="w-[20px] h-[20px] rounded-full bg-[#6366f1] flex items-center justify-center text-[0.55rem] font-[800] text-white">AK</div>
-                      <span className="text-[0.65rem] text-[var(--gray)]">Arjun K. · 8 min · 4.2k views</span>
+                    <div className="text-[0.85rem] font-[800] text-[var(--navy)] leading-[1.4] mb-2">Building UIs with React 18 Concurrent Mode</div>
+                    <div className="flex items-center gap-[8px]">
+                      <div className="w-[24px] h-[24px] rounded-full bg-[#6366f1] flex items-center justify-center text-[0.6rem] font-[800] text-white">AK</div>
+                      <span className="text-[0.7rem] text-[var(--gray)] font-medium">Arjun K. · 8 min · 4.2k views</span>
                     </div>
-                  </div>
-                  <div className="bg-white rounded-[12px] p-[12px_14px] border border-[var(--border)]">
-                    <div className="flex gap-[5px] mb-[6px]">
-                      <span className="bg-[#e0f2fe] text-[#0369a1] text-[0.62rem] font-[700] px-[8px] py-[2px] rounded-[999px]">Spring Boot</span>
-                      <span className="bg-[#fce7f3] text-[#9d174d] text-[0.62rem] font-[700] px-[8px] py-[2px] rounded-[999px]">JWT</span>
+                  </motion.div>
+                  <motion.div 
+                    whileHover={{ scale: 1.02, x: 5 }}
+                    className="bg-white rounded-[16px] p-[16px_20px] border border-[var(--border)] shadow-sm cursor-pointer transition-shadow hover:shadow-md"
+                  >
+                    <div className="flex gap-[6px] mb-[8px]">
+                      <span className="bg-[#e0f2fe] text-[#0369a1] text-[0.65rem] font-[800] px-[10px] py-[3px] rounded-[999px]">Spring Boot</span>
+                      <span className="bg-[#fce7f3] text-[#9d174d] text-[0.65rem] font-[800] px-[10px] py-[3px] rounded-[999px]">JWT</span>
                     </div>
-                    <div className="text-[0.78rem] font-[800] text-[var(--navy)] leading-[1.3]">JWT Authentication in Spring Boot 3 — Full Guide</div>
-                    <div className="flex items-center gap-[8px] mt-[6px]">
-                      <div className="w-[20px] height-[20px] rounded-full bg-[#ec4899] flex items-center justify-center text-[0.55rem] font-[800] text-white">PM</div>
-                      <span className="text-[0.65rem] text-[var(--gray)]">Priya M. · 12 min · 7.8k views</span>
+                    <div className="text-[0.85rem] font-[800] text-[var(--navy)] leading-[1.4] mb-2">JWT Authentication in Spring Boot 3 — Full Guide</div>
+                    <div className="flex items-center gap-[8px]">
+                      <div className="w-[24px] h-[24px] rounded-full bg-[#ec4899] flex items-center justify-center text-[0.6rem] font-[800] text-white">PM</div>
+                      <span className="text-[0.7rem] text-[var(--gray)] font-medium">Priya M. · 12 min · 7.8k views</span>
                     </div>
-                  </div>
-                  <div className="bg-white rounded-[12px] p-[10px_14px] border border-[var(--border)] flex items-start gap-[8px]">
-                    <div className="w-[20px] h-[20px] rounded-full bg-[var(--green)] flex items-center justify-center text-[0.55rem] font-[800] text-white shrink-0 mt-[1px]">RS</div>
-                    <div>
-                      <div className="text-[0.65rem] font-[700] text-[var(--navy)]">Rahul S. <span className="text-[var(--gray)] font-[400]">· 2h ago</span></div>
-                      <div className="text-[0.65rem] text-[var(--gray)] mt-[2px]">Great write-up! The useDeferredValue hook really clicked for me.</div>
-                    </div>
-                  </div>
+                  </motion.div>
                 </div>
               </div>
-            </div>
-            <div className="absolute top-[-20px] right-[-20px] bg-white rounded-[14px] p-[12px_16px] shadow-[0_8px_24px_rgba(0,0,0,0.12)] border border-[var(--mint)] animate-[floatBadge_4s_ease-in-out_infinite_1.5s]">
-              <div className="flex items-center gap-[10px]">
-                <div className="w-[36px] h-[36px] rounded-full bg-[#dbeafe] flex items-center justify-center text-[12px] font-[800] text-[#1d4ed8]">JD</div>
+            </motion.div>
+            
+            {/* Decals/Floating badges */}
+            <motion.div 
+              animate={{ y: [0, -15, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-[-30px] right-[-30px] bg-white rounded-[18px] p-[14px_20px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-[var(--mint)] z-20"
+            >
+              <div className="flex items-center gap-[12px]">
+                <div className="relative">
+                  <div className="w-[42px] h-[42px] rounded-full bg-[#dbeafe] flex items-center justify-center text-[14px] font-[800] text-[#1d4ed8]">JD</div>
+                  <div className="absolute bottom-[-2px] right-[-2px] w-[14px] h-[14px] bg-[var(--green)] border-2 border-white rounded-full"></div>
+                </div>
                 <div>
-                  <div className="text-[0.72rem] font-[800] text-[var(--navy)]">John Doe</div>
-                  <div className="text-[0.65rem] text-[var(--green)] font-[600]">Author · Just Published</div>
+                  <div className="text-[0.8rem] font-[800] text-[var(--navy)]">John Doe</div>
+                  <div className="text-[0.7rem] text-[var(--green)] font-[700]">Author · Just Published</div>
                 </div>
               </div>
-            </div>
-            <div className="absolute bottom-[-24px] left-[-24px] bg-[var(--navy)] text-white rounded-[14px] p-[12px_16px] shadow-[0_8px_24px_rgba(0,0,0,0.12)] border border-[var(--mint)] animate-[floatBadge_5s_ease-in-out_infinite_2.s]">
-              <div className="flex items-center gap-[10px]">
-                <div className="w-[32px] height-[32px] bg-[var(--green)] rounded-[10px] flex items-center justify-center">
-                  <svg width="15" height="15" fill="none" stroke="#fff" strokeWidth="2.5" viewBox="0 0 24 24">
+            </motion.div>
+
+            <motion.div 
+              animate={{ y: [0, 15, 0] }}
+              transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+              className="absolute bottom-[-30px] left-[-30px] bg-[var(--navy)] text-white rounded-[18px] p-[14px_20px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-20"
+            >
+              <div className="flex items-center gap-[12px]">
+                <div className="w-[36px] h-[36px] bg-[var(--green)] rounded-[12px] flex items-center justify-center">
+                  <svg width="18" height="18" fill="none" stroke="#fff" strokeWidth="3" viewBox="0 0 24 24">
                     <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
                 <div>
-                  <div className="text-[0.65rem] text-[#94a3b8] font-[500]">Monthly Readers</div>
-                  <div className="text-[1rem] font-[900]">+124%</div>
+                  <div className="text-[0.7rem] text-[#94a3b8] font-[600] tracking-[0.5px] uppercase">Readers Growth</div>
+                  <div className="text-[1.1rem] font-[900]">+124%</div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* STATS */}
       <section className="bg-[var(--mint)] px-12 py-[4rem]">
-        <div className="si max-w-[1280px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-[2rem] text-center reveal">
+        <div className="max-w-[1280px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-[2rem] text-center">
           {[
-            { n: '12,000+', l: 'Active Authors' },
-            { n: '480K', l: 'Posts Published' },
-            { n: '2.1M', l: 'Monthly Readers' },
-            { n: '99.9%', l: 'Uptime' }
+            { n: 12000, suf: '+', l: 'Active Authors' },
+            { n: 480, suf: 'K', l: 'Posts Published' },
+            { n: 2.1, suf: 'M', l: 'Monthly Readers' },
+            { n: 99.9, suf: '%', l: 'Uptime' }
           ].map((stat, i) => (
-            <div key={i}>
-              <div className="sn text-[2.5rem] font-[900] tracking-[-1.5px] bg-[linear-gradient(90deg,var(--navy)_0%,var(--green)_50%,var(--navy)_100%)] bg-[length:200%_auto] [-webkit-background-clip:text] [-webkit-text-fill-color:transparent] [background-clip:text]">
-                {stat.n}
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: i * 0.1 }}
+            >
+              <div className="text-[clamp(1.75rem,3vw,2.5rem)] font-[900] text-[var(--navy)] tracking-[-1.5px] flex justify-center items-baseline gap-[2px]">
+                <CountUp value={stat.n} precision={stat.n % 1 !== 0 ? 1 : 0} />
+                <span className="text-[var(--green)]">{stat.suf}</span>
               </div>
-              <div className="text-[0.72rem] font-[700] text-[var(--gray)] uppercase tracking-[2px] mt-[6px]">{stat.l}</div>
-            </div>
+              <div className="text-[0.72rem] font-[700] text-[var(--gray)] uppercase tracking-[1px] mt-[4px]">{stat.l}</div>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -304,26 +384,34 @@ const LandingPage = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1.5rem] mt-[4rem]">
             {[
-              { i: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z', t: 'TipTap Rich Editor', d: 'Headings, bold, italic, inline code, code blocks, images and links — distraction-free canvas with live preview.', cls: 'd1' },
-              { i: 'M7 7h.01M7 11h.01M7 15h.01M13 7h.01M13 11h.01M13 15h.01M17 7h.01M17 11h.01M17 15h.01', t: 'Smart Tagging', d: 'Assign multiple tags and one category per post. Readers filter by tag or category — discovery made effortless.', cls: 'd2' },
-              { i: 'M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z', t: 'Nested Comments', d: 'Two-level threaded comments — readers comment, authors reply. Real conversations, not just noise.', cls: 'd3' },
-              { i: 'M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z', t: 'RSS 2.0 Feed', d: 'Auto-generated valid RSS feed for every blog. Readers subscribe in any feed reader, forever. Includes title, excerpt and pubDate.', cls: 'd4' },
-              { i: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z', t: 'Full-text Search', d: 'PostgreSQL tsvector + GIN index powers instant search across all post titles and content without loading everything into memory.', cls: 'd5' },
-              { i: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', t: 'JWT Role Security', d: 'READER · AUTHOR · ADMIN roles enforced via Spring Security. Protected routes return 401. All secrets in environment variables.', cls: 'd6' }
+              { i: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z', t: 'TipTap Rich Editor', d: 'Headings, bold, italic, inline code, code blocks, images and links — distraction-free canvas with live preview.' },
+              { i: 'M7 7h.01M7 11h.01M7 15h.01M13 7h.01M13 11h.01M13 15h.01M17 7h.01M17 11h.01M17 15h.01', t: 'Smart Tagging', d: 'Assign multiple tags and one category per post. Readers filter by tag or category — discovery made effortless.' },
+              { i: 'M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z', t: 'Nested Comments', d: 'Two-level threaded comments — readers comment, authors reply. Real conversations, not just noise.' },
+              { i: 'M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z', t: 'RSS 2.0 Feed', d: 'Auto-generated valid RSS feed for every blog. Readers subscribe in any feed reader, forever. Includes title, excerpt and pubDate.' },
+              { i: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z', t: 'Full-text Search', d: 'PostgreSQL tsvector + GIN index powers instant search across all post titles and content without loading everything into memory.' },
+              { i: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', t: 'JWT Role Security', d: 'READER · AUTHOR · ADMIN roles enforced via Spring Security. Protected routes return 401. All secrets in environment variables.' }
             ].map((feature, i) => (
-              <div key={i} className={`bg-white p-[2rem] rounded-[20px] border-2 border-transparent transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-default relative overflow-hidden group hover:border-[var(--green)] hover:translate-y-[-8px] hover:shadow-[0_20px_60px_rgba(16,185,129,0.15)] reveal ${feature.cls}`}>
+              <motion.div 
+                key={i} 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1, ease: "easeOut" }}
+                whileHover={{ y: -10, scale: 1.02 }}
+                className="bg-white p-[2rem] rounded-[24px] border border-[var(--border)] transition-shadow duration-300 cursor-default relative overflow-hidden group hover:shadow-[0_40px_80px_rgba(16,185,129,0.12)]"
+              >
                 <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(16,185,129,0.04),transparent)] opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-                <div className="w-[52px] h-[52px] bg-[var(--mint)] text-[var(--green)] rounded-[14px] flex items-center justify-center mb-[1.5rem] transition-all duration-300 group-hover:bg-[var(--green)] group-hover:text-white group-hover:animate-[iconPop_0.4s_ease]">
-                  <svg width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <div className="w-[56px] h-[56px] bg-[var(--mint)] text-[var(--green)] rounded-[16px] flex items-center justify-center mb-[1.5rem] transition-all duration-400 group-hover:bg-[var(--green)] group-hover:text-white group-hover:rotate-[8deg] group-hover:scale-110">
+                  <svg width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <path d={feature.i} />
                   </svg>
                 </div>
-                <div className="text-[1.05rem] font-[800] text-[var(--navy)] mb-[0.6rem]">{feature.t}</div>
-                <div className="text-[0.875rem] text-[var(--gray)] leading-[1.7] mb-[1.25rem]">{feature.d}</div>
+                <div className="text-[1.2rem] font-[800] text-[var(--navy)] mb-[0.75rem] tracking-[-0.5px]">{feature.t}</div>
+                <p className="text-[0.95rem] text-[var(--gray)] leading-[1.65] mb-[1.5rem]">{feature.d}</p>
                 <Link to="#" className="text-[0.875rem] font-[700] text-[var(--green)] flex items-center gap-[6px] no-underline transition-all duration-200 group-hover:gap-[10px]">
-                  Learn more <span>→</span>
+                  Learn more <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </Link>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -342,16 +430,26 @@ const LandingPage = () => {
               { n: 3, t: 'Tag, categorise & preview', d: 'Assign multiple tags and a category. Your URL-friendly slug auto-generates from the title. Preview exactly how readers will see it.' },
               { n: 4, t: 'Hit Publish — reach your audience', d: 'Post goes live on the public feed, full-text search index, and your RSS feed instantly. Readers comment, reply, and subscribe.' }
             ].map((step, i) => (
-              <div key={i} className="flex gap-[1.25rem] mb-[2rem] relative last:mb-0">
+              <motion.div 
+                key={i} 
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.6, delay: i * 0.15 }}
+                className="flex gap-[1.25rem] mb-[2rem] relative last:mb-0 group cursor-default"
+              >
                 {i < 3 && <div className="absolute left-[19px] top-[52px] w-[2px] h-[calc(100%+.5rem)] bg-[linear-gradient(to_bottom,var(--green),rgba(16,185,129,0.1))]"></div>}
-                <div className="w-[40px] h-[40px] rounded-full bg-[var(--green)] text-white flex items-center justify-center font-[900] text-[0.875rem] shrink-0 shadow-[0_4px_12px_rgba(16,185,129,0.3)]">
+                <motion.div 
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  className="w-[40px] h-[40px] rounded-full bg-[var(--green)] text-white flex items-center justify-center font-[900] text-[0.875rem] shrink-0 shadow-[0_4px_12px_rgba(16,185,129,0.3)] z-10"
+                >
                   {step.n}
+                </motion.div>
+                <div className="pt-1">
+                  <div className="text-[1.1rem] font-[800] text-[var(--navy)] mb-[0.4rem] transition-colors group-hover:text-[var(--green)]">{step.t}</div>
+                  <p className="text-[0.925rem] text-[var(--gray)] leading-[1.65] max-w-[480px]">{step.d}</p>
                 </div>
-                <div>
-                  <div className="text-[1rem] font-[800] text-[var(--navy)] mb-[0.3rem]">{step.t}</div>
-                  <p className="text-[0.875rem] text-[var(--gray)] leading-[1.65]">{step.d}</p>
-                </div>
-              </div>
+              </motion.div>
             ))}
           </div>
 
@@ -478,23 +576,36 @@ const LandingPage = () => {
       {/* CTA */}
       <section className="px-12 py-[7rem]" id="getstarted">
         <div className="max-w-[1280px] mx-auto">
-          <div className="bg-[linear-gradient(135deg,var(--mint),#ecfdf5)] rounded-[48px] p-[5rem_4rem] text-center border border-[rgba(16,185,129,0.12)] shadow-[0_4px_40px_rgba(16,185,129,0.07)] reveal">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="bg-[linear-gradient(135deg,var(--mint),#ecfdf5)] rounded-[48px] p-[5rem_4rem] text-center border border-[rgba(16,185,129,0.12)] shadow-[0_4px_40px_rgba(16,185,129,0.07)]"
+          >
             <h2 className="text-[clamp(2.25rem,4vw,3.5rem)] font-[900] text-[var(--navy)] tracking-[-1.5px] mb-[1.25rem] leading-[1.1]">Ready to Start<br /><span className="text-[var(--green)]">Publishing?</span></h2>
-            <p className="text-[1.05rem] text-[var(--gray)] max-w-[520px] mx-auto mb-[2.5rem] leading-[1.7]">Join over 12,000 professional authors and teams growing their audience on BlogSpace today.</p>
-            <Link to="/register" className="bg-[var(--green)] text-white px-[3rem] py-[1.1rem] rounded-[18px] text-[1.1rem] font-[800] border-none cursor-pointer inline-block no-underline transition-all duration-250 shadow-[0_8px_32px_rgba(16,185,129,0.4)] animate-[glowPulse_3s_ease-in-out_infinite] hover:bg-[var(--gd)] hover:translate-y-[-3px]">
+            <p className="text-[1.1rem] text-[var(--gray)] max-w-[520px] mx-auto mb-[2.5rem] leading-[1.7]">Join over 12,000 professional authors and teams growing their audience on BlogSpace today.</p>
+            <Link to="/register" className="bg-[var(--green)] text-white px-[3rem] py-[1.1rem] rounded-[18px] text-[1.1rem] font-[800] border-none cursor-pointer inline-block no-underline transition-all duration-250 shadow-[0_8px_32px_rgba(16,185,129,0.4)] hover:bg-[var(--gd)] hover:translate-y-[-3px] hover:shadow-[0_16px_48px_rgba(16,185,129,0.5)]">
               Start Writing Free →
             </Link>
-            <div className="flex justify-center gap-[2.5rem] mt-[2rem] flex-wrap">
-              {['No credit card required', '14-day free trial', 'Cancel anytime'].map(text => (
-                <div key={text} className="flex items-center gap-[6px] text-[0.825rem] font-[600] text-[var(--gray)]">
-                  <svg width="16" height="16" fill="none" stroke="var(--green)" strokeWidth="2.5" viewBox="0 0 24 24">
+            <div className="flex justify-center gap-[2.5rem] mt-[2.5rem] flex-wrap">
+              {['No credit card required', '14-day free trial', 'Cancel anytime'].map((text, i) => (
+                <motion.div 
+                  key={text} 
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.5 + i * 0.1 }}
+                  className="flex items-center gap-[6px] text-[0.85rem] font-[600] text-[var(--gray)]"
+                >
+                  <svg width="18" height="18" fill="none" stroke="var(--green)" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   {text}
-                </div>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -523,11 +634,17 @@ const LandingPage = () => {
                   )},
                   { t: 'Github', content: <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.34-3.369-1.34-.454-1.152-1.11-1.458-1.11-1.458-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12c0-5.523-4.477-10-10-10z" /> }
                 ].map((ic, i) => (
-                  <a key={i} title={ic.t} href="#" className="w-[36px] h-[36px] rounded-full bg-[var(--mint)] text-[var(--green)] flex items-center justify-center transition-all duration-250 hover:bg-[var(--green)] hover:text-white hover:translate-y-[-2px]">
+                  <motion.a 
+                    key={i} 
+                    title={ic.t} 
+                    href="#" 
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    className="w-[36px] h-[36px] rounded-full bg-[var(--mint)] text-[var(--green)] flex items-center justify-center transition-colors duration-250 hover:bg-[var(--green)] hover:text-white"
+                  >
                     <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
                       {ic.content}
                     </svg>
-                  </a>
+                  </motion.a>
                 ))}
               </div>
             </div>
@@ -563,7 +680,7 @@ const LandingPage = () => {
       <button 
         ref={sttRef} 
         onClick={scrollToTop}
-        className="fixed bottom-[2rem] right-[2rem] z-[888] w-[48px] h-[48px] bg-[var(--green)] text-white rounded-full border-none cursor-pointer flex items-center justify-center shadow-[0_8px_24px_rgba(16,185,129,0.4)] opacity-0 pointer-events-none transition-all duration-300 [&.v]:opacity-100 [&.v]:pointer-events-all [&.v]:animate-[bounceIn_0.5s_cubic-bezier(0.22,1,0.36,1)] hover:bg-[var(--gd)] hover:translate-y-[-3px]"
+        className="fixed bottom-[2rem] right-[2rem] z-[888] w-[48px] h-[48px] bg-[var(--green)] text-white rounded-full border-none cursor-pointer flex items-center justify-center shadow-[0_8px_24px_rgba(16,185,129,0.4)] opacity-0 pointer-events-none transition-all duration-300 [&.v]:opacity-100 [&.v]:pointer-events-auto [&.v]:animate-[bounceIn_0.5s_cubic-bezier(0.22,1,0.36,1)] hover:bg-[var(--gd)] hover:translate-y-[-3px]"
       >
         <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
           <path d="M18 15l-6-6-6 6" />
