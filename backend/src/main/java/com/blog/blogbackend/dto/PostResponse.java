@@ -20,6 +20,7 @@ public class PostResponse {
     private String slug;
     private String content;
     private String excerpt;
+    private String coverImageUrl;
     private PostStatus status;
     private LocalDateTime publishedAt;
     private String authorName;

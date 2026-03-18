@@ -23,10 +23,22 @@ const CustomHeading = Heading.extend({
   },
 })
 
+const EMPTY_DOC = { type: 'doc', content: [{ type: 'paragraph' }] };
+
+const parseContent = (value) => {
+  if (!value) return EMPTY_DOC;
+  try {
+    const parsed = JSON.parse(value);
+    return parsed?.type ? parsed : EMPTY_DOC;
+  } catch {
+    return EMPTY_DOC;
+  }
+};
+
 const ReadOnlyEditor = ({ content }) => {
   const editor = useEditor({
     editable: false,
-    content: JSON.parse(content || '{}'),
+    content: parseContent(content),
     extensions: [
       StarterKit.configure({
         heading: false, // Disable default heading
@@ -36,8 +48,13 @@ const ReadOnlyEditor = ({ content }) => {
           class: 'scroll-mt-24',
         },
       }),
-      Link,
-      Image,
+      Link.configure({ openOnClick: true, autolink: true, defaultProtocol: 'https' }),
+      Image.configure({
+        HTMLAttributes: {
+          class:
+            'rounded-2xl border border-slate-200 dark:border-slate-700 mx-auto my-6 w-full max-h-[560px] object-contain bg-slate-50 dark:bg-slate-800/30',
+        },
+      }),
     ],
   });
 

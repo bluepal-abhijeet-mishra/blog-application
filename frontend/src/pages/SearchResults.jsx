@@ -9,6 +9,7 @@ const SearchResults = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const q = searchParams.get('q') || '';
   const page = parseInt(searchParams.get('page') || '0');
+  const sort = searchParams.get('sort') || 'relevance';
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
@@ -35,10 +36,10 @@ const SearchResults = () => {
   });
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['search', q, page],
+    queryKey: ['search', q, page, sort],
     queryFn: async () => {
       try {
-        return await postService.searchPosts(q, page, 10);
+        return await postService.searchPosts(q, page, 10, sort);
       } catch (err) {
         toast.error('Failed to retrieve search results');
         throw err;
@@ -48,7 +49,12 @@ const SearchResults = () => {
   });
 
   const handlePageChange = (newPage) => {
-    setSearchParams({ q, page: newPage.toString() });
+    setSearchParams({ q, page: newPage.toString(), sort });
+    window.scrollTo(0, 0);
+  };
+
+  const handleSortChange = (nextSort) => {
+    setSearchParams({ q, page: '0', sort: nextSort });
     window.scrollTo(0, 0);
   };
 
@@ -63,13 +69,24 @@ const SearchResults = () => {
             <div>
               <p className="text-xs font-bold text-slate-900 dark:text-white mb-4">Sorting Protocol</p>
               <div className="flex flex-col gap-3">
-                {['Relevance', 'Latest', 'Oldest'].map((sort) => (
-                  <label key={sort} className="flex items-center gap-3 cursor-pointer group">
+                {[
+                  { label: 'Relevance', value: 'relevance' },
+                  { label: 'Latest', value: 'latest' },
+                  { label: 'Oldest', value: 'oldest' },
+                ].map((option) => (
+                  <label key={option.value} className="flex items-center gap-3 cursor-pointer group">
                     <div className="relative flex items-center justify-center">
-                       <input type="radio" name="sort" value={sort.toLowerCase()} defaultChecked={sort === 'Relevance'} className="peer appearance-none w-5 h-5 rounded-full border-2 border-slate-200 dark:border-slate-700 checked:border-primary transition-all" />
+                       <input
+                         type="radio"
+                         name="sort"
+                         value={option.value}
+                         checked={sort === option.value}
+                         onChange={() => handleSortChange(option.value)}
+                         className="peer appearance-none w-5 h-5 rounded-full border-2 border-slate-200 dark:border-slate-700 checked:border-primary transition-all"
+                       />
                        <div className="absolute w-2 h-2 rounded-full bg-primary scale-0 peer-checked:scale-100 transition-transform"></div>
                     </div>
-                    <span className="text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">{sort}</span>
+                    <span className="text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">{option.label}</span>
                   </label>
                 ))}
               </div>

@@ -88,6 +88,7 @@ public class PostController {
     @GetMapping("/search")
     public ResponseEntity<Page<PostResponse>> searchPosts(
             @RequestParam @Size(min = 1, max = 100, message = "Search query must be between 1 and 100 characters") String q,
+            @RequestParam(defaultValue = "relevance") @Size(max = 20, message = "Sort value too long") String sort,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size) {
         
@@ -95,7 +96,7 @@ public class PostController {
         size = Math.min(size, 50);
         
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(postService.searchPosts(q, pageable));
+        return ResponseEntity.ok(postService.searchPosts(q, sort, pageable));
     }
 
     @GetMapping("/my-posts")

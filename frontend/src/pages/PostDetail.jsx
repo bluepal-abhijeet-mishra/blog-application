@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import ReadOnlyEditor from '../components/ReadOnlyEditor';
 import CommentSection from '../components/CommentSection';
 import { format } from 'date-fns';
+import { getPostCoverImage } from '../utils/postMedia';
 
 const PostDetail = () => {
   const { slug } = useParams();
@@ -45,6 +46,7 @@ const PostDetail = () => {
   if (error) return <div className="max-w-[740px] mx-auto px-6 py-12 text-red-500">Post not found.</div>;
 
   const headings = extractHeadings(post.content);
+  const coverImage = getPostCoverImage(post);
 
   return (
     <div className="flex flex-col lg:flex-row max-w-[1200px] mx-auto relative px-6">
@@ -106,7 +108,7 @@ const PostDetail = () => {
             <p className="font-bold text-slate-900 dark:text-white text-lg leading-tight">{post.authorName}</p>
             <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mt-1">
               <span>{post.publishedAt ? format(new Date(post.publishedAt), 'MMMM dd, yyyy') : 'Draft Version'}</span>
-              <span>•</span>
+              <span>|</span>
               <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">schedule</span> 5 min read</span>
             </div>
           </div>
@@ -124,8 +126,11 @@ const PostDetail = () => {
       <div className="mb-12 rounded-3xl overflow-hidden shadow-2xl shadow-primary/5 border border-slate-100 dark:border-slate-800">
         <img 
           className="w-full h-auto max-h-[500px] object-cover" 
-          alt="Hero" 
-          src={`https://picsum.photos/seed/${post.id}/1200/800`}
+          alt={post.title}
+          src={coverImage}
+          onError={(event) => {
+            event.currentTarget.src = '/post-cover-placeholder.svg';
+          }}
         />
       </div>
 

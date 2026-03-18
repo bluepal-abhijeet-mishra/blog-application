@@ -1,6 +1,7 @@
 package com.blog.blogbackend.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,6 +27,10 @@ public class PostRequest {
     
     @Size(max = 300, message = "Excerpt must not exceed 300 characters")
     private String excerpt;
+
+    @Size(max = 1000, message = "Cover image URL must not exceed 1000 characters")
+    @Pattern(regexp = "^(https?://.*)?$", message = "Cover image URL must start with http:// or https://")
+    private String coverImageUrl;
     
     private UUID categoryId;
     

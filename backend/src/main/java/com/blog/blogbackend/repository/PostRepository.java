@@ -17,6 +17,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     boolean existsBySlug(String slug);
 
     Page<Post> findByStatus(PostStatus status, Pageable pageable);
+    List<Post> findTop20ByStatusOrderByPublishedAtDesc(PostStatus status);
 
     List<Post> findByAuthorId(UUID authorId);
 
@@ -26,9 +27,32 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     @Query("SELECT p FROM Post p WHERE p.category.slug = :categorySlug AND p.status = 'PUBLISHED'")
     Page<Post> findByCategorySlug(@Param("categorySlug") String categorySlug, Pageable pageable);
 
-    @Query(value = "SELECT * FROM posts WHERE search_vector @@ plainto_tsquery('english', :q) AND status = 'PUBLISHED' ORDER BY published_at DESC",
-           nativeQuery = true)
-    Page<Post> fullTextSearch(@Param("q") String q, Pageable pageable);
+    @Query(
+            value = "SELECT * FROM posts " +
+                    "WHERE search_vector @@ plainto_tsquery('english', :q) AND status = 'PUBLISHED' " +
+                    "ORDER BY ts_rank(search_vector, plainto_tsquery('english', :q)) DESC, published_at DESC",
+            countQuery = "SELECT COUNT(*) FROM posts WHERE search_vector @@ plainto_tsquery('english', :q) AND status = 'PUBLISHED'",
+            nativeQuery = true
+    )
+    Page<Post> fullTextSearchByRelevance(@Param("q") String q, Pageable pageable);
+
+    @Query(
+            value = "SELECT * FROM posts " +
+                    "WHERE search_vector @@ plainto_tsquery('english', :q) AND status = 'PUBLISHED' " +
+                    "ORDER BY published_at DESC",
+            countQuery = "SELECT COUNT(*) FROM posts WHERE search_vector @@ plainto_tsquery('english', :q) AND status = 'PUBLISHED'",
+            nativeQuery = true
+    )
+    Page<Post> fullTextSearchLatest(@Param("q") String q, Pageable pageable);
+
+    @Query(
+            value = "SELECT * FROM posts " +
+                    "WHERE search_vector @@ plainto_tsquery('english', :q) AND status = 'PUBLISHED' " +
+                    "ORDER BY published_at ASC",
+            countQuery = "SELECT COUNT(*) FROM posts WHERE search_vector @@ plainto_tsquery('english', :q) AND status = 'PUBLISHED'",
+            nativeQuery = true
+    )
+    Page<Post> fullTextSearchOldest(@Param("q") String q, Pageable pageable);
 
     long countByAuthorId(UUID authorId);
     long countByAuthorIdAndStatus(UUID authorId, PostStatus status);

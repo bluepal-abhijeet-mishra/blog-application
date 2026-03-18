@@ -38,6 +38,9 @@ public class Post {
     @Column(columnDefinition = "TEXT")
     private String excerpt;
 
+    @Column(name = "cover_image_url", length = 1000)
+    private String coverImageUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PostStatus status;

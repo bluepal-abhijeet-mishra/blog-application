@@ -12,6 +12,7 @@ import com.blog.blogbackend.repository.PostRepository;
 import com.blog.blogbackend.repository.TagRepository;
 import com.blog.blogbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,6 +48,7 @@ public class PostService {
     private SlugService slugService;
 
     @Transactional
+    @CacheEvict(value = "rss-feed", allEntries = true)
     public PostResponse createPost(PostRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User author = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
@@ -56,6 +58,7 @@ public class PostService {
                 .slug(slugService.generateSlug(request.getTitle()))
                 .content(request.getContent())
                 .excerpt(request.getExcerpt())
+                .coverImageUrl(normalizeOptionalValue(request.getCoverImageUrl()))
                 .status(PostStatus.DRAFT)
                 .author(author)
                 .build();
@@ -80,6 +83,7 @@ public class PostService {
     }
 
     @Transactional
+    @CacheEvict(value = "rss-feed", allEntries = true)
     public PostResponse updatePost(UUID id, PostRequest request) {
         Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
         User currentUser = getCurrentUser();
@@ -91,6 +95,7 @@ public class PostService {
         }
         post.setContent(request.getContent());
         post.setExcerpt(request.getExcerpt());
+        post.setCoverImageUrl(normalizeOptionalValue(request.getCoverImageUrl()));
 
         if (request.getCategoryId() != null) {
             Category category = categoryRepository.findById(request.getCategoryId()).orElse(null);
@@ -112,6 +117,7 @@ public class PostService {
     }
 
     @Transactional
+    @CacheEvict(value = "rss-feed", allEntries = true)
     public PostResponse publishPost(UUID id) {
         Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
         User currentUser = getCurrentUser();
@@ -123,6 +129,7 @@ public class PostService {
     }
 
     @Transactional
+    @CacheEvict(value = "rss-feed", allEntries = true)
     public PostResponse unpublishPost(UUID id) {
         Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
         User currentUser = getCurrentUser();
@@ -134,6 +141,8 @@ public class PostService {
         return mapToResponse(postRepository.save(post));
     }
 
+    @Transactional
+    @CacheEvict(value = "rss-feed", allEntries = true)
     public void deletePost(UUID id) {
         Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
         User currentUser = getCurrentUser();
@@ -174,8 +183,14 @@ public class PostService {
         return posts.map(this::mapToResponse);
     }
 
-    public Page<PostResponse> searchPosts(String q, Pageable pageable) {
-        return postRepository.fullTextSearch(q, pageable).map(this::mapToResponse);
+    public Page<PostResponse> searchPosts(String q, String sort, Pageable pageable) {
+        String normalizedSort = sort == null ? "relevance" : sort.trim().toLowerCase();
+        Page<Post> posts = switch (normalizedSort) {
+            case "latest" -> postRepository.fullTextSearchLatest(q, pageable);
+            case "oldest" -> postRepository.fullTextSearchOldest(q, pageable);
+            default -> postRepository.fullTextSearchByRelevance(q, pageable);
+        };
+        return posts.map(this::mapToResponse);
     }
 
     public List<PostResponse> getAuthorPosts() {
@@ -208,6 +223,7 @@ public class PostService {
                 .slug(post.getSlug())
                 .content(post.getContent())
                 .excerpt(post.getExcerpt())
+                .coverImageUrl(post.getCoverImageUrl())
                 .status(post.getStatus())
                 .publishedAt(post.getPublishedAt())
                 .authorId(post.getAuthor().getId())
@@ -225,6 +241,12 @@ public class PostService {
                         .slug(tag.getSlug())
                         .build()).collect(Collectors.toSet()))
                 .build();
+    }
+
+    private String normalizeOptionalValue(String value) {
+        if (value == null) return null;
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     private User getCurrentUser() {

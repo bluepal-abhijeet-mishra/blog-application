@@ -40,8 +40,8 @@ const postService = {
     return response.data;
   },
 
-  searchPosts: async (q, page = 0, size = 10) => {
-    const response = await api.get('/posts/search', { params: { q, page, size } });
+  searchPosts: async (q, page = 0, size = 10, sort = 'relevance') => {
+    const response = await api.get('/posts/search', { params: { q, page, size, sort } });
     return response.data;
   },
 

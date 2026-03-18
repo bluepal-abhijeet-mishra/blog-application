@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import adminService from '../api/services/adminService';
 import postService from '../api/services/postService';
 import applicationService from '../api/services/applicationService';
+import categoryRequestService from '../api/services/categoryRequestService';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,6 +13,8 @@ const AdminPanel = () => {
   const [activeView, setActiveView] = useState('users');
   const [rejectionModal, setRejectionModal] = useState({ open: false, applicationId: null });
   const [rejectionReason, setRejectionReason] = useState('');
+  const [categoryRejectionModal, setCategoryRejectionModal] = useState({ open: false, requestId: null });
+  const [categoryRejectionReason, setCategoryRejectionReason] = useState('');
 
   const { data: users } = useQuery({
     queryKey: ['admin-users'],
@@ -36,6 +39,15 @@ const AdminPanel = () => {
     queryFn: () => applicationService.getAllApplications('PENDING'),
     enabled: activeView === 'applications',
   });
+
+  const { data: categoryRequestsData } = useQuery({
+    queryKey: ['admin-category-requests'],
+    queryFn: () => categoryRequestService.getAdminRequests('PENDING'),
+    enabled: activeView === 'category-requests',
+  });
+
+  const applications = Array.isArray(applicationsData) ? applicationsData : [];
+  const categoryRequests = Array.isArray(categoryRequestsData) ? categoryRequestsData : [];
 
   const { data: platformStats } = useQuery({
     queryKey: ['admin-stats'],
@@ -104,6 +116,27 @@ const AdminPanel = () => {
     onError: (err) => toast.error(err.response?.data || 'Failed to reject application'),
   });
 
+  const approveCategoryRequestMutation = useMutation({
+    mutationFn: (id) => categoryRequestService.approveRequest(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-category-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      toast.success('Category request approved and category created.');
+    },
+    onError: (err) => toast.error(err.response?.data || err.message || 'Failed to approve request'),
+  });
+
+  const rejectCategoryRequestMutation = useMutation({
+    mutationFn: ({ id, note }) => categoryRequestService.rejectRequest(id, note),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-category-requests'] });
+      setCategoryRejectionModal({ open: false, requestId: null });
+      setCategoryRejectionReason('');
+      toast.success('Category request rejected.');
+    },
+    onError: (err) => toast.error(err.response?.data || err.message || 'Failed to reject request'),
+  });
+
   const getNextRole = (role) => {
     if (role === 'READER') return 'AUTHOR';
     if (role === 'AUTHOR') return 'ADMIN';
@@ -124,11 +157,20 @@ const AdminPanel = () => {
     rejectApplicationMutation.mutate({ id: rejectionModal.applicationId, reason: rejectionReason });
   };
 
+  const handleCategoryReject = () => {
+    if (!categoryRejectionReason.trim()) {
+      toast.error('Please provide a reason for rejection.');
+      return;
+    }
+    rejectCategoryRequestMutation.mutate({ id: categoryRejectionModal.requestId, note: categoryRejectionReason });
+  };
+
   const viewTabs = [
     { key: 'users', label: 'Users', badge: users?.length || 0 },
     { key: 'posts', label: 'Posts', badge: postsData?.totalElements || 0 },
     { key: 'comments', label: 'Comments', badge: commentsData?.totalElements || 0 },
-    { key: 'applications', label: 'Applications', badge: applicationsData?.length || 0 },
+    { key: 'applications', label: 'Applications', badge: applications.length },
+    { key: 'category-requests', label: 'Category Requests', badge: categoryRequests.length },
   ];
 
   return (
@@ -224,6 +266,13 @@ const AdminPanel = () => {
                         <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Action</th>
                       </tr>
                     )}
+                    {activeView === 'category-requests' && (
+                      <tr>
+                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Requested Category</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Requested By</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Action</th>
+                      </tr>
+                    )}
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {activeView === 'users' && users?.map((u) => (
@@ -310,11 +359,11 @@ const AdminPanel = () => {
                       </tr>
                     ))}
 
-                    {activeView === 'applications' && (applicationsData?.length === 0 ? (
+                    {activeView === 'applications' && (applications.length === 0 ? (
                       <tr><td colSpan="3" className="px-8 py-20 text-center">
                         <p className="text-slate-900 dark:text-white font-black uppercase tracking-widest text-xs">No pending applications.</p>
                       </td></tr>
-                    ) : applicationsData.map((app) => (
+                    ) : applications.map((app) => (
                       <tr key={app.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
                         <td className="px-8 py-5">
                           <p className="font-black text-slate-900 dark:text-white leading-tight">{app.userDisplayName}</p>
@@ -327,6 +376,49 @@ const AdminPanel = () => {
                           <div className="flex justify-end gap-3">
                             <button onClick={() => approveApplicationMutation.mutate(app.id)} className="px-4 py-2 bg-primary text-white text-[9px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-primary/20">Approve</button>
                             <button onClick={() => setRejectionModal({ open: true, applicationId: app.id })} className="px-4 py-2 border border-rose-100 dark:border-rose-900/30 text-rose-500 text-[9px] font-black uppercase tracking-widest rounded-xl">Reject</button>
+                          </div>
+                        </td>
+                      </tr>
+                    )))}
+
+                    {activeView === 'category-requests' && (categoryRequests.length === 0 ? (
+                      <tr>
+                        <td colSpan="3" className="px-8 py-20 text-center">
+                          <p className="text-slate-900 dark:text-white font-black uppercase tracking-widest text-xs">No pending category requests.</p>
+                        </td>
+                      </tr>
+                    ) : categoryRequests.map((request) => (
+                      <tr key={request.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                        <td className="px-8 py-5">
+                          <p className="font-black text-slate-900 dark:text-white leading-tight">{request.name}</p>
+                          <p className="text-[10px] font-bold text-slate-400 mt-0.5 tracking-tight">
+                            /categories/{request.slug}
+                          </p>
+                          {request.reason && (
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 max-w-md line-clamp-2">
+                              {request.reason}
+                            </p>
+                          )}
+                        </td>
+                        <td className="px-8 py-5">
+                          <p className="font-black text-slate-900 dark:text-white leading-tight">{request.requestedByName}</p>
+                          <p className="text-[10px] font-bold text-slate-400 mt-0.5 tracking-tight">{request.requestedByEmail}</p>
+                          <p className="text-[10px] text-slate-400 mt-1">{format(new Date(request.createdAt), 'MMM dd, yyyy HH:mm')}</p>
+                        </td>
+                        <td className="px-8 py-5 text-right whitespace-nowrap">
+                          <div className="flex justify-end gap-3">
+                            <button
+                              onClick={() => approveCategoryRequestMutation.mutate(request.id)}
+                              className="px-4 py-2 bg-primary text-white text-[9px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-primary/20"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => setCategoryRejectionModal({ open: true, requestId: request.id })}
+                              className="px-4 py-2 border border-rose-100 dark:border-rose-900/30 text-rose-500 text-[9px] font-black uppercase tracking-widest rounded-xl"
+                            >
+                              Reject
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -357,6 +449,44 @@ const AdminPanel = () => {
               <div className="flex flex-col gap-3 mt-8">
                 <button onClick={handleReject} className="w-full h-12 bg-rose-500 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-rose-500/20 hover:bg-rose-600 active:scale-95 transition-all">Finalize Rejection</button>
                 <button onClick={() => setRejectionModal({ open: false, applicationId: null })} className="w-full h-12 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600 transition-all">Cancel</button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {categoryRejectionModal.open && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[32px] p-10 border border-slate-100 dark:border-slate-800 shadow-2xl"
+            >
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">Reject Category Request</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-8">Provide feedback for the author.</p>
+
+              <textarea
+                className="w-full h-32 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 text-sm outline-none focus:ring-2 focus:ring-rose-500/20 transition-all placeholder:text-slate-300"
+                placeholder="Duplicate category, too broad, not aligned with taxonomy, etc..."
+                value={categoryRejectionReason}
+                onChange={(e) => setCategoryRejectionReason(e.target.value)}
+              />
+
+              <div className="flex flex-col gap-3 mt-8">
+                <button
+                  onClick={handleCategoryReject}
+                  className="w-full h-12 bg-rose-500 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-rose-500/20 hover:bg-rose-600 active:scale-95 transition-all"
+                >
+                  Finalize Rejection
+                </button>
+                <button
+                  onClick={() => setCategoryRejectionModal({ open: false, requestId: null })}
+                  className="w-full h-12 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600 transition-all"
+                >
+                  Cancel
+                </button>
               </div>
             </motion.div>
           </div>
