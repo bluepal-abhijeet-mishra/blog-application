@@ -6,6 +6,7 @@ import com.blog.blogbackend.dto.CategoryRequestDto;
 import com.blog.blogbackend.entity.Category;
 import com.blog.blogbackend.entity.CategoryRequest;
 import com.blog.blogbackend.entity.CategoryRequestStatus;
+import com.blog.blogbackend.entity.NotificationType;
 import com.blog.blogbackend.entity.User;
 import com.blog.blogbackend.repository.CategoryRepository;
 import com.blog.blogbackend.repository.CategoryRequestRepository;
@@ -27,6 +28,7 @@ public class CategoryRequestService {
     private final CategoryRequestRepository categoryRequestRepository;
     private final CategoryRepository categoryRepository;
     private final SlugService slugService;
+    private final NotificationService notificationService;
 
     @Transactional
     public CategoryRequestDto submitRequest(User requester, CategoryRequestCreateRequest request) {
@@ -54,6 +56,13 @@ public class CategoryRequestService {
                 .reason(normalizeOptional(request.getReason()))
                 .status(CategoryRequestStatus.PENDING)
                 .build());
+
+        notificationService.createNotificationForAdmins(
+                NotificationType.CATEGORY_REQUEST_SUBMITTED,
+                "New category request",
+                requester.getDisplayName() + " requested category \"" + normalizedName + "\".",
+                "/admin"
+        );
 
         return toDto(saved);
     }
@@ -97,7 +106,17 @@ public class CategoryRequestService {
         request.setReviewedBy(reviewer);
         request.setReviewNote(normalizeOptional(decision != null ? decision.getNote() : null));
         request.setReviewedAt(LocalDateTime.now());
-        return toDto(categoryRequestRepository.save(request));
+        CategoryRequest saved = categoryRequestRepository.save(request);
+
+        notificationService.createNotification(
+                request.getRequestedBy(),
+                NotificationType.CATEGORY_REQUEST_APPROVED,
+                "Category request approved",
+                "Your category request for \"" + request.getName() + "\" was approved.",
+                "/editor"
+        );
+
+        return toDto(saved);
     }
 
     @Transactional
@@ -113,7 +132,18 @@ public class CategoryRequestService {
         request.setReviewedBy(reviewer);
         request.setReviewNote(normalizeOptional(decision != null ? decision.getNote() : null));
         request.setReviewedAt(LocalDateTime.now());
-        return toDto(categoryRequestRepository.save(request));
+        CategoryRequest saved = categoryRequestRepository.save(request);
+
+        String note = normalizeOptional(decision != null ? decision.getNote() : null);
+        notificationService.createNotification(
+                request.getRequestedBy(),
+                NotificationType.CATEGORY_REQUEST_REJECTED,
+                "Category request rejected",
+                "Your category request for \"" + request.getName() + "\" was rejected." + (note != null ? " Note: " + note : ""),
+                "/editor"
+        );
+
+        return toDto(saved);
     }
 
     private CategoryRequestDto toDto(CategoryRequest request) {
