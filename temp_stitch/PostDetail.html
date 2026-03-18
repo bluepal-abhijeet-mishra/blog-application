@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2463eb",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#111621",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .prose h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; color: #0f172a; }
+        .prose p { margin-bottom: 1.25rem; line-height: 1.75; color: #334155; }
+        .prose code { background-color: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.875em; }
+        .prose pre { background-color: #1e293b; color: #f8fafc; padding: 1.25rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<header class="sticky top-0 z-50 w-full bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2">
+<div class="text-primary">
+<svg class="w-8 h-8" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
+</svg>
+</div>
+<span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">BlogSpace</span>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-sm font-medium text-slate-600 hover:text-primary transition-colors" href="#">Home</a>
+<a class="text-sm font-medium text-slate-600 hover:text-primary transition-colors" href="#">Explore</a>
+<a class="text-sm font-medium text-slate-600 hover:text-primary transition-colors" href="#">Bookmarks</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+<input class="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-full text-sm w-64 focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Search articles..." type="text"/>
+</div>
+<div class="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden border-2 border-primary/10">
+<img class="w-full h-full object-cover" data-alt="User profile avatar showing a smiling person" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVSB_neU9yDNLPUvcE1UyGdlaPXPqFXIAYwlELpa03S1P3_eNfCg6misFxGnL6z0XeLVvBfAX4IjydpNjoMCo9dWP79tY1OtFlHS8IQMFc87ZwfIKFB1yNPB_H7PjMlR5fcZ43Hb5UcbyczupEMrJmkOx35m5dhweaWofHe_HSSikuimAS32z-kXNBadMXqWP6iP4vHpa5x06jDWW3y2j3PtLRRalXaPchdemgJqspbOqiIkji9J8QQ-mF_DfxkHpF0bTbuN1FTnA"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-[740px] mx-auto px-6 py-12">
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full uppercase tracking-wider">Technology</span>
+<span class="px-3 py-1 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-semibold rounded-full uppercase tracking-wider">Web Design</span>
+</div>
+<h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white leading-[1.15] mb-8">
+            The Future of Minimalist Web Design in 2024
+        </h1>
+<div class="flex items-center justify-between mb-10 pb-10 border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-4">
+<div class="h-12 w-12 rounded-full overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Author Alex Rivera smiling in a professional portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8-L5oITmIr58_vhKOri0Jcd99uxoq3Dj8IZYVvlM3_tUS2HkjSGWA0F24yYkHI7X-9HYNfZe9RIilg5hlQioldwUjXf90aj_1g-RoMyrmszc2dwkWTMIDynODnZ_cGpYho5me0KTZwhgh6_dthH9c2QNj41pzbK08b3uexGqGYzitLwBhGGFZnmhBqoZdna55J97e19YOMDNiU50GGuVptIKstjot26KhBsbhVdx1YQXXSD8J2zVEJjdI1RHQGCN6Dqmomzta4Jg"/>
+</div>
+<div>
+<p class="font-bold text-slate-900 dark:text-white">Alex Rivera</p>
+<p class="text-sm text-slate-500 dark:text-slate-400">Oct 24, 2023 · 8 min read</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</div>
+<article class="prose prose-slate max-w-none">
+<p class="text-xl text-slate-600 dark:text-slate-300 leading-relaxed mb-8">
+                In the ever-evolving landscape of digital interfaces, minimalism continues to stand as a pillar of effective user experience. This article explores how modern frameworks are simplifying the way we build for the web.
+            </p>
+<p>
+                Minimalism isn't just about what's missing; it's about making sure every element on the screen serves a purpose. As we head into 2024, the trend of "complex minimalism" is taking hold—where the simplicity is only skin-deep, powered by sophisticated underlying architecture.
+            </p>
+<h2>The Shift Toward Utility</h2>
+<p>
+                Developers are moving away from heavy UI kits in favor of utility-first frameworks. This change allows for faster iteration and smaller bundle sizes without sacrificing the aesthetic quality of the end product.
+            </p>
+<pre><code>// Example of a minimalist component structure
+const Header = ({ title }) =&gt; (
+  &lt;header class="flex justify-between p-4"&gt;
+    &lt;h1 class="text-lg font-bold"&gt;{title}&lt;/h1&gt;
+    &lt;nav&gt;
+      &lt;ul class="flex gap-4"&gt;
+        &lt;li&gt;Home&lt;/li&gt;
+        &lt;li&gt;About&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/nav&gt;
+  &lt;/header&gt;
+);</code></pre>
+<p>
+                By leveraging tools like <a class="text-primary hover:underline" href="#">Tailwind CSS</a> and <a class="text-primary hover:underline" href="#">Next.js</a>, the barrier between design and implementation is thinner than ever. We are entering an era where performance is the new white space.
+            </p>
+</article>
+<hr class="my-16 border-slate-200 dark:border-slate-800"/>
+<section class="mt-12">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white">Comments (12)</h3>
+</div>
+<div class="mb-12">
+<div class="flex gap-4">
+<div class="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="User profile avatar showing a smiling person" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkBNA4IlAe26zFBTT2m15wg9DHa-gr6ManY5PHtG_g27TVo2-RKhBQtaolIYzzFIeFh9mQZWgqaWHzk9wHeQ5at19PEtMYps9I393_4DCyAV-c48jPnEPNQws38-YzsYr0qOE_Ld9oX8L678QCiDNUrjm11bE386MSmJtFXS9UVLd4_9CCpXqUP82nepXOFfH02sfeZe71s41jExGPkz1lWrMZNZ6veSUpCtuCFelUXQTjCxNIdof1dxbkAyslQHDTxhgSeq_7gIE"/>
+</div>
+<div class="flex-1">
+<textarea class="w-full p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all min-h-[100px] text-sm" placeholder="Write a comment..."></textarea>
+<div class="mt-3 flex justify-end">
+<button class="bg-primary text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-primary/90 transition-colors">Post Comment</button>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-8">
+<div class="flex gap-4">
+<div class="h-10 w-10 rounded-full bg-slate-200 shrink-0 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Commenter profile photo of a smiling woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUHByRUI-Vs7FqEshBHnpZIXeMv3wLI4WcK8oX-KTFjTBwMZkY_BdSwGoUqcEqG-gNIWnXexDY00mA_6TY8BaUgpbDsb4w-N-UTlxFdizdj6F0GdjqrJJope_Kcgck3up2XTquBlUGwQ9lPbdst6wM3lar9kwFq6xOlFwa8uClpPqCdBfbUcale4CZM99PIJGXfVK-ZpvirgruqVOPJHnZ5QAuvtaN8mKB-szP2-y4sK_bycknvhe74P3iMKxvgwalBULZcpT66PM"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-bold text-slate-900 dark:text-white">Sarah Jenkins</span>
+<span class="text-xs text-slate-500">2 hours ago</span>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                            This is exactly the trend I've been seeing in my latest projects. The focus on typography and spacing over heavy graphics is a breath of fresh air.
+                        </p>
+<button class="mt-2 text-xs font-semibold text-primary hover:underline flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">reply</span>
+                            Reply
+                        </button>
+<div class="mt-6 flex gap-4 pl-4 border-l-2 border-slate-200 dark:border-slate-800">
+<div class="h-8 w-8 rounded-full bg-slate-200 shrink-0 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Reply commenter profile photo of a man in glasses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjTw4zetxyKWxcFJ8tPTfiACv-aMkLLKIAyc8rlpNFWZG2PLx-3_C2rOePaZs4d3mTpYMvPL02q_ScYNCGfuK2OXxXCLtpTQLiCzSNX0d-IPQuXJap8w7JZikuBu1fJBgkkZdhSuEvezbRyAFEPwPTBS8PHa_69CozFL9vrHoSaLwAoRGruCymkApL-K9mxfuU5wfnNAEA1mr-4Uiw0-48bDiRtJ7JOs6GtentndrsPtzCka_MMNYlt8xydDqNh3JetmDExhY2YgQ"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-bold text-slate-900 dark:text-white text-sm">Marcus Chen</span>
+<span class="text-[10px] text-slate-500">1 hour ago</span>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                                    Agreed! Especially with the core web vitals becoming so important for SEO. Minimalist code is a must.
+                                </p>
+<button class="mt-2 text-xs font-semibold text-primary hover:underline flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">reply</span>
+                                    Reply
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="h-10 w-10 rounded-full bg-slate-200 shrink-0 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Commenter profile photo of a young man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtGjNReQTw2d0Hkk4wUrSioUVTCS1dFz4eMxCuxyiJs5B1Ii3MEF25rbzqTOYWNASeUivGLZ19PBLX3GS6V2mmIzF86CUq0W-DFCKA-zwLXglecJFzuxvZ6yTQyjlufZUtZLmW5FemRNsdnsCzvf8lTho9JR9VGQvY1rYiFH2d-Uc0zWm2PnXg_uaWZV55cOz_bpvWMCDpNjYoxdWnnG4C417dZEXEwU6W66F2E9V54nXg6iTjSr-aS9ddzjAurPfsZvyh9CzL5T0"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-bold text-slate-900 dark:text-white">David Miller</span>
+<span class="text-xs text-slate-500">4 hours ago</span>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                            Great read. Do you think this minimalist approach also applies to complex data dashboards?
+                        </p>
+<button class="mt-2 text-xs font-semibold text-primary hover:underline flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">reply</span>
+                            Reply
+                        </button>
+</div>
+</div>
+</div>
+<button class="w-full mt-10 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                Load More Comments
+            </button>
+</section>
+</main>
+<footer class="mt-20 py-10 border-t border-slate-200 dark:border-slate-800">
+<div class="max-w-[740px] mx-auto px-6 text-center">
+<div class="flex items-center justify-center gap-2 mb-4 opacity-50">
+<div class="text-slate-900 dark:text-white">
+<svg class="w-6 h-6" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
+</svg>
+</div>
+<span class="font-bold">BlogSpace</span>
+</div>
+<p class="text-sm text-slate-500">© 2024 BlogSpace. All rights reserved.</p>
+</div>
+</footer>
+</body></html>

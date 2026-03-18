@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1400" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#052e2b"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+    <linearGradient id="shape" x1="220" y1="210" x2="1180" y2="720" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#34d399" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#5eead4" stop-opacity=".08"/>
+    </linearGradient>
+  </defs>
+  <rect width="1400" height="900" fill="url(#bg)"/>
+  <rect x="120" y="120" width="1160" height="660" rx="56" fill="url(#shape)" stroke="#99f6e4" stroke-opacity=".25"/>
+  <circle cx="260" cy="240" r="10" fill="#6ee7b7"/>
+  <circle cx="300" cy="240" r="10" fill="#34d399"/>
+  <circle cx="340" cy="240" r="10" fill="#10b981"/>
+  <text x="190" y="430" fill="#ecfeff" font-family="Outfit, Inter, sans-serif" font-size="84" font-weight="800" letter-spacing="1">
+    BlogSpace Story
+  </text>
+  <text x="190" y="500" fill="#99f6e4" font-family="Inter, sans-serif" font-size="32" font-weight="600">
+    Add a cover image URL or include the first image inside your post.
+  </text>
+</svg>
