@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '../api/axios';
+import postService from '../api/services/postService';
+import metadataService from '../api/services/metadataService';
+import toast from 'react-hot-toast';
 import RichTextEditor from '../components/RichTextEditor';
 
 const EditorPage = () => {
@@ -20,16 +22,24 @@ const EditorPage = () => {
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await api.get('/categories');
-      return response.data;
+      try {
+        return await metadataService.getCategories();
+      } catch (err) {
+        toast.error('Failed to load categories');
+        return [];
+      }
     },
   });
 
   const { data: post, isLoading: isLoadingPost } = useQuery({
     queryKey: ['post-edit', id],
     queryFn: async () => {
-      const response = await api.get(`/posts/edit/${id}`);
-      return response.data;
+      try {
+        return await postService.getPostForEdit(id);
+      } catch (err) {
+        toast.error('Failed to load post for editing');
+        throw err;
+      }
     },
     enabled: !!id,
   });
@@ -46,22 +56,29 @@ const EditorPage = () => {
 
   const saveMutation = useMutation({
     mutationFn: async ({ postData, publish }) => {
-      const payload = { ...postData };
       let res;
       if (id) {
-        res = await api.put(`/posts/${id}`, payload);
+        res = await postService.updatePost(id, postData);
       } else {
-        res = await api.post('/posts', payload);
+        res = await postService.createPost(postData);
       }
-      if (publish && res.data?.id) {
-        await api.patch(`/posts/${res.data.id}/publish`);
+      
+      const savedPost = res.data || res; // Handle both direct data and response objects
+      const finalId = id || savedPost.id;
+      
+      if (publish && finalId) {
+        await postService.publishPost(finalId);
       }
-      return res;
+      return savedPost;
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['my-posts']);
+      toast.success('Story saved successfully');
       navigate('/dashboard');
     },
+    onError: (err) => {
+      toast.error(err.message || 'Failed to preserve story');
+    }
   });
 
   const handleSaveDraft = (e) => {
@@ -225,8 +242,8 @@ const EditorPage = () => {
                   value={content}
                   onChange={(json, text) => {
                     setContent(json);
-                    if (!id && (!excerpt || excerpt === text.substring(0, 150))) {
-                      setExcerpt(text.substring(0, 150));
+                    if (!id && (!excerpt || excerpt === text.substring(0, 300))) {
+                      setExcerpt(text.substring(0, 300));
                     }
                   }}
                 />

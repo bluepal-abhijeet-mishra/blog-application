@@ -1,74 +1,111 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [query, setQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query)}`);
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
-  return (
-    <header className="sticky top-0 z-50 w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-        <Link to="/feed" className="flex items-center gap-2 shrink-0">
-          <div className="bg-primary text-white p-1.5 rounded-lg flex items-center justify-center shadow-sm shadow-primary/20">
-            <span className="material-symbols-outlined">auto_stories</span>
-          </div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">BlogSpace</h1>
-        </Link>
-        
-        <div className="flex-1 max-w-2xl hidden md:block">
+  // Authenticated Top Bar (Dashboard Style)
+  if (user) {
+    return (
+      <header className="h-[72px] bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between px-8 sticky top-0 z-40 backdrop-blur-md bg-white/80 dark:bg-slate-900/80">
+        <div className="flex-1 max-w-xl">
           <form onSubmit={handleSearch} className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
-              <span className="material-symbols-outlined">search</span>
-            </div>
-            <input 
-              className="block w-full pl-10 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm" 
-              placeholder="Search for stories, people, or tags..." 
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+            <input
               type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search reports, insights, and stories..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-11 pl-12 pr-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all outline-none"
             />
           </form>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
-          <a href="/api/feed.rss" className="text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors hidden sm:block" target="_blank" rel="noreferrer">
-            RSS
-          </a>
-          {user ? (
-            <>
-              {(user.role === 'AUTHOR' || user.role === 'ADMIN') && (
-                <Link to="/dashboard" className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors hidden sm:block">Dashboard</Link>
+        <div className="flex items-center gap-6">
+          <button className="relative p-2 text-slate-500 hover:text-primary transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl">
+            <span className="material-symbols-outlined">notifications</span>
+            <span className="absolute top-2 right-2 size-2 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+          </button>
+          
+          <div className="h-6 w-px bg-slate-200 dark:bg-slate-800"></div>
+
+          <div className="flex items-center gap-3 relative">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-black text-slate-900 dark:text-white leading-none">{user.displayName}</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">{user.role}</p>
+            </div>
+            
+            <button 
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="size-10 rounded-xl overflow-hidden border-2 border-transparent hover:border-primary transition-all p-0.5"
+            >
+              <img 
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=10b981&color=fff&bold=true&size=80`} 
+                alt="Profile" 
+                className="w-full h-full object-cover rounded-lg"
+              />
+            </button>
+
+            <AnimatePresence>
+              {showUserMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="absolute right-0 top-full mt-3 w-56 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xl p-2 z-[60]"
+                >
+                  <Link to="/profile" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                    <span className="material-symbols-outlined text-lg">person</span>
+                    Profile Settings
+                  </Link>
+                  <button 
+                    onClick={() => { logout(); navigate('/'); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-lg">logout</span>
+                    Sign Out
+                  </button>
+                </motion.div>
               )}
-              {user.role === 'ADMIN' && (
-                <Link to="/admin" className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors hidden sm:block">Admin</Link>
-              )}
-              <div className="flex items-center gap-2 ml-2">
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">{user.displayName}</span>
-                <button onClick={logout} className="p-2 text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Logout">
-                  <span className="material-symbols-outlined">logout</span>
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <Link to="/login" className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-                Login
-              </Link>
-              <Link to="/register" className="px-5 py-2 text-sm font-semibold text-white bg-primary hover:bg-emerald-700 rounded-lg shadow-sm shadow-primary/20 transition-all">
-                Register
-              </Link>
-            </>
-          )}
+            </AnimatePresence>
+          </div>
         </div>
+      </header>
+    );
+  }
+
+  // Unauthenticated Header (Landing Style)
+  return (
+    <header className="h-20 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-900 flex items-center justify-between px-6 md:px-12 sticky top-0 z-40">
+      <Link to="/" className="flex items-center gap-3">
+        <div className="bg-primary text-white p-2 rounded-xl shadow-lg shadow-primary/20">
+          <span className="material-symbols-outlined text-2xl">auto_stories</span>
+        </div>
+        <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">BlogSpace</span>
+      </Link>
+
+      <div className="hidden md:flex items-center gap-10">
+        <Link to="/feed" className="text-sm font-black text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">Intelligence Feed</Link>
+        <Link to="/search" className="text-sm font-black text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">Network Search</Link>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <Link to="/login" className="px-6 py-2.5 text-sm font-black text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">Login</Link>
+        <Link to="/register" className="px-7 py-2.5 bg-primary text-white text-sm font-black rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95">
+          Join Network
+        </Link>
       </div>
     </header>
   );

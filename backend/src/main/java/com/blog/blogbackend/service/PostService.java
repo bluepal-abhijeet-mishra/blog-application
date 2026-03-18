@@ -1,11 +1,13 @@
 package com.blog.blogbackend.service;
 
+import com.blog.blogbackend.dto.AuthorStatsResponse;
 import com.blog.blogbackend.dto.CategoryDto;
 import com.blog.blogbackend.dto.PostRequest;
 import com.blog.blogbackend.dto.PostResponse;
 import com.blog.blogbackend.dto.TagDto;
 import com.blog.blogbackend.entity.*;
 import com.blog.blogbackend.repository.CategoryRepository;
+import com.blog.blogbackend.repository.CommentRepository;
 import com.blog.blogbackend.repository.PostRepository;
 import com.blog.blogbackend.repository.TagRepository;
 import com.blog.blogbackend.repository.UserRepository;
@@ -37,6 +39,9 @@ public class PostService {
 
     @Autowired
     private TagRepository tagRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Autowired
     private SlugService slugService;
@@ -125,6 +130,21 @@ public class PostService {
         return mapToResponse(postRepository.save(post));
     }
 
+    @Transactional
+    public PostResponse unpublishPost(UUID id) {
+        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        if (!post.getAuthor().getId().equals(currentUser.getId()) && currentUser.getRole() != Role.ADMIN) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        post.setStatus(PostStatus.DRAFT);
+        // We keep publishedAt as a record of when it was first/last published, or clear it. 
+        // PRD doesn't specify, but DRAFT usually means not publicly visible.
+        return mapToResponse(postRepository.save(post));
+    }
+
     public void deletePost(UUID id) {
         Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -173,6 +193,21 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    public AuthorStatsResponse getAuthorStats() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User author = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        
+        long totalPosts = postRepository.countByAuthorId(author.getId());
+        long publishedPosts = postRepository.countByAuthorIdAndStatus(author.getId(), PostStatus.PUBLISHED);
+        long totalComments = commentRepository.countByAuthorId(author.getId());
+
+        return AuthorStatsResponse.builder()
+                .totalPosts(totalPosts)
+                .publishedPosts(publishedPosts)
+                .totalComments(totalComments)
+                .build();
+    }
+
     private PostResponse mapToResponse(Post post) {
         return PostResponse.builder()
                 .id(post.getId())
@@ -189,6 +224,7 @@ public class PostService {
                         .id(post.getCategory().getId())
                         .name(post.getCategory().getName())
                         .slug(post.getCategory().getSlug())
+                        .description(post.getCategory().getDescription())
                         .build() : null)
                 .tags(post.getTags().stream().map(tag -> TagDto.builder()
                         .id(tag.getId())

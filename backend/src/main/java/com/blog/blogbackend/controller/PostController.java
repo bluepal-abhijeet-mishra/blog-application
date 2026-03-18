@@ -66,6 +66,12 @@ public class PostController {
         return ResponseEntity.ok(postService.publishPost(id));
     }
 
+    @PatchMapping("/{id}/unpublish")
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
+    public ResponseEntity<PostResponse> unpublishPost(@PathVariable UUID id) {
+        return ResponseEntity.ok(postService.unpublishPost(id));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     public ResponseEntity<Void> deletePost(@PathVariable UUID id) {
@@ -90,5 +96,11 @@ public class PostController {
     @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     public ResponseEntity<java.util.List<PostResponse>> getMyPosts() {
         return ResponseEntity.ok(postService.getAuthorPosts());
+    }
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
+    public ResponseEntity<com.blog.blogbackend.dto.AuthorStatsResponse> getStats() {
+        return ResponseEntity.ok(postService.getAuthorStats());
     }
 }

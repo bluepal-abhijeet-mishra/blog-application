@@ -2,13 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
 :root {
-  --navy: #1a1a2e;
+  --navy: #1a1a1a;
   --green: #10b981;
   --gd: #059669;
-  --mint: #f0faf5;
-  --gray: #4b5563;
-  --border: #e5e7eb;
+  --mint: #f0fdf9;
+  --mint-dark: #e6f7f2;
+  --gray: #6b7280;
+  --border: #f3f4f6;
+  --primary: #10b981;
+  --background-light: #ffffff;
+  --background-dark: #0f172a;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  @apply bg-background-light dark:bg-background-dark;
+}
+
+.font-display {
+  font-family: 'Outfit', sans-serif;
 }
 
 /* Provided HTML Snippet Styles */
@@ -100,15 +115,44 @@
 }
 
 .premium-glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.125);
+  @apply bg-white/70 backdrop-blur-xl border border-white/20;
 }
 
 .dark .premium-glass {
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  @apply bg-slate-900/70 border-white/5;
+}
+
+.ambient-shadow {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1), 0 20px 25px -5px rgb(0 0 0 / 0.05);
+}
+
+.ambient-shadow-hover {
+  @apply transition-shadow duration-500;
+}
+
+.ambient-shadow-hover:hover {
+  box-shadow: 0 20px 25px -5px rgb(16 185 129 / 0.1), 0 8px 10px -6px rgb(16 185 129 / 0.1);
+}
+
+/* Design Match Specific Utilities */
+.sidebar-item-active {
+  @apply bg-primary/10 text-primary font-bold transition-all duration-300;
+}
+
+.newsletter-card {
+  @apply bg-mint rounded-[1.5rem] p-6 border border-primary/10;
+}
+
+.tag-overlay {
+  @apply absolute top-4 left-4 bg-primary text-white text-[9px] font-black px-3 py-1 rounded-md uppercase tracking-widest;
+}
+
+.pagination-btn {
+  @apply size-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:border-primary hover:text-primary transition-all font-bold;
+}
+
+.pagination-btn-active {
+  @apply bg-primary text-white border-primary shadow-lg shadow-primary/20;
 }
 
 .smooth-transition {

@@ -22,4 +22,7 @@ public class Category {
 
     @Column(unique = true, nullable = false)
     private String slug;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
 }

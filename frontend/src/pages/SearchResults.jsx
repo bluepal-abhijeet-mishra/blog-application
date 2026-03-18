@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
-import api from '../api/axios';
+import { useSearchParams, Link } from 'react-router-dom';
+import postService from '../api/services/postService';
+import metadataService from '../api/services/metadataService';
+import toast from 'react-hot-toast';
 import PostCard from '../components/PostCard';
 
 const SearchResults = () => {
@@ -8,13 +10,39 @@ const SearchResults = () => {
   const q = searchParams.get('q') || '';
   const page = parseInt(searchParams.get('page') || '0');
 
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      try {
+        return await metadataService.getCategories();
+      } catch (err) {
+        toast.error('Failed to load categories');
+        return [];
+      }
+    },
+  });
+
+  const { data: tags } = useQuery({
+    queryKey: ['tags'],
+    queryFn: async () => {
+      try {
+        return await metadataService.getTags();
+      } catch (err) {
+        toast.error('Failed to load tags');
+        return [];
+      }
+    },
+  });
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['search', q, page],
     queryFn: async () => {
-      const response = await api.get('/posts/search', {
-        params: { q, page, size: 10 },
-      });
-      return response.data;
+      try {
+        return await postService.searchPosts(q, page, 10);
+      } catch (err) {
+        toast.error('Failed to retrieve search results');
+        throw err;
+      }
     },
     enabled: !!q,
   });
@@ -52,14 +80,17 @@ const SearchResults = () => {
             <div>
               <p className="text-xs font-bold text-slate-900 dark:text-white mb-4">Category Matrix</p>
               <div className="flex flex-col gap-3">
-                {['Technology', 'Tutorials', 'UI Design', 'DevOps'].map((cat) => (
-                  <label key={cat} className="flex items-center gap-3 cursor-pointer group">
+                {Array.isArray(categories) && categories.slice(0, 6).map((cat) => (
+                  <Link 
+                    key={cat.id} 
+                    to={`/feed?category=${cat.slug}`}
+                    className="flex items-center gap-3 cursor-pointer group"
+                  >
                     <div className="relative flex items-center justify-center">
-                      <input type="checkbox" className="peer appearance-none w-5 h-5 rounded-lg border-2 border-slate-200 dark:border-slate-700 checked:bg-primary checked:border-primary transition-all" />
-                      <span className="material-symbols-outlined absolute text-white text-sm scale-0 peer-checked:scale-100 transition-transform select-none">check</span>
+                      <div className="w-5 h-5 rounded-lg border-2 border-slate-200 dark:border-slate-700 group-hover:border-primary transition-all"></div>
                     </div>
-                    <span className="text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">{cat}</span>
-                  </label>
+                    <span className="text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">{cat.name}</span>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -69,10 +100,14 @@ const SearchResults = () => {
             <div>
               <p className="text-xs font-bold text-slate-900 dark:text-white mb-4">Identifier Tags</p>
               <div className="flex flex-wrap gap-2">
-                {['React', 'JavaScript', 'Frontend', 'Hooks', 'State'].map((tag, idx) => (
-                    <span key={tag} className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tight border cursor-pointer transition-all ${idx === 0 || idx === 3 ? 'bg-primary/10 text-primary border-primary/20 shadow-sm shadow-primary/10' : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-primary/50'}`}>
-                      {tag}
-                    </span>
+                {Array.isArray(tags) && tags.slice(0, 10).map((tag) => (
+                    <Link 
+                      key={tag.id}
+                      to={`/feed?tag=${tag.slug}`}
+                      className="px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tight border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:border-primary/50 hover:text-primary transition-all"
+                    >
+                      {tag.name}
+                    </Link>
                 ))}
               </div>
             </div>

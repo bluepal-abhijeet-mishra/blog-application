@@ -29,4 +29,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     @Query(value = "SELECT * FROM posts WHERE search_vector @@ plainto_tsquery('english', :q) AND status = 'PUBLISHED' ORDER BY published_at DESC",
            nativeQuery = true)
     Page<Post> fullTextSearch(@Param("q") String q, Pageable pageable);
+
+    long countByAuthorId(UUID authorId);
+    long countByAuthorIdAndStatus(UUID authorId, PostStatus status);
 }

@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import api from '../api/axios';
+import postService from '../api/services/postService';
+import toast from 'react-hot-toast';
 import ReadOnlyEditor from '../components/ReadOnlyEditor';
 import CommentSection from '../components/CommentSection';
 import { format } from 'date-fns';
@@ -11,16 +12,68 @@ const PostDetail = () => {
   const { data: post, isLoading, error } = useQuery({
     queryKey: ['post', slug],
     queryFn: async () => {
-      const response = await api.get(`/posts/${slug}`);
-      return response.data;
+      try {
+        return await postService.getPostBySlug(slug);
+      } catch (err) {
+        toast.error(err.message || 'Failed to load post');
+        throw err;
+      }
     },
   });
+
+  const extractHeadings = (contentJson) => {
+    if (!contentJson) return [];
+    try {
+      const doc = JSON.parse(contentJson);
+      return doc.content
+        .filter(node => node.type === 'heading')
+        .map(node => {
+          const text = node.content?.map(c => c.text).join('') || '';
+          const id = text.toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/[\s_-]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+          return { level: node.attrs.level, text, id };
+        });
+    } catch (e) {
+      return [];
+    }
+  };
 
   if (isLoading) return <div className="max-w-[740px] mx-auto px-6 py-12 text-slate-500">Loading...</div>;
   if (error) return <div className="max-w-[740px] mx-auto px-6 py-12 text-red-500">Post not found.</div>;
 
+  const headings = extractHeadings(post.content);
+
   return (
-    <main className="max-w-[800px] mx-auto px-6 py-12 md:py-20 animate-fade-in">
+    <div className="flex flex-col lg:flex-row max-w-[1200px] mx-auto relative px-6">
+      {/* Table of Contents Sidebar */}
+      {headings.length > 0 && (
+        <aside className="hidden lg:block w-64 shrink-0 sticky top-24 h-fit pr-8 mt-40">
+          <div className="border-l-2 border-slate-100 dark:border-slate-800 pl-6">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6">On this Page</h3>
+            <ul className="space-y-4">
+              {headings.map((heading, i) => (
+                <li 
+                  key={i} 
+                  style={{ paddingLeft: `${(heading.level - 1) * 12}px` }}
+                  className="group"
+                >
+                  <a 
+                    href={`#${heading.id}`}
+                    className="text-sm font-bold text-slate-500 hover:text-primary transition-colors block leading-tight"
+                  >
+                    {heading.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
+      )}
+
+      <main className="flex-1 max-w-[800px] py-12 md:py-20 animate-fade-in mx-auto lg:mx-0">
       <div className="flex flex-wrap items-center gap-3 mb-8">
         {post.category && (
           <span className="px-4 py-1.5 bg-primary/10 text-primary text-xs font-bold rounded-full uppercase tracking-widest shadow-sm shadow-primary/5">
@@ -104,6 +157,7 @@ const PostDetail = () => {
         <CommentSection postId={post.id} />
       </div>
     </main>
+    </div>
   );
 };
 
