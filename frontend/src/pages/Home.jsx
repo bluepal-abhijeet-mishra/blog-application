@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useLocation, useParams } from 'react-router-dom';
 import postService from '../api/services/postService';
 import metadataService from '../api/services/metadataService';
 import toast from 'react-hot-toast';
@@ -8,8 +8,12 @@ import { motion } from 'framer-motion';
 
 const Home = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const tag = searchParams.get('tag');
-  const category = searchParams.get('category');
+  const { slug } = useParams();
+  const location = useLocation();
+  const routeTag = location.pathname.startsWith('/tags/') ? slug : null;
+  const routeCategory = location.pathname.startsWith('/categories/') ? slug : null;
+  const tag = routeTag || searchParams.get('tag');
+  const category = routeCategory || searchParams.get('category');
   const page = parseInt(searchParams.get('page') || '0');
 
   const { data: postsData, isLoading: isLoadingPosts, error: postsError } = useQuery({

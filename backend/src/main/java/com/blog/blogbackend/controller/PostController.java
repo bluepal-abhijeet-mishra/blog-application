@@ -40,6 +40,12 @@ public class PostController {
         return ResponseEntity.ok(postService.getPublishedPosts(tag, category, pageable));
     }
 
+    @GetMapping("/id/{id}")
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
+    public ResponseEntity<PostResponse> getPostByIdForEdit(@PathVariable UUID id) {
+        return ResponseEntity.ok(postService.getPostForEdit(id));
+    }
+
     @GetMapping("/{slug}")
     public ResponseEntity<PostResponse> getPostBySlug(
             @PathVariable @Size(min = 1, max = 255, message = "Invalid slug") String slug) {

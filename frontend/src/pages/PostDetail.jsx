@@ -154,7 +154,7 @@ const PostDetail = () => {
       </div>
       
       <div className="mt-20">
-        <CommentSection postId={post.id} />
+        <CommentSection postId={post.id} postAuthorId={post.authorId} />
       </div>
     </main>
     </div>

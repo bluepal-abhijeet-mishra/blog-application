@@ -82,13 +82,8 @@ public class PostService {
     @Transactional
     public PostResponse updatePost(UUID id, PostRequest request) {
         Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
-
-        // Authorization check
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        if (!post.getAuthor().getId().equals(currentUser.getId()) && currentUser.getRole() != Role.ADMIN) {
-            throw new RuntimeException("Unauthorized");
-        }
+        User currentUser = getCurrentUser();
+        assertCanManagePost(post, currentUser);
 
         if (!post.getTitle().equals(request.getTitle())) {
             post.setTitle(request.getTitle());
@@ -119,11 +114,8 @@ public class PostService {
     @Transactional
     public PostResponse publishPost(UUID id) {
         Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        if (!post.getAuthor().getId().equals(currentUser.getId()) && currentUser.getRole() != Role.ADMIN) {
-            throw new RuntimeException("Unauthorized");
-        }
+        User currentUser = getCurrentUser();
+        assertCanManagePost(post, currentUser);
 
         post.setStatus(PostStatus.PUBLISHED);
         post.setPublishedAt(LocalDateTime.now());
@@ -133,11 +125,8 @@ public class PostService {
     @Transactional
     public PostResponse unpublishPost(UUID id) {
         Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        if (!post.getAuthor().getId().equals(currentUser.getId()) && currentUser.getRole() != Role.ADMIN) {
-            throw new RuntimeException("Unauthorized");
-        }
+        User currentUser = getCurrentUser();
+        assertCanManagePost(post, currentUser);
 
         post.setStatus(PostStatus.DRAFT);
         // We keep publishedAt as a record of when it was first/last published, or clear it. 
@@ -147,12 +136,16 @@ public class PostService {
 
     public void deletePost(UUID id) {
         Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        if (!post.getAuthor().getId().equals(currentUser.getId()) && currentUser.getRole() != Role.ADMIN) {
-            throw new RuntimeException("Unauthorized");
-        }
+        User currentUser = getCurrentUser();
+        assertCanManagePost(post, currentUser);
         postRepository.delete(post);
+    }
+
+    public PostResponse getPostForEdit(UUID id) {
+        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
+        User currentUser = getCurrentUser();
+        assertCanManagePost(post, currentUser);
+        return mapToResponse(post);
     }
 
     public PostResponse getPostBySlug(String slug) {
@@ -232,5 +225,16 @@ public class PostService {
                         .slug(tag.getSlug())
                         .build()).collect(Collectors.toSet()))
                 .build();
+    }
+
+    private User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    private void assertCanManagePost(Post post, User currentUser) {
+        if (!post.getAuthor().getId().equals(currentUser.getId()) && currentUser.getRole() != Role.ADMIN) {
+            throw new RuntimeException("Unauthorized");
+        }
     }
 }

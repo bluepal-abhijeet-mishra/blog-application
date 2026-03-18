@@ -13,6 +13,7 @@ import com.blog.blogbackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,15 @@ public class DataInitializer implements CommandLineRunner {
     private final TagRepository tagRepository;
     private final PostRepository postRepository;
     private final PasswordEncoder passwordEncoder;
+    
+    @Value("${app.seed.admin.email:}")
+    private String seedAdminEmail;
+
+    @Value("${app.seed.admin.password:}")
+    private String seedAdminPassword;
+
+    @Value("${app.seed.admin.display-name:System Administrator}")
+    private String seedAdminDisplayName;
 
     @Override
     @Transactional
@@ -48,7 +58,8 @@ public class DataInitializer implements CommandLineRunner {
     private void seedPosts() {
         if (postRepository.count() > 0) return;
 
-        User admin = userRepository.findByEmail("admin@blogspace.io").orElse(null);
+        if (seedAdminEmail == null || seedAdminEmail.isBlank()) return;
+        User admin = userRepository.findByEmail(seedAdminEmail).orElse(null);
         if (admin == null) return;
 
         Category tech = categoryRepository.findBySlug("technology").orElse(null);
@@ -86,17 +97,21 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void seedAdminUser() {
-        String adminEmail = "admin@blogspace.io";
-        if (!userRepository.existsByEmail(adminEmail)) {
+        if (seedAdminEmail == null || seedAdminEmail.isBlank() || seedAdminPassword == null || seedAdminPassword.isBlank()) {
+            log.info("No admin seed credentials provided. Skipping admin user seeding.");
+            return;
+        }
+
+        if (!userRepository.existsByEmail(seedAdminEmail)) {
             User admin = User.builder()
-                    .email(adminEmail)
-                    .password(passwordEncoder.encode("Admin@123"))
-                    .displayName("System Administrator")
+                    .email(seedAdminEmail)
+                    .password(passwordEncoder.encode(seedAdminPassword))
+                    .displayName(seedAdminDisplayName)
                     .role(Role.ADMIN)
                     .bio("Primary system administrator for the BlogSpace platform.")
                     .build();
             userRepository.save(admin);
-            log.info("Seeded default administrator account: {}", adminEmail);
+            log.info("Seeded default administrator account: {}", seedAdminEmail);
         } else {
             log.info("Administrator account already exists. Skipping user seeding.");
         }

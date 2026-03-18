@@ -53,11 +53,13 @@ function App() {
       <ErrorBoundary>
         <AuthProvider>
           <Toaster position="top-right" reverseOrder={false} />
-          <Router>
+          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <Layout>
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/feed" element={<Home />} />
+                <Route path="/tags/:slug" element={<Home />} />
+                <Route path="/categories/:slug" element={<Home />} />
                 <Route path="/login" element={<AuthContainer initialMode="login" />} />
                 <Route path="/register" element={<AuthContainer initialMode="register" />} />
                 <Route path="/posts/:slug" element={<PostDetail />} />

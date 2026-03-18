@@ -49,6 +49,20 @@ const PostCard = ({ post }) => {
         <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-2 mb-6 leading-relaxed font-medium">
           {post.excerpt || 'Explore this in-depth analysis and discover the future of professional insights within our community.'}
         </p>
+
+        {post.tags?.length > 0 && (
+          <div className="mb-5 flex flex-wrap gap-2">
+            {post.tags.slice(0, 4).map((tag) => (
+              <Link
+                key={tag.id}
+                to={`/tags/${tag.slug}`}
+                className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest bg-slate-50 dark:bg-slate-800 text-slate-500 hover:text-primary transition-colors"
+              >
+                #{tag.name}
+              </Link>
+            ))}
+          </div>
+        )}
         
         <div className="mt-auto flex items-center justify-between border-t border-slate-50 dark:border-slate-800/50 pt-6">
           <div className="flex items-center gap-3">

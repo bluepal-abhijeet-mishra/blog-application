@@ -6,8 +6,8 @@ const commentService = {
     return response.data;
   },
 
-  addComment: async (postId, content) => {
-    const response = await api.post(`/posts/${postId}/comments`, { content });
+  addComment: async (postId, payload) => {
+    const response = await api.post(`/posts/${postId}/comments`, payload);
     return response.data;
   },
 

@@ -4,6 +4,7 @@ import com.blog.blogbackend.dto.CommentRequest;
 import com.blog.blogbackend.dto.CommentResponse;
 import com.blog.blogbackend.entity.Comment;
 import com.blog.blogbackend.entity.Post;
+import com.blog.blogbackend.entity.PostStatus;
 import com.blog.blogbackend.entity.Role;
 import com.blog.blogbackend.entity.User;
 import com.blog.blogbackend.repository.CommentRepository;
@@ -37,6 +38,9 @@ public class CommentService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+        if (post.getStatus() != PostStatus.PUBLISHED) {
+            throw new RuntimeException("Cannot comment on unpublished post");
+        }
 
         Comment comment = Comment.builder()
                 .content(request.getContent())
@@ -46,6 +50,9 @@ public class CommentService {
 
         if (request.getParentId() != null) {
             Comment parent = commentRepository.findById(request.getParentId()).orElseThrow(() -> new RuntimeException("Parent comment not found"));
+            if (!parent.getPost().getId().equals(postId)) {
+                throw new RuntimeException("Parent comment does not belong to this post");
+            }
             if (parent.getParent() != null) {
                 throw new RuntimeException("Cannot reply to a reply");
             }

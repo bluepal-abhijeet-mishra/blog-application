@@ -34,6 +34,14 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-6">
+          <a
+            href="/api/feed.rss"
+            target="_blank"
+            rel="noreferrer"
+            className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors"
+          >
+            RSS
+          </a>
           <button className="relative p-2 text-slate-500 hover:text-primary transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl">
             <span className="material-symbols-outlined">notifications</span>
             <span className="absolute top-2 right-2 size-2 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900"></span>
@@ -99,6 +107,7 @@ const Navbar = () => {
       <div className="hidden md:flex items-center gap-10">
         <Link to="/feed" className="text-sm font-black text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">Intelligence Feed</Link>
         <Link to="/search" className="text-sm font-black text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">Network Search</Link>
+        <a href="/api/feed.rss" target="_blank" rel="noreferrer" className="text-sm font-black text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">RSS</a>
       </div>
 
       <div className="flex items-center gap-4">

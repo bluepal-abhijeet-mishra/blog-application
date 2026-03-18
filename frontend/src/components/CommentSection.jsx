@@ -5,17 +5,18 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 
-const CommentSection = ({ postId }) => {
+const CommentSection = ({ postId, postAuthorId }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [content, setContent] = useState('');
   const [replyTo, setReplyTo] = useState(null);
+  const [size, setSize] = useState(10);
 
   const { data: comments, isLoading } = useQuery({
-    queryKey: ['comments', postId],
+    queryKey: ['comments', postId, size],
     queryFn: async () => {
       try {
-        return await commentService.getComments(postId);
+        return await commentService.getComments(postId, 0, size);
       } catch (err) {
         toast.error('Failed to load comments');
         throw err;
@@ -25,10 +26,10 @@ const CommentSection = ({ postId }) => {
 
   const addCommentMutation = useMutation({
     mutationFn: async (newComment) => {
-      return await commentService.addComment(postId, newComment.content);
+      return await commentService.addComment(postId, newComment);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['comments', postId]);
+      queryClient.invalidateQueries({ queryKey: ['comments', postId] });
       setContent('');
       setReplyTo(null);
       toast.success('Comment posted successfully');
@@ -43,7 +44,7 @@ const CommentSection = ({ postId }) => {
       return await commentService.deleteComment(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['comments', postId]);
+      queryClient.invalidateQueries({ queryKey: ['comments', postId] });
       toast.success('Comment deleted');
     },
     onError: (err) => {
@@ -54,7 +55,10 @@ const CommentSection = ({ postId }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!content.trim()) return;
-    addCommentMutation.mutate({ content, parentId: replyTo?.id });
+    addCommentMutation.mutate({
+      content,
+      parentId: replyTo?.id || null,
+    });
   };
 
   if (isLoading) return <div className="text-slate-500">Loading comments...</div>;
@@ -131,7 +135,7 @@ const CommentSection = ({ postId }) => {
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
-                    {(user?.role === 'ADMIN' || user?.userId === comment.authorId) && (
+                    {(user?.role === 'ADMIN' || user?.id === comment.authorId || user?.id === postAuthorId) && (
                       <button 
                         onClick={() => deleteCommentMutation.mutate(comment.id)} 
                         className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-all"
@@ -180,7 +184,7 @@ const CommentSection = ({ postId }) => {
                                 {formatDistanceToNow(new Date(reply.createdAt), { addSuffix: true })}
                               </span>
                             </div>
-                            {(user?.role === 'ADMIN' || user?.userId === reply.authorId) && (
+                            {(user?.role === 'ADMIN' || user?.id === reply.authorId || user?.id === postAuthorId) && (
                               <button 
                                 onClick={() => deleteCommentMutation.mutate(reply.id)} 
                                 className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-all"
@@ -204,8 +208,11 @@ const CommentSection = ({ postId }) => {
         ))}
       </div>
       
-      {comments?.totalPages > 1 && !comments?.last && (
-        <button className="w-full mt-10 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+      {comments?.totalElements > size && (
+        <button
+          onClick={() => setSize((prev) => prev + 10)}
+          className="w-full mt-10 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+        >
           Load More Comments
         </button>
       )}

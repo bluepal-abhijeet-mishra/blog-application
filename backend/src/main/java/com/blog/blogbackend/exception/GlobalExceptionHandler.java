@@ -57,7 +57,9 @@ public class GlobalExceptionHandler {
         
         // Bad Request (400) errors
         if ("Email already exists".equals(message) || 
-            "Cannot reply to a reply".equals(message)) {
+            "Cannot reply to a reply".equals(message) ||
+            "Cannot comment on unpublished post".equals(message) ||
+            "Parent comment does not belong to this post".equals(message)) {
             return ResponseEntity.badRequest().body(Map.of(
                 "error", message,
                 "status", 400
