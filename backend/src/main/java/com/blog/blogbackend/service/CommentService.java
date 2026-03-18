@@ -3,6 +3,7 @@ package com.blog.blogbackend.service;
 import com.blog.blogbackend.dto.CommentRequest;
 import com.blog.blogbackend.dto.CommentResponse;
 import com.blog.blogbackend.entity.Comment;
+import com.blog.blogbackend.entity.NotificationType;
 import com.blog.blogbackend.entity.Post;
 import com.blog.blogbackend.entity.PostStatus;
 import com.blog.blogbackend.entity.Role;
@@ -33,6 +34,9 @@ public class CommentService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @Transactional
     public CommentResponse addComment(UUID postId, CommentRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -59,7 +63,9 @@ public class CommentService {
             comment.setParent(parent);
         }
 
-        return mapToResponse(commentRepository.save(comment));
+        Comment saved = commentRepository.save(comment);
+        notifyRelevantUsers(saved, user);
+        return mapToResponse(saved);
     }
 
     public Page<CommentResponse> getCommentsForPost(UUID postId, Pageable pageable) {
@@ -99,5 +105,29 @@ public class CommentService {
         List<Comment> replies = commentRepository.findByParentId(comment.getId());
         response.setReplies(replies.stream().map(this::mapToResponse).collect(Collectors.toList()));
         return response;
+    }
+
+    private void notifyRelevantUsers(Comment comment, User actor) {
+        Post post = comment.getPost();
+        if (!post.getAuthor().getId().equals(actor.getId())) {
+            notificationService.createNotification(
+                    post.getAuthor(),
+                    NotificationType.COMMENT_ON_POST,
+                    "New comment on your story",
+                    actor.getDisplayName() + " commented on \"" + post.getTitle() + "\".",
+                    "/posts/" + post.getSlug()
+            );
+        }
+
+        Comment parent = comment.getParent();
+        if (parent != null && !parent.getUser().getId().equals(actor.getId()) && !parent.getUser().getId().equals(post.getAuthor().getId())) {
+            notificationService.createNotification(
+                    parent.getUser(),
+                    NotificationType.COMMENT_REPLY,
+                    "New reply to your comment",
+                    actor.getDisplayName() + " replied to your comment on \"" + post.getTitle() + "\".",
+                    "/posts/" + post.getSlug()
+            );
+        }
     }
 }

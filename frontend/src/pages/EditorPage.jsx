@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import RichTextEditor from '../components/RichTextEditor';
 import ReadOnlyEditor from '../components/ReadOnlyEditor';
 import { getFirstImageFromContent, normalizeCoverImageUrl } from '../utils/postMedia';
+import { useAuth } from '../context/AuthContext';
 
 const parseEditorText = (json) => {
   try {
@@ -36,6 +37,8 @@ const EditorPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const canRequestCategory = user?.role === 'AUTHOR';
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('{}');
@@ -386,17 +389,19 @@ const EditorPage = () => {
                   <option key={cat.id} value={cat.id} className="bg-navy">{cat.name}</option>
                 ))}
               </select>
-              <button
-                type="button"
-                className="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-primary/80"
-                onClick={() => {
-                  setRequestedCategoryName('');
-                  setRequestedCategoryReason('');
-                  setIsCategoryRequestOpen(true);
-                }}
-              >
-                Request new category
-              </button>
+              {canRequestCategory && (
+                <button
+                  type="button"
+                  className="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-primary/80"
+                  onClick={() => {
+                    setRequestedCategoryName('');
+                    setRequestedCategoryReason('');
+                    setIsCategoryRequestOpen(true);
+                  }}
+                >
+                  Request new category
+                </button>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -637,7 +642,7 @@ const EditorPage = () => {
         </div>
       )}
 
-      {isCategoryRequestOpen && (
+      {canRequestCategory && isCategoryRequestOpen && (
         <div className="fixed inset-0 z-[130] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-6">
           <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl">
             <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">

@@ -78,7 +78,8 @@ public class GlobalExceptionHandler {
         if ("Post not found".equals(message) || 
             "User not found".equals(message) ||
             "Comment not found".equals(message) ||
-            "Parent comment not found".equals(message)) {
+            "Parent comment not found".equals(message) ||
+            "Notification not found".equals(message)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                 "error", message,
                 "status", 404
