@@ -53,6 +53,10 @@ const postService = {
   getStats: async () => {
     const response = await api.get('/posts/stats');
     return response.data;
+  },
+  
+  toggleSave: async (id) => {
+    await api.post(`/posts/${id}/save`);
   }
 };
 

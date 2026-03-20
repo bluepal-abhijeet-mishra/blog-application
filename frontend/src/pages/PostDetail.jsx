@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import postService from '../api/services/postService';
 import toast from 'react-hot-toast';
 import ReadOnlyEditor from '../components/ReadOnlyEditor';
@@ -9,6 +9,7 @@ import { getPostCoverImage } from '../utils/postMedia';
 
 const PostDetail = () => {
   const { slug } = useParams();
+  const queryClient = useQueryClient();
 
   const { data: post, isLoading, error } = useQuery({
     queryKey: ['post', slug],
@@ -21,6 +22,38 @@ const PostDetail = () => {
       }
     },
   });
+
+  const saveMutation = useMutation({
+    mutationFn: () => postService.toggleSave(post.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['post', slug]);
+      toast.success(post.isSaved ? 'Removed from bookmarks' : 'Added to bookmarks', {
+        icon: post.isSaved ? '🗑️' : '🔖',
+        style: {
+          borderRadius: '12px',
+          background: '#1e293b',
+          color: '#fff',
+        },
+      });
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Action failed');
+    }
+  });
+
+  const handleShare = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      toast.success('Link copied to clipboard!', {
+        icon: '📋',
+        style: {
+          borderRadius: '12px',
+          background: '#1e293b',
+          color: '#fff',
+        },
+      });
+    });
+  };
 
   const extractHeadings = (contentJson) => {
     if (!contentJson) return [];
@@ -114,11 +147,29 @@ const PostDetail = () => {
           </div>
         </div>
         <div className="flex gap-3">
-          <button className="size-10 flex items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-primary hover:border-primary hover:bg-primary/5 transition-all">
+          <button 
+            onClick={handleShare}
+            className="size-10 flex items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-primary hover:border-primary hover:bg-primary/5 transition-all active:scale-95"
+            title="Share Post"
+          >
             <span className="material-symbols-outlined text-xl">share</span>
           </button>
-          <button className="size-10 flex items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-primary hover:border-primary hover:bg-primary/5 transition-all">
-            <span className="material-symbols-outlined text-xl">bookmark</span>
+          <button 
+            onClick={() => saveMutation.mutate()}
+            disabled={saveMutation.isPending}
+            className={`size-10 flex items-center justify-center rounded-full border transition-all active:scale-95 ${
+              post.isSaved 
+                ? 'bg-primary/10 border-primary text-primary shadow-sm shadow-primary/10' 
+                : 'border-slate-200 dark:border-slate-700 text-slate-500 hover:text-primary hover:border-primary hover:bg-primary/5'
+            }`}
+            title={post.isSaved ? "Remove Bookmark" : "Bookmark Post"}
+          >
+            <span 
+              className="material-symbols-outlined text-xl"
+              style={{ fontVariationSettings: post.isSaved ? "'FILL' 1" : "'FILL' 0" }}
+            >
+              bookmark
+            </span>
           </button>
         </div>
       </div>

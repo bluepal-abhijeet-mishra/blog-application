@@ -112,6 +112,13 @@ public class PostController {
         return ResponseEntity.ok(postService.getAuthorPosts(pageable));
     }
 
+    @PostMapping("/{id}/save")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> toggleSave(@PathVariable UUID id) {
+        postService.toggleSave(id);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/stats")
     @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     public ResponseEntity<com.blog.blogbackend.dto.AuthorStatsResponse> getStats() {

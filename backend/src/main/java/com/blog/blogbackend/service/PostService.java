@@ -6,11 +6,7 @@ import com.blog.blogbackend.dto.PostRequest;
 import com.blog.blogbackend.dto.PostResponse;
 import com.blog.blogbackend.dto.TagDto;
 import com.blog.blogbackend.entity.*;
-import com.blog.blogbackend.repository.CategoryRepository;
-import com.blog.blogbackend.repository.CommentRepository;
-import com.blog.blogbackend.repository.PostRepository;
-import com.blog.blogbackend.repository.TagRepository;
-import com.blog.blogbackend.repository.UserRepository;
+import com.blog.blogbackend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
@@ -43,6 +39,9 @@ public class PostService {
 
     @Autowired
     private CommentRepository commentRepository;
+    
+    @Autowired
+    private SavedPostRepository savedPostRepository;
 
     @Autowired
     private SlugService slugService;
@@ -136,8 +135,6 @@ public class PostService {
         assertCanManagePost(post, currentUser);
 
         post.setStatus(PostStatus.DRAFT);
-        // We keep publishedAt as a record of when it was first/last published, or clear it. 
-        // PRD doesn't specify, but DRAFT usually means not publicly visible.
         return mapToResponse(postRepository.save(post));
     }
 
@@ -154,7 +151,7 @@ public class PostService {
         Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
         User currentUser = getCurrentUser();
         assertCanManagePost(post, currentUser);
-        return mapToResponse(post);
+        return mapToResponse(post, currentUser);
     }
 
     public PostResponse getPostBySlug(String slug) {
@@ -192,6 +189,7 @@ public class PostService {
         };
         return posts.map(this::mapToResponse);
     }
+    
     public Page<PostResponse> getAuthorPosts(Pageable pageable) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User author = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
@@ -214,7 +212,32 @@ public class PostService {
                 .build();
     }
 
+    @Transactional
+    public void toggleSave(UUID postId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+        User user = getCurrentUser();
+        
+        savedPostRepository.findByUserAndPost(user, post).ifPresentOrElse(
+            savedPostRepository::delete,
+            () -> savedPostRepository.save(SavedPost.builder().user(user).post(post).build())
+        );
+    }
+
     private PostResponse mapToResponse(Post post) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = null;
+        if (!email.equals("anonymousUser")) {
+            currentUser = userRepository.findByEmail(email).orElse(null);
+        }
+        return mapToResponse(post, currentUser);
+    }
+
+    private PostResponse mapToResponse(Post post, User user) {
+        boolean isSaved = false;
+        if (user != null) {
+            isSaved = savedPostRepository.existsByUserAndPost(user, post);
+        }
+
         return PostResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -227,6 +250,7 @@ public class PostService {
                 .authorId(post.getAuthor().getId())
                 .authorName(post.getAuthor().getDisplayName())
                 .createdAt(post.getCreatedAt())
+                .isSaved(isSaved)
                 .category(post.getCategory() != null ? CategoryDto.builder()
                         .id(post.getCategory().getId())
                         .name(post.getCategory().getName())

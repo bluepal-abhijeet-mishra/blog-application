@@ -26,31 +26,31 @@ const StatCard = ({ label, value, icon, color, delay, subtext, progress }) => (
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay, duration: 0.5, ease: "easeOut" }}
-    className="relative group h-full"
+    className="relative group"
   >
-    <div className="h-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 p-8 rounded-[24px] shadow-sm hover:shadow-xl transition-all duration-300">
-      <div className={`size-12 rounded-xl flex items-center justify-center ${color} mb-6 transition-transform group-hover:scale-110 duration-300`}>
-        <span className="material-symbols-outlined text-2xl">{icon}</span>
+    <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 p-6 rounded-[24px] shadow-sm hover:shadow-lg transition-all duration-300">
+      <div className={`size-10 rounded-xl flex items-center justify-center ${color} mb-4 transition-transform group-hover:scale-110 duration-300`}>
+        <span className="material-symbols-outlined text-xl">{icon}</span>
       </div>
       
-      <h3 className="text-slate-400 dark:text-slate-500 text-[11px] font-black uppercase tracking-[0.15em] mb-2">
+      <h3 className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.12em] mb-1.5">
         {label}
       </h3>
       
-      <div className="flex items-baseline gap-2 mb-4">
-        <p className="text-4xl font-black text-slate-900 dark:text-white leading-none tracking-tight">
+      <div className="flex items-baseline gap-2 mb-3">
+        <p className="text-3xl font-black text-slate-900 dark:text-white leading-none tracking-tight">
           {value}
         </p>
       </div>
 
       {subtext && (
-        <p className="text-emerald-500 text-[11px] font-bold mb-6 flex items-center gap-1">
+        <p className="text-emerald-500 text-[10px] font-bold mb-4 flex items-center gap-1">
           {subtext}
         </p>
       )}
 
       {/* Progress Bar Container */}
-      <div className="w-full h-1.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+      <div className="w-full h-1 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
         <motion.div 
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}

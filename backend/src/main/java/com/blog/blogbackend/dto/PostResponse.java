@@ -28,4 +28,5 @@ public class PostResponse {
     private CategoryDto category;
     private Set<TagDto> tags;
     private LocalDateTime createdAt;
+    private boolean isSaved;
 }
