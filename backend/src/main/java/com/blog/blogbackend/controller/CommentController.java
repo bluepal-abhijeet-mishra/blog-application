@@ -45,6 +45,13 @@ public class CommentController {
         return ResponseEntity.ok(commentService.addComment(postId, request));
     }
 
+    @PostMapping("/comments/{id}/toggle-like")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> toggleLike(@PathVariable UUID id) {
+        commentService.toggleLike(id);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/comments/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteComment(@PathVariable UUID id) {
