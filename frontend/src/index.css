@@ -169,3 +169,13 @@ body {
   background-color: rgba(16, 185, 129, 0.2);
   color: var(--green);
 }
+
+@media print {
+  .no-pdf {
+    display: none !important;
+  }
+}
+
+.no-pdf {
+  /* This class is also used by html2pdf to exclude elements */
+}

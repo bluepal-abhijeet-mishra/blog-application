@@ -75,6 +75,25 @@ const PostDetail = () => {
     }
   };
 
+  const handleDownloadPdf = () => {
+    const element = document.getElementById('post-content-container');
+    const opt = {
+      margin: [10, 10],
+      filename: `${post.slug}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    import('html2pdf.js').then((html2pdf) => {
+      html2pdf.default().from(element).set(opt).save();
+      toast.success('Generating PDF...', {
+        icon: '📄',
+        style: { borderRadius: '12px', background: '#1e293b', color: '#fff' }
+      });
+    });
+  };
+
   if (isLoading) return <div className="max-w-[740px] mx-auto px-6 py-12 text-slate-500">Loading...</div>;
   if (error) return <div className="max-w-[740px] mx-auto px-6 py-12 text-red-500">Post not found.</div>;
 
@@ -82,10 +101,10 @@ const PostDetail = () => {
   const coverImage = getPostCoverImage(post);
 
   return (
-    <div className="flex flex-col lg:flex-row max-w-[1200px] mx-auto relative px-6">
+    <div className="flex flex-col lg:flex-row max-w-[1200px] mx-auto relative px-6" id="post-content-container">
       {/* Table of Contents Sidebar */}
       {headings.length > 0 && (
-        <aside className="hidden lg:block w-64 shrink-0 sticky top-24 h-fit pr-8 mt-40">
+        <aside className="hidden lg:block w-64 shrink-0 sticky top-24 h-fit pr-8 mt-40 no-pdf">
           <div className="border-l-2 border-slate-100 dark:border-slate-800 pl-6">
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6">On this Page</h3>
             <ul className="space-y-4">
@@ -146,7 +165,14 @@ const PostDetail = () => {
             </div>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 no-pdf">
+          <button 
+            onClick={handleDownloadPdf}
+            className="size-10 flex items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-primary hover:border-primary hover:bg-primary/5 transition-all active:scale-95"
+            title="Download PDF"
+          >
+            <span className="material-symbols-outlined text-xl">picture_as_pdf</span>
+          </button>
           <button 
             onClick={handleShare}
             className="size-10 flex items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-primary hover:border-primary hover:bg-primary/5 transition-all active:scale-95"

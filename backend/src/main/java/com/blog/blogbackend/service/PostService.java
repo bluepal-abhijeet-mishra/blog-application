@@ -154,8 +154,13 @@ public class PostService {
         return mapToResponse(post, currentUser);
     }
 
+    @Transactional
     public PostResponse getPostBySlug(String slug) {
         Post post = postRepository.findBySlug(slug).orElseThrow(() -> new RuntimeException("Post not found"));
+        // Increment view count
+        post.setViewCount(post.getViewCount() + 1);
+        postRepository.save(post);
+
         // If draft, only author/admin can see
         if (post.getStatus() == PostStatus.DRAFT) {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -232,6 +237,60 @@ public class PostService {
         return mapToResponse(post, currentUser);
     }
 
+    public byte[] exportAllPostsJson() {
+        User author = getCurrentUser();
+        List<Post> posts = postRepository.findAllByAuthorId(author.getId());
+        List<PostResponse> responses = posts.stream().map(this::mapToResponse).collect(Collectors.toList());
+        try {
+            return new com.fasterxml.jackson.databind.ObjectMapper()
+                    .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsBytes(responses);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to export posts to JSON", e);
+        }
+    }
+
+    public byte[] generateEngagementCsv() {
+        User author = getCurrentUser();
+        List<Post> posts = postRepository.findAllByAuthorId(author.getId());
+        
+        StringBuilder csv = new StringBuilder("Title,Status,Published At,Views,Likes (Saves),Comments,Shares\n");
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        
+        for (Post post : posts) {
+            long commentCount = commentRepository.countByPostId(post.getId());
+            long likeCount = savedPostRepository.countByPostId(post.getId());
+            
+            csv.append(String.format("\"%s\",%s,%s,%d,%d,%d,%d\n",
+                    post.getTitle().replace("\"", "\"\""),
+                    post.getStatus(),
+                    post.getPublishedAt() != null ? post.getPublishedAt().format(formatter) : "N/A",
+                    post.getViewCount(),
+                    likeCount,
+                    commentCount,
+                    post.getShareCount()
+            ));
+        }
+        return csv.toString().getBytes();
+    }
+
+    @Transactional
+    public void incrementViewCount(String slug) {
+        postRepository.findBySlug(slug).ifPresent(post -> {
+            post.setViewCount(post.getViewCount() + 1);
+            postRepository.save(post);
+        });
+    }
+
+    @Transactional
+    public void incrementShareCount(UUID id) {
+        postRepository.findById(id).ifPresent(post -> {
+            post.setShareCount(post.getShareCount() + 1);
+            postRepository.save(post);
+        });
+    }
+
     private PostResponse mapToResponse(Post post, User user) {
         boolean isSaved = false;
         if (user != null) {
@@ -251,6 +310,9 @@ public class PostService {
                 .authorName(post.getAuthor().getDisplayName())
                 .createdAt(post.getCreatedAt())
                 .isSaved(isSaved)
+                .viewCount(post.getViewCount())
+                .likeCount(post.getLikeCount())
+                .shareCount(post.getShareCount())
                 .category(post.getCategory() != null ? CategoryDto.builder()
                         .id(post.getCategory().getId())
                         .name(post.getCategory().getName())

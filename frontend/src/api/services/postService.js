@@ -57,6 +57,32 @@ const postService = {
   
   toggleSave: async (id) => {
     await api.post(`/posts/${id}/save`);
+  },
+
+  incrementShare: async (id) => {
+    await api.post(`/posts/${id}/share`);
+  },
+
+  exportPostsJson: async () => {
+    const response = await api.get('/posts/export/json', { responseType: 'blob' });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'my-posts.json');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  },
+
+  exportStatsCsv: async () => {
+    const response = await api.get('/posts/analytics/export/csv', { responseType: 'blob' });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'engagement-stats.csv');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   }
 };
 

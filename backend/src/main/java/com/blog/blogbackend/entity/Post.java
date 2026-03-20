@@ -57,6 +57,7 @@ public class Post {
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
+    @Builder.Default
     private Set<Tag> tags = new HashSet<>();
 
     @CreationTimestamp
@@ -64,4 +65,16 @@ public class Post {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @Column(name = "view_count", nullable = false)
+    @Builder.Default
+    private long viewCount = 0;
+
+    @Column(name = "like_count", nullable = false)
+    @Builder.Default
+    private long likeCount = 0;
+
+    @Column(name = "share_count", nullable = false)
+    @Builder.Default
+    private long shareCount = 0;
 }

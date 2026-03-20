@@ -52,6 +52,32 @@ public class PostController {
         return ResponseEntity.ok(postService.getPostBySlug(slug));
     }
 
+    @PostMapping("/{id}/share")
+    public ResponseEntity<Void> incrementShare(@PathVariable UUID id) {
+        postService.incrementShareCount(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/export/json")
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
+    public ResponseEntity<byte[]> exportPostsJson() {
+        byte[] data = postService.exportAllPostsJson();
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=my-posts.json")
+                .header("Content-Type", "application/json")
+                .body(data);
+    }
+
+    @GetMapping("/analytics/export/csv")
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
+    public ResponseEntity<byte[]> exportStatsCsv() {
+        byte[] data = postService.generateEngagementCsv();
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=engagement-stats.csv")
+                .header("Content-Type", "text/csv")
+                .body(data);
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     public ResponseEntity<PostResponse> createPost(@Valid @RequestBody PostRequest request) {
@@ -91,8 +117,6 @@ public class PostController {
             @RequestParam(defaultValue = "relevance") @Size(max = 20, message = "Sort value too long") String sort,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size) {
-        
-        // Limit page size for performance
         
         // Limit page size for performance
         size = Math.min(size, 50);

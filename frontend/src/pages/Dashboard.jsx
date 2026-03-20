@@ -188,7 +188,20 @@ const Dashboard = () => {
             </p>
           </motion.div>
           
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6, delay: 0.2 }}>
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="flex flex-col sm:flex-row gap-4 items-end sm:items-center">
+            <div className="flex gap-2 mb-2 sm:mb-0">
+              <button 
+                onClick={() => postService.exportStatsCsv()}
+                className="group flex items-center gap-3 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 px-6 py-4 rounded-2xl font-bold text-[11px] uppercase tracking-[0.15em] border border-slate-200 dark:border-white/10 hover:border-primary/50 hover:text-primary hover:shadow-lg hover:shadow-primary/5 transition-all active:scale-95"
+                title="Download engagement metrics"
+              >
+                <div className="size-8 rounded-lg bg-slate-50 dark:bg-white/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                  <span className="material-symbols-outlined text-xl transition-transform group-hover:scale-110">query_stats</span>
+                </div>
+                Export Stats
+              </button>
+            </div>
+            
             <Link to="/editor" className="group relative flex items-center gap-4 bg-primary text-white pl-8 pr-10 py-5 rounded-[24px] font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-primary/30 active:scale-95 transition-all overflow-hidden">
               <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
               <span className="material-symbols-outlined text-xl transition-transform group-hover:rotate-90 duration-500">add_box</span>
