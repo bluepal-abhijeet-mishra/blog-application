@@ -19,6 +19,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.blog.blogbackend.dto.MonthlyTrend;
+import com.blog.blogbackend.entity.PostStatus;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -112,11 +117,55 @@ public class AdminController {
 
     @GetMapping("/stats")
     public ResponseEntity<PlatformStatsResponse> getPlatformStats() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM yyyy");
+        List<User> users = userRepository.findAll();
+        List<com.blog.blogbackend.entity.Post> posts = postRepository.findAll();
+        YearMonth currentMonth = YearMonth.now();
+
+        // Role Distribution
+        Map<String, Long> roleDistribution = users.stream()
+                .collect(Collectors.groupingBy(u -> u.getRole().name(), Collectors.counting()));
+
+        // Category Distribution (only for published posts)
+        Map<String, Long> categoryDistribution = posts.stream()
+                .filter(p -> p.getStatus() == PostStatus.PUBLISHED && p.getCategory() != null)
+                .collect(Collectors.groupingBy(p -> p.getCategory().getName(), Collectors.counting()));
+
+        // User Growth (last 6 months, null-safe and zero-filled)
+        Map<YearMonth, Long> userGrowthByMonth = users.stream()
+                .filter(u -> u.getCreatedAt() != null)
+                .collect(Collectors.groupingBy(u -> YearMonth.from(u.getCreatedAt()), Collectors.counting()));
+        List<MonthlyTrend> userGrowth = buildMonthlyTrend(currentMonth, userGrowthByMonth, formatter);
+
+        // Post Activity (last 6 months, only published, null-safe and zero-filled)
+        Map<YearMonth, Long> postActivityByMonth = posts.stream()
+                .filter(p -> p.getStatus() == PostStatus.PUBLISHED && p.getPublishedAt() != null)
+                .collect(Collectors.groupingBy(p -> YearMonth.from(p.getPublishedAt()), Collectors.counting()));
+        List<MonthlyTrend> postActivity = buildMonthlyTrend(currentMonth, postActivityByMonth, formatter);
+
         return ResponseEntity.ok(PlatformStatsResponse.builder()
-                .totalUsers(userRepository.count())
-                .totalPosts(postRepository.count())
+                .totalUsers(users.size())
+                .totalPosts(posts.size())
                 .totalComments(commentRepository.count())
-                .authorCount(userRepository.findAll().stream().filter(u -> u.getRole() == Role.AUTHOR).count())
+                .authorCount(users.stream().filter(u -> u.getRole() == Role.AUTHOR).count())
+                .userGrowth(userGrowth)
+                .postActivity(postActivity)
+                .categoryDistribution(categoryDistribution)
+                .roleDistribution(roleDistribution)
                 .build());
+    }
+
+    private List<MonthlyTrend> buildMonthlyTrend(
+            YearMonth currentMonth,
+            Map<YearMonth, Long> valuesByMonth,
+            DateTimeFormatter formatter
+    ) {
+        List<MonthlyTrend> trend = new ArrayList<>();
+        for (int i = 5; i >= 0; i--) {
+            YearMonth month = currentMonth.minusMonths(i);
+            long count = valuesByMonth.getOrDefault(month, 0L);
+            trend.add(new MonthlyTrend(month.format(formatter), count));
+        }
+        return trend;
     }
 }

@@ -45,8 +45,8 @@ const postService = {
     return response.data;
   },
 
-  getMyPosts: async () => {
-    const response = await api.get('/posts/my-posts');
+  getMyPosts: async (params) => {
+    const response = await api.get('/posts/my-posts', { params });
     return response.data;
   },
 

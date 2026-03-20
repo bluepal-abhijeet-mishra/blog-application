@@ -11,7 +11,9 @@ const Layout = ({ children }) => {
   // Routes that should NOT have any chrome (landing, login, register)
   const isBarePage = location.pathname === '/' ||
                      location.pathname === '/login' ||
-                     location.pathname === '/register';
+                     location.pathname === '/register' ||
+                     location.pathname === '/forgot-password' ||
+                     location.pathname === '/reset-password';
 
   if (isBarePage) {
     return (

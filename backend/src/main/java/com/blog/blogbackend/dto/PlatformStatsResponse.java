@@ -10,4 +10,9 @@ public class PlatformStatsResponse {
     private long totalPosts;
     private long totalComments;
     private long authorCount;
+    private java.util.List<MonthlyTrend> userGrowth;
+    private java.util.List<MonthlyTrend> postActivity;
+    private java.util.Map<String, Long> categoryDistribution;
+    private java.util.Map<String, Long> roleDistribution;
+
 }

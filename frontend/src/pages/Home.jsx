@@ -5,6 +5,7 @@ import metadataService from '../api/services/metadataService';
 import toast from 'react-hot-toast';
 import PostCard from '../components/PostCard';
 import { motion } from 'framer-motion';
+import Pagination from '../components/Pagination';
 
 const Home = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -20,7 +21,7 @@ const Home = () => {
     queryKey: ['posts', tag, category, page],
     queryFn: async () => {
       try {
-        return await postService.getPosts({ tag, category, page, size: 10 });
+        return await postService.getPosts({ tag, category, page, size: 6 });
       } catch (err) {
         toast.error(err.message || 'Failed to load posts');
         throw err;
@@ -134,44 +135,13 @@ const Home = () => {
               ))}
             </div>
 
-            {/* Premium Pagination */}
-            {postsData.totalPages > 1 && (
-              <div className="mt-24 pt-12 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                <div className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                  Page <span className="text-slate-900 dark:text-white">{page + 1}</span> of {postsData.totalPages}
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => updatePage(page - 1)}
-                    disabled={postsData.first}
-                    className="size-12 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 hover:border-primary hover:text-primary transition-all disabled:opacity-20"
-                  >
-                    <span className="material-symbols-outlined">chevron_left</span>
-                  </button>
-
-                  <div className="flex items-center gap-2 mx-4">
-                    {[...Array(postsData.totalPages)].map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => updatePage(i)}
-                        className={`size-10 rounded-xl text-xs font-black transition-all ${page === i ? 'bg-primary text-white shadow-lg' : 'text-slate-400 hover:text-primary'}`}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={() => updatePage(page + 1)}
-                    disabled={postsData.last}
-                    className="size-12 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 hover:border-primary hover:text-primary transition-all disabled:opacity-20"
-                  >
-                    <span className="material-symbols-outlined">chevron_right</span>
-                  </button>
-                </div>
-              </div>
-            )}
+            {/* Professional Pagination */}
+            <Pagination 
+              currentPage={page} 
+              totalPages={postsData?.totalPages || 0} 
+              onPageChange={updatePage} 
+              className="mt-16"
+            />
           </>
         ) : (
           <div className="py-32 text-center bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 shadow-sm p-16">

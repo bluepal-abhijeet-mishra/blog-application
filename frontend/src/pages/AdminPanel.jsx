@@ -52,7 +52,20 @@ const AdminPanel = () => {
   const { data: platformStats } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: () => adminService.getPlatformStats(),
+    retry: 1,
+    refetchInterval: 60000,
   });
+
+  const safePlatformStats = platformStats || {
+    totalUsers: 0,
+    authorCount: 0,
+    totalPosts: 0,
+    totalComments: 0,
+    userGrowth: [],
+    postActivity: [],
+    categoryDistribution: {},
+    roleDistribution: {},
+  };
 
   const promoteUserMutation = useMutation({
     mutationFn: ({ id, role }) => adminService.updateUserRole(id, role),
@@ -203,10 +216,10 @@ const AdminPanel = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="space-y-4">
             {[
-              { label: 'Total Users', value: platformStats?.totalUsers || 0, icon: 'group' },
-              { label: 'Authors', value: platformStats?.authorCount || 0, icon: 'verified' },
-              { label: 'Posts', value: platformStats?.totalPosts || 0, icon: 'article' },
-              { label: 'Comments', value: platformStats?.totalComments || 0, icon: 'chat' },
+              { label: 'Total Users', value: safePlatformStats.totalUsers, icon: 'group' },
+              { label: 'Authors', value: safePlatformStats.authorCount, icon: 'verified' },
+              { label: 'Posts', value: safePlatformStats.totalPosts, icon: 'article' },
+              { label: 'Comments', value: safePlatformStats.totalComments, icon: 'chat' },
             ].map((stat, i) => (
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -229,12 +242,14 @@ const AdminPanel = () => {
           </div>
 
           <div className="lg:col-span-3">
-            <motion.div
-              key={activeView}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-slate-900 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-black/20 overflow-hidden"
-            >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeView}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="bg-white dark:bg-slate-900 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-black/20 overflow-hidden"
+              >
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm border-collapse">
                   <thead className="bg-slate-50/50 dark:bg-slate-800/30">
@@ -426,7 +441,8 @@ const AdminPanel = () => {
                   </tbody>
                 </table>
               </div>
-            </motion.div>
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
       </div>
