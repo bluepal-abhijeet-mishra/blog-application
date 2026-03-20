@@ -13,6 +13,10 @@ const commentService = {
 
   deleteComment: async (commentId) => {
     await api.delete(`/comments/${commentId}`);
+  },
+  
+  toggleLike: async (commentId) => {
+    await api.post(`/comments/${commentId}/toggle-like`);
   }
 };
 

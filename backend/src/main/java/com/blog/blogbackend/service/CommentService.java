@@ -3,11 +3,13 @@ package com.blog.blogbackend.service;
 import com.blog.blogbackend.dto.CommentRequest;
 import com.blog.blogbackend.dto.CommentResponse;
 import com.blog.blogbackend.entity.Comment;
+import com.blog.blogbackend.entity.CommentLike;
 import com.blog.blogbackend.entity.NotificationType;
 import com.blog.blogbackend.entity.Post;
 import com.blog.blogbackend.entity.PostStatus;
 import com.blog.blogbackend.entity.Role;
 import com.blog.blogbackend.entity.User;
+import com.blog.blogbackend.repository.CommentLikeRepository;
 import com.blog.blogbackend.repository.CommentRepository;
 import com.blog.blogbackend.repository.PostRepository;
 import com.blog.blogbackend.repository.UserRepository;
@@ -37,6 +39,9 @@ public class CommentService {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private CommentLikeRepository commentLikeRepository;
+
     @Transactional
     public CommentResponse addComment(UUID postId, CommentRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -57,20 +62,34 @@ public class CommentService {
             if (!parent.getPost().getId().equals(postId)) {
                 throw new RuntimeException("Parent comment does not belong to this post");
             }
-            if (parent.getParent() != null) {
-                throw new RuntimeException("Cannot reply to a reply");
-            }
             comment.setParent(parent);
         }
 
         Comment saved = commentRepository.save(comment);
         notifyRelevantUsers(saved, user);
-        return mapToResponse(saved);
+        return mapToResponse(saved, user);
+    }
+
+    @Transactional
+    public void toggleLike(UUID commentId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new RuntimeException("Comment not found"));
+
+        commentLikeRepository.findByCommentIdAndUserId(commentId, user.getId())
+                .ifPresentOrElse(
+                        commentLikeRepository::delete,
+                        () -> commentLikeRepository.save(CommentLike.builder().comment(comment).user(user).build())
+                );
     }
 
     public Page<CommentResponse> getCommentsForPost(UUID postId, Pageable pageable) {
+        String email = SecurityContextHolder.getContext().getAuthentication() != null ? 
+                SecurityContextHolder.getContext().getAuthentication().getName() : null;
+        User currentUser = email != null ? userRepository.findByEmail(email).orElse(null) : null;
+
         return commentRepository.findByPostIdAndParentIsNull(postId, pageable)
-                .map(this::mapToResponseWithReplies);
+                .map(comment -> mapToResponseWithReplies(comment, currentUser));
     }
 
     public void deleteComment(UUID id) {
@@ -89,7 +108,7 @@ public class CommentService {
         }
     }
 
-    private CommentResponse mapToResponse(Comment comment) {
+    private CommentResponse mapToResponse(Comment comment, User currentUser) {
         return CommentResponse.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
@@ -97,13 +116,17 @@ public class CommentService {
                 .authorName(comment.getUser().getDisplayName())
                 .authorAvatarUrl(comment.getUser().getAvatarUrl())
                 .createdAt(comment.getCreatedAt())
+                .likeCount(commentLikeRepository.countByCommentId(comment.getId()))
+                .likedByCurrentUser(currentUser != null && commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), currentUser.getId()))
                 .build();
     }
 
-    private CommentResponse mapToResponseWithReplies(Comment comment) {
-        CommentResponse response = mapToResponse(comment);
+    private CommentResponse mapToResponseWithReplies(Comment comment, User currentUser) {
+        CommentResponse response = mapToResponse(comment, currentUser);
         List<Comment> replies = commentRepository.findByParentId(comment.getId());
-        response.setReplies(replies.stream().map(this::mapToResponse).collect(Collectors.toList()));
+        response.setReplies(replies.stream()
+                .map(reply -> mapToResponseWithReplies(reply, currentUser))
+                .collect(Collectors.toList()));
         return response;
     }
 

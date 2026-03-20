@@ -219,20 +219,29 @@ const Sidebar = () => {
             </AnimatePresence>
           </div>
 
-          <button
-            onClick={() => { logout(); navigate('/'); }}
-            onMouseEnter={() => setHoveredItem('logout')}
-            onMouseLeave={() => setHoveredItem(null)}
-            className="w-12 h-12 rounded-2xl flex items-center justify-center text-slate-500 hover:bg-rose-500/10 hover:text-rose-500 transition-all group"
-          >
-            <span className="material-symbols-outlined text-2xl font-light">logout</span>
-            {hoveredItem === 'logout' && (
-              <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 bg-rose-500 text-white text-[11px] font-black uppercase tracking-widest px-4 py-2 rounded-xl shadow-2xl z-[100] pointer-events-none whitespace-nowrap">
-                Sign Out
-                <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-rose-500"></div>
-              </div>
-            )}
-          </button>
+          <div className="relative w-full flex justify-center">
+            <button
+              onClick={() => { logout(); navigate('/'); }}
+              onMouseEnter={() => setHoveredItem('logout')}
+              onMouseLeave={() => setHoveredItem(null)}
+              className="w-12 h-12 rounded-2xl flex items-center justify-center text-slate-500 hover:bg-rose-500/10 hover:text-rose-500 transition-all group"
+            >
+              <span className="material-symbols-outlined text-2xl font-light">logout</span>
+            </button>
+            <AnimatePresence>
+              {hoveredItem === 'logout' && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  className="absolute left-full ml-4 top-1/2 -translate-y-1/2 bg-rose-500 text-white text-[11px] font-black uppercase tracking-widest px-4 py-2 rounded-xl shadow-2xl z-[100] pointer-events-none whitespace-nowrap border border-white/10"
+                >
+                  Sign Out
+                  <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-rose-500"></div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </aside>
 
