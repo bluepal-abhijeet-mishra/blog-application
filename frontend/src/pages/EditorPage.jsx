@@ -7,6 +7,7 @@ import categoryRequestService from '../api/services/categoryRequestService';
 import toast from 'react-hot-toast';
 import RichTextEditor from '../components/RichTextEditor';
 import ReadOnlyEditor from '../components/ReadOnlyEditor';
+import ConfirmationModal from '../components/ConfirmationModal';
 import { getFirstImageFromContent, normalizeCoverImageUrl } from '../utils/postMedia';
 import { useAuth } from '../context/AuthContext';
 
@@ -33,6 +34,22 @@ const slugifyPreview = (input) =>
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
+const MAX_TAGS_PER_STORY = 20;
+const MAX_TAG_LENGTH = 50;
+const MAX_VISIBLE_TAG_SUGGESTIONS = 20;
+
+const normalizeTag = (rawTag) =>
+  (rawTag || '')
+    .trim()
+    .replace(/^#+/, '')
+    .replace(/\s+/g, ' ');
+
+const splitRawTags = (rawTags) =>
+  (rawTags || '')
+    .split(',')
+    .map(normalizeTag)
+    .filter(Boolean);
+
 const EditorPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -56,6 +73,8 @@ const EditorPage = () => {
   const [isCategoryRequestOpen, setIsCategoryRequestOpen] = useState(false);
   const [requestedCategoryName, setRequestedCategoryName] = useState('');
   const [requestedCategoryReason, setRequestedCategoryReason] = useState('');
+  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+  const [pendingDraft, setPendingDraft] = useState(null);
 
   const storageKey = `editor-draft-${id || 'new'}`;
 
@@ -96,13 +115,13 @@ const EditorPage = () => {
   });
 
   const buildPayload = useCallback(
-    () => ({
+    (tagOverride = tagArray) => ({
       title: title.trim(),
       content,
       excerpt: excerpt.trim().substring(0, 300),
       coverImageUrl: coverImageUrl.trim() || null,
       categoryId: categoryId || null,
-      tags: Array.from(new Set(tagArray.map((t) => t.trim()).filter(Boolean))),
+      tags: Array.from(new Set(tagOverride.map((t) => t.trim()).filter(Boolean))),
     }),
     [title, content, excerpt, coverImageUrl, categoryId, tagArray]
   );
@@ -157,17 +176,19 @@ const EditorPage = () => {
         isExcerptManual: true,
       };
       applyDraftState(serverData);
+      
       const savedDraft = localStorage.getItem(storageKey);
       if (savedDraft) {
         try {
           const parsed = JSON.parse(savedDraft);
-          if (window.confirm('A local unsaved draft was found for this post. Restore it?')) {
-            applyDraftState(parsed);
-          }
+          // Instead of blocking window.confirm, we open our modal
+          setPendingDraft(parsed);
+          setIsRestoreModalOpen(true);
         } catch {
           localStorage.removeItem(storageKey);
         }
       }
+      
       setBaselineSignature(
         JSON.stringify({
           title: serverData.title.trim(),
@@ -187,11 +208,8 @@ const EditorPage = () => {
       if (savedDraft) {
         try {
           const parsed = JSON.parse(savedDraft);
-          if (window.confirm('A local draft was found. Restore it?')) {
-            applyDraftState(parsed);
-          } else {
-            localStorage.removeItem(storageKey);
-          }
+          setPendingDraft(parsed);
+          setIsRestoreModalOpen(true);
         } catch {
           localStorage.removeItem(storageKey);
         }
@@ -209,6 +227,26 @@ const EditorPage = () => {
       setIsReady(true);
     }
   }, [id, post, storageKey, applyDraftState]);
+
+  const handleConfirmRestore = () => {
+    if (pendingDraft) {
+      applyDraftState(pendingDraft);
+    }
+    setIsRestoreModalOpen(false);
+    setPendingDraft(null);
+    toast.success('Draft restored successfully.');
+  };
+
+  const handleCancelRestore = () => {
+    if (!id) {
+      // For new posts, if they cancel, we probably want to discard the old draft
+      // to avoid nagging them again.
+      localStorage.removeItem(storageKey);
+    }
+    setIsRestoreModalOpen(false);
+    setPendingDraft(null);
+    toast('Draft ignored.', { icon: 'ℹ️' });
+  };
 
   useEffect(() => {
     if (!isReady || !isDirty) return undefined;
@@ -237,21 +275,21 @@ const EditorPage = () => {
   }, [isDirty]);
 
   const saveMutation = useMutation({
-    mutationFn: async ({ publish }) => {
-      const payload = buildPayload();
+    mutationFn: async ({ publish, tagOverride }) => {
+      const payload = buildPayload(tagOverride);
       const savedPost = id ? await postService.updatePost(id, payload) : await postService.createPost(payload);
       const finalId = id || savedPost.id;
       if (publish && finalId) {
         await postService.publishPost(finalId);
       }
-      return { savedPost, finalId, publish };
+      return { savedPost, finalId, publish, savedSignature: JSON.stringify(payload) };
     },
-    onSuccess: ({ finalId, publish }) => {
+    onSuccess: ({ finalId, publish, savedSignature }) => {
       queryClient.invalidateQueries({ queryKey: ['my-posts'] });
       queryClient.invalidateQueries({ queryKey: ['my-stats'] });
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       localStorage.removeItem(storageKey);
-      setBaselineSignature(currentSignature);
+      setBaselineSignature(savedSignature);
       if (publish) {
         toast.success('Story published successfully.');
         navigate('/dashboard');
@@ -286,21 +324,83 @@ const EditorPage = () => {
     },
   });
 
+  const mergeIncomingTags = useCallback((existingTags, rawTagInput) => {
+    const incomingTags = splitRawTags(rawTagInput);
+    if (!incomingTags.length) {
+      return {
+        nextTags: existingTags,
+        addedCount: 0,
+        hasLongTag: false,
+        hitTagLimit: false,
+      };
+    }
+
+    const nextTags = [...existingTags];
+    let hasLongTag = false;
+    let hitTagLimit = false;
+    let addedCount = 0;
+
+    incomingTags.forEach((candidate) => {
+      if (candidate.length > MAX_TAG_LENGTH) {
+        hasLongTag = true;
+        return;
+      }
+
+      if (nextTags.some((existing) => existing.toLowerCase() === candidate.toLowerCase())) {
+        return;
+      }
+
+      if (nextTags.length >= MAX_TAGS_PER_STORY) {
+        hitTagLimit = true;
+        return;
+      }
+
+      nextTags.push(candidate);
+      addedCount += 1;
+    });
+
+    return { nextTags, addedCount, hasLongTag, hitTagLimit };
+  }, []);
+
+  const commitTagInput = useCallback((options = {}) => {
+    const { silent = false } = options;
+    const { nextTags, addedCount, hasLongTag, hitTagLimit } = mergeIncomingTags(tagArray, tagInput);
+
+    if (addedCount > 0) {
+      setTagArray(nextTags);
+    }
+
+    if (tagInput.trim()) {
+      setTagInput('');
+    }
+
+    if (!silent && hasLongTag) {
+      toast.error(`Each tag can be at most ${MAX_TAG_LENGTH} characters.`);
+    }
+    if (!silent && hitTagLimit) {
+      toast.error(`You can add up to ${MAX_TAGS_PER_STORY} tags per story.`);
+    }
+
+    return nextTags;
+  }, [mergeIncomingTags, tagArray, tagInput]);
+
   const handleSaveDraft = useCallback(() => {
+    const finalTags = commitTagInput();
     if (!hasSubstantialContent) {
       toast.error('Add a title or content before saving.');
       return;
     }
-    saveMutation.mutate({ publish: false });
-  }, [hasSubstantialContent, saveMutation]);
+    saveMutation.mutate({ publish: false, tagOverride: finalTags });
+  }, [commitTagInput, hasSubstantialContent, saveMutation]);
 
   const handlePublish = useCallback(() => {
+    const finalTags = commitTagInput();
     if (!canPublish) {
       toast.error(publishChecks[0]);
       return;
     }
-    saveMutation.mutate({ publish: true });
-  }, [canPublish, publishChecks, saveMutation]);
+    saveMutation.mutate({ publish: true, tagOverride: finalTags });
+  }, [canPublish, commitTagInput, publishChecks, saveMutation]);
 
   useEffect(() => {
     const onKeyDown = (event) => {
@@ -317,26 +417,49 @@ const EditorPage = () => {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [handleSaveDraft, handlePublish, canPublish]);
 
-  const addTag = (rawTag) => {
-    const newTag = rawTag.trim().replace(/^#/, '');
-    if (!newTag) return;
-    if (tagArray.some((t) => t.toLowerCase() === newTag.toLowerCase())) return;
-    setTagArray((prev) => [...prev, newTag]);
+  const addTag = useCallback((rawTag, options = {}) => {
+    const { silent = false } = options;
+    const { nextTags, addedCount, hasLongTag, hitTagLimit } = mergeIncomingTags(tagArray, rawTag);
+
+    if (addedCount > 0) {
+      setTagArray(nextTags);
+    }
     setTagInput('');
-  };
+
+    if (!silent && hasLongTag) {
+      toast.error(`Each tag can be at most ${MAX_TAG_LENGTH} characters.`);
+    }
+    if (!silent && hitTagLimit) {
+      toast.error(`You can add up to ${MAX_TAGS_PER_STORY} tags per story.`);
+    }
+  }, [mergeIncomingTags, tagArray]);
 
   const removeTag = (tagToRemove) => {
     setTagArray((prev) => prev.filter((t) => t !== tagToRemove));
   };
 
-  const suggestedTags = useMemo(() => {
+  const allMatchingTags = useMemo(() => {
     if (!availableTags?.length) return [];
     const typed = tagInput.trim().toLowerCase();
     return availableTags
       .filter((t) => !tagArray.some((existing) => existing.toLowerCase() === t.name.toLowerCase()))
-      .filter((t) => !typed || t.name.toLowerCase().includes(typed))
-      .slice(0, 6);
+      .filter((t) => !typed || t.name.toLowerCase().includes(typed));
   }, [availableTags, tagArray, tagInput]);
+
+  const suggestedTags = useMemo(
+    () => allMatchingTags.slice(0, MAX_VISIBLE_TAG_SUGGESTIONS),
+    [allMatchingTags]
+  );
+
+  const canCreateTypedTag = useMemo(() => {
+    const typed = normalizeTag(tagInput);
+    if (!typed) return false;
+    if (typed.length > MAX_TAG_LENGTH) return false;
+    if (tagArray.some((existing) => existing.toLowerCase() === typed.toLowerCase())) return false;
+    if (allMatchingTags.some((existing) => existing.name.toLowerCase() === typed.toLowerCase())) return false;
+    if (tagArray.length >= MAX_TAGS_PER_STORY) return false;
+    return true;
+  }, [allMatchingTags, tagArray, tagInput]);
 
   if (id && isLoadingPost) {
     return <div className="p-8 text-slate-500">Loading editor...</div>;
@@ -559,20 +682,36 @@ const EditorPage = () => {
                 ))}
                 <input
                   className="border-none focus:ring-0 text-sm font-bold p-0 min-w-[180px] bg-transparent outline-none placeholder:text-slate-300"
-                  placeholder="Add tag and press Enter"
+                  placeholder="Add tags (custom allowed) and press Enter"
                   type="text"
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
+                  onBlur={() => {
+                    if (!tagInput.trim()) return;
+                    addTag(tagInput, { silent: true });
+                  }}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ',') {
+                    if (e.key === 'Enter' || e.key === ',' || e.key === 'Tab') {
                       e.preventDefault();
                       addTag(tagInput);
                     }
                   }}
                 />
               </div>
+              <div className="mb-2 text-[10px] font-semibold text-slate-400">
+                Use Enter, comma, or Tab. You can add custom tags not listed in suggestions.
+              </div>
               {suggestedTags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
+                  {canCreateTypedTag && (
+                    <button
+                      type="button"
+                      onClick={() => addTag(tagInput)}
+                      className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-primary/30 text-primary bg-primary/5 hover:bg-primary/10"
+                    >
+                      + Create "{normalizeTag(tagInput)}"
+                    </button>
+                  )}
                   {suggestedTags.map((tag) => (
                     <button
                       key={tag.id}
@@ -584,6 +723,20 @@ const EditorPage = () => {
                     </button>
                   ))}
                 </div>
+              )}
+              {suggestedTags.length === 0 && canCreateTypedTag && (
+                <button
+                  type="button"
+                  onClick={() => addTag(tagInput)}
+                  className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-primary/30 text-primary bg-primary/5 hover:bg-primary/10"
+                >
+                  + Create "{normalizeTag(tagInput)}"
+                </button>
+              )}
+              {allMatchingTags.length > MAX_VISIBLE_TAG_SUGGESTIONS && (
+                <p className="mt-2 text-[10px] text-slate-400 font-semibold">
+                  Showing {MAX_VISIBLE_TAG_SUGGESTIONS} suggestions. Refine your input to narrow results.
+                </p>
               )}
             </div>
 
@@ -702,6 +855,17 @@ const EditorPage = () => {
           </div>
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={isRestoreModalOpen}
+        onClose={handleCancelRestore}
+        onConfirm={handleConfirmRestore}
+        title="Restore Unsaved Draft?"
+        message="We found an unsaved local draft for this story. Would you like to restore it and continue where you left off?"
+        confirmText="Restore Draft"
+        cancelText="Discard Draft"
+        type="primary"
+      />
     </div>
   );
 };

@@ -252,7 +252,7 @@ const AuthContainer = ({ initialMode = 'login' }) => {
                   <motion.div variants={itemVariants} className="space-y-2">
                     <div className="flex justify-between items-center px-1">
                       <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Password</label>
-                      {isLogin && <button type="button" className="text-xs font-bold text-primary hover:underline">Forgot Password?</button>}
+                      {isLogin && <Link to="/forgot-password" className="text-xs font-bold text-primary hover:underline">Forgot Password?</Link>}
                     </div>
                     <div className="relative group">
                       <span className={`material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${fieldErrors.password ? 'text-rose-500' : 'text-slate-400 group-focus-within:text-primary'}`}>lock</span>

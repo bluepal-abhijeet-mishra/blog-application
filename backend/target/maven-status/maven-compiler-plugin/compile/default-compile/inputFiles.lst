@@ -1,7 +1,9 @@
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\repository\TagRepository.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\repository\PostRepository.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\security\CustomUserDetailsService.java
+D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\dto\MessageResponse.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\entity\Post.java
+D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\dto\UserProfileResponse.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\exception\GlobalExceptionHandler.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\dto\CategoryRequestDecisionRequest.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\controller\PostController.java
@@ -18,6 +20,7 @@ D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\loader\DataInitializer.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\entity\Category.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\service\CommentService.java
+D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\dto\ForgotPasswordRequest.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\controller\AuthController.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\dto\AuthorStatsResponse.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\service\AuthService.java
@@ -28,6 +31,7 @@ D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\repository\CategoryRequestRepository.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\BlogBackendApplication.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\dto\CategoryRequestDto.java
+D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\service\UserService.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\dto\PostRequest.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\entity\AuthorApplication.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\dto\CategoryDto.java
@@ -42,14 +46,18 @@ D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\controller\MetadataController.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\repository\CommentRepository.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\entity\CategoryRequestStatus.java
+D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\controller\UserController.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\config\CorsConfig.java
+D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\dto\ResetPasswordRequest.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\dto\MonthlyTrend.java
+D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\service\PasswordResetNotificationService.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\config\OpenApiConfig.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\entity\Notification.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\entity\User.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\repository\UserRepository.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\controller\AdminController.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\controller\AuthorApplicationController.java
+D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\dto\UserProfileRequest.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\service\PostService.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\config\ValidationConfig.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\entity\CategoryRequest.java
@@ -60,6 +68,7 @@ D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\dto\AuthorApplicationDto.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\service\NotificationService.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\controller\RssFeedController.java
+D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\dto\ResetTokenValidationResponse.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\dto\LoginRequest.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\dto\RegisterRequest.java
 D:\blog-application\blog-application\backend\src\main\java\com\blog\blogbackend\security\JwtTokenProvider.java

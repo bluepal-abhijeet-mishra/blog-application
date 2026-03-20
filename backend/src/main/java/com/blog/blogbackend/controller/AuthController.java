@@ -1,8 +1,12 @@
 package com.blog.blogbackend.controller;
 
 import com.blog.blogbackend.dto.AuthResponse;
+import com.blog.blogbackend.dto.ForgotPasswordRequest;
 import com.blog.blogbackend.dto.LoginRequest;
+import com.blog.blogbackend.dto.MessageResponse;
 import com.blog.blogbackend.dto.RegisterRequest;
+import com.blog.blogbackend.dto.ResetPasswordRequest;
+import com.blog.blogbackend.dto.ResetTokenValidationResponse;
 import com.blog.blogbackend.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,6 +21,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -71,5 +77,63 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @Operation(
+        summary = "Request password reset",
+        description = "Initiates password reset flow and sends reset instructions when account exists."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Reset request accepted",
+            content = @Content(schema = @Schema(implementation = MessageResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid input format",
+            content = @Content
+        )
+    })
+    @PostMapping("/forgot-password")
+    public ResponseEntity<MessageResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        return ResponseEntity.ok(authService.forgotPassword(request));
+    }
+
+    @Operation(
+        summary = "Validate password reset token",
+        description = "Checks whether a password reset token is valid and not expired."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Validation status returned",
+            content = @Content(schema = @Schema(implementation = ResetTokenValidationResponse.class))
+        )
+    })
+    @GetMapping("/reset-password/validate")
+    public ResponseEntity<ResetTokenValidationResponse> validateResetToken(@RequestParam String token) {
+        return ResponseEntity.ok(authService.validateResetToken(token));
+    }
+
+    @Operation(
+        summary = "Reset password",
+        description = "Resets account password using a valid one-time reset token."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Password reset successfully",
+            content = @Content(schema = @Schema(implementation = MessageResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid token or password",
+            content = @Content
+        )
+    })
+    @PostMapping("/reset-password")
+    public ResponseEntity<MessageResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        return ResponseEntity.ok(authService.resetPassword(request));
     }
 }

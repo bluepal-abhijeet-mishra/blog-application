@@ -93,6 +93,8 @@ public class PostController {
             @RequestParam(defaultValue = "10") @Min(1) int size) {
         
         // Limit page size for performance
+        
+        // Limit page size for performance
         size = Math.min(size, 50);
         
         Pageable pageable = PageRequest.of(page, size);
@@ -101,8 +103,13 @@ public class PostController {
 
     @GetMapping("/my-posts")
     @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
-    public ResponseEntity<java.util.List<PostResponse>> getMyPosts() {
-        return ResponseEntity.ok(postService.getAuthorPosts());
+    public ResponseEntity<Page<PostResponse>> getMyPosts(
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) int size) {
+        
+        size = Math.min(size, 50);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return ResponseEntity.ok(postService.getAuthorPosts(pageable));
     }
 
     @GetMapping("/stats")

@@ -36,6 +36,13 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    @Column(length = 64)
+    private String passwordResetTokenHash;
+
+    private LocalDateTime passwordResetExpiresAt;
+
+    private LocalDateTime passwordResetRequestedAt;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 }

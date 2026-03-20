@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import postService from '../api/services/postService';
@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import AdminCharts from '../components/AdminCharts';
+import Pagination from '../components/Pagination';
 
 const EMPTY_ANALYTICS_STATS = {
   totalUsers: 0,
@@ -25,10 +26,14 @@ const Dashboard = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === 'ADMIN';
 
-  const { data: posts, isLoading: isLoadingPosts } = useQuery({
-    queryKey: ['my-posts'],
-    queryFn: () => postService.getMyPosts(),
+  const [page, setPage] = useState(0);
+  const { data: postsData, isLoading: isLoadingPosts } = useQuery({
+    queryKey: ['my-posts', page],
+    queryFn: () => postService.getMyPosts({ page, size: 5 }),
   });
+
+  const posts = postsData?.content || [];
+  const totalPages = postsData?.totalPages || 0;
 
   const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ['my-stats'],
@@ -213,7 +218,9 @@ const Dashboard = () => {
         >
           <div className="p-8 border-b border-slate-50 dark:border-slate-800/50 flex items-center justify-between">
             <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Author Portfolio</h3>
-            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Refining {safePosts.length} Records</div>
+            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              {postsData?.totalElements || 0} Assets Found
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm border-collapse">
@@ -226,7 +233,7 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
-                {safePosts.length === 0 ? (
+                {posts.length === 0 ? (
                   <tr>
                     <td colSpan="4" className="px-10 py-24 text-center">
                       <span className="material-symbols-outlined text-5xl text-slate-200 block mb-4">edit_note</span>
@@ -235,7 +242,7 @@ const Dashboard = () => {
                     </td>
                   </tr>
                 ) : (
-                  safePosts.map((post) => (
+                  posts.map((post) => (
                     <tr key={post.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
                       <td className="px-10 py-8">
                         <Link to={`/posts/${post.slug}`} className="font-black text-slate-900 dark:text-white group-hover:text-primary transition-colors text-base tracking-tight block max-w-md line-clamp-1">{post.title}</Link>
@@ -292,6 +299,18 @@ const Dashboard = () => {
               </tbody>
             </table>
           </div>
+          {totalPages >= 1 && (
+            <div className="px-8 bg-slate-50/30 dark:bg-slate-800/10">
+              <Pagination 
+                currentPage={page} 
+                totalPages={totalPages} 
+                onPageChange={(newPage) => {
+                  setPage(newPage);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }} 
+              />
+            </div>
+          )}
         </motion.div>
       </div>
     </div>

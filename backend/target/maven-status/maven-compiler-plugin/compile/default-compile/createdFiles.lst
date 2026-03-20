@@ -2,8 +2,11 @@ com\blog\blogbackend\entity\User$UserBuilder.class
 com\blog\blogbackend\dto\AuthResponse.class
 com\blog\blogbackend\controller\AuthController.class
 com\blog\blogbackend\controller\PostController.class
+com\blog\blogbackend\dto\MessageResponse$MessageResponseBuilder.class
+com\blog\blogbackend\dto\MessageResponse.class
 com\blog\blogbackend\entity\Comment.class
 com\blog\blogbackend\dto\TagDto.class
+com\blog\blogbackend\dto\ResetPasswordRequest$ResetPasswordRequestBuilder.class
 com\blog\blogbackend\entity\Tag.class
 com\blog\blogbackend\entity\Comment$CommentBuilder.class
 com\blog\blogbackend\dto\CommentRequest.class
@@ -16,6 +19,7 @@ com\blog\blogbackend\entity\Category$CategoryBuilder.class
 com\blog\blogbackend\dto\PostResponse.class
 com\blog\blogbackend\repository\UserRepository.class
 com\blog\blogbackend\repository\CommentRepository.class
+com\blog\blogbackend\dto\ResetTokenValidationResponse$ResetTokenValidationResponseBuilder.class
 com\blog\blogbackend\repository\PostRepository.class
 com\blog\blogbackend\controller\CommentController.class
 com\blog\blogbackend\dto\LoginRequest.class
@@ -23,6 +27,7 @@ com\blog\blogbackend\dto\RegisterRequest$RegisterRequestBuilder.class
 com\blog\blogbackend\dto\RegisterRequest.class
 com\blog\blogbackend\repository\TagRepository.class
 com\blog\blogbackend\dto\PostRequest.class
+com\blog\blogbackend\dto\ForgotPasswordRequest$ForgotPasswordRequestBuilder.class
 com\blog\blogbackend\service\AuthService.class
 com\blog\blogbackend\controller\MetadataController.class
 com\blog\blogbackend\service\PostService.class
@@ -41,12 +46,16 @@ com\blog\blogbackend\controller\AdminController.class
 com\blog\blogbackend\dto\PostResponse$PostResponseBuilder.class
 com\blog\blogbackend\service\SlugService.class
 com\blog\blogbackend\security\JwtAuthenticationFilter.class
+com\blog\blogbackend\dto\ForgotPasswordRequest.class
 com\blog\blogbackend\dto\AuthResponse$AuthResponseBuilder.class
 com\blog\blogbackend\entity\User.class
 com\blog\blogbackend\dto\UserResponse.class
 com\blog\blogbackend\config\SecurityConfig.class
 com\blog\blogbackend\dto\CategoryDto.class
+com\blog\blogbackend\dto\ResetPasswordRequest.class
 com\blog\blogbackend\entity\Role.class
 com\blog\blogbackend\dto\PostRequest$PostRequestBuilder.class
 com\blog\blogbackend\security\CustomUserDetailsService.class
+com\blog\blogbackend\dto\ResetTokenValidationResponse.class
+com\blog\blogbackend\service\PasswordResetNotificationService.class
 com\blog\blogbackend\entity\Tag$TagBuilder.class

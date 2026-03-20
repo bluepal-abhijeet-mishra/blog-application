@@ -192,13 +192,11 @@ public class PostService {
         };
         return posts.map(this::mapToResponse);
     }
-
-    public List<PostResponse> getAuthorPosts() {
+    public Page<PostResponse> getAuthorPosts(Pageable pageable) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User author = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        return postRepository.findByAuthorId(author.getId()).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        return postRepository.findByAuthorId(author.getId(), pageable)
+                .map(this::mapToResponse);
     }
 
     public AuthorStatsResponse getAuthorStats() {
