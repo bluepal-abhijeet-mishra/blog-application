@@ -1,6 +1,8 @@
-import { useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import postService from '../api/services/postService';
+import userService from '../api/services/userService';
 import toast from 'react-hot-toast';
 import ReadOnlyEditor from '../components/ReadOnlyEditor';
 import CommentSection from '../components/CommentSection';
@@ -9,7 +11,9 @@ import { getPostCoverImage } from '../utils/postMedia';
 
 const PostDetail = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const { data: post, isLoading, error } = useQuery({
     queryKey: ['post', slug],
@@ -22,6 +26,41 @@ const PostDetail = () => {
       }
     },
   });
+
+  const { data: authorProfile } = useQuery({
+    queryKey: ['authorProfile', post?.authorId],
+    queryFn: () => userService.getAuthorProfile(post.authorId),
+    enabled: !!post?.authorId
+  });
+
+  const followMutation = useMutation({
+    mutationFn: () => userService.toggleFollow(post.authorId),
+    onSuccess: (isNowFollowing) => {
+      queryClient.setQueryData(['authorProfile', post.authorId], old => {
+        if (!old) return old;
+        return {
+          ...old,
+          isFollowing: isNowFollowing,
+          followerCount: isNowFollowing ? old.followerCount + 1 : Math.max(0, old.followerCount - 1)
+        };
+      });
+      toast.success(isNowFollowing ? `You are now following ${post.authorName}` : `Unfollowed ${post.authorName}`, {
+        icon: isNowFollowing ? '✅' : '👋',
+        style: { borderRadius: '12px', background: '#1e293b', color: '#fff' }
+      });
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || err.message || 'Action failed');
+    }
+  });
+
+  const isFollowing = authorProfile?.isFollowing || false;
+  
+  const formatCount = (count) => {
+    if (count >= 1000000) return (count / 1000000).toFixed(1) + 'M';
+    if (count >= 1000) return (count / 1000).toFixed(1) + 'K';
+    return count.toString();
+  };
 
   const saveMutation = useMutation({
     mutationFn: () => postService.toggleSave(post.id),
@@ -55,6 +94,15 @@ const PostDetail = () => {
     });
   };
 
+  const handleFollow = () => {
+    if (!authorProfile) return;
+    followMutation.mutate();
+  };
+
+  const handleProfileClick = () => {
+    setShowProfileModal(true);
+  };
+
   const extractHeadings = (contentJson) => {
     if (!contentJson) return [];
     try {
@@ -76,12 +124,20 @@ const PostDetail = () => {
   };
 
   const handleDownloadPdf = () => {
-    const element = document.getElementById('post-content-container');
+    const element = document.getElementById('pdf-content');
     const opt = {
-      margin: [10, 10],
+      margin: [15, 15],
       filename: `${post.slug}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
+      pagebreak: { mode: ['css', 'avoid-all', 'legacy'] },
+      html2canvas: { 
+        scale: 2, 
+        useCORS: true,
+        windowWidth: element ? element.scrollWidth : 800,
+        ignoreElements: (node) => {
+          return node.classList && node.classList.contains('no-pdf');
+        }
+      },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
@@ -101,7 +157,7 @@ const PostDetail = () => {
   const coverImage = getPostCoverImage(post);
 
   return (
-    <div className="flex flex-col lg:flex-row max-w-[1200px] mx-auto relative px-6" id="post-content-container">
+    <div className="flex flex-col lg:flex-row max-w-[1200px] mx-auto relative px-6">
       {/* Table of Contents Sidebar */}
       {headings.length > 0 && (
         <aside className="hidden lg:block w-64 shrink-0 sticky top-24 h-fit pr-8 mt-40 no-pdf">
@@ -128,6 +184,7 @@ const PostDetail = () => {
       )}
 
       <main className="flex-1 max-w-[800px] py-12 md:py-20 animate-fade-in mx-auto lg:mx-0">
+      <div id="pdf-content" className="w-full bg-background-light dark:bg-background-dark">
       <div className="flex flex-wrap items-center gap-3 mb-8">
         {post.category && (
           <span className="px-4 py-1.5 bg-primary/10 text-primary text-xs font-bold rounded-full uppercase tracking-widest shadow-sm shadow-primary/5">
@@ -214,8 +271,9 @@ const PostDetail = () => {
       <article className="prose prose-lg md:prose-xl max-w-none prose-slate dark:prose-invert prose-headings:tracking-tight prose-a:text-primary prose-strong:text-slate-900 dark:prose-strong:text-white">
         <ReadOnlyEditor content={post.content} />
       </article>
+      </div>
 
-      <div className="mt-20 pt-10 border-t border-slate-100 dark:border-slate-800">
+      <div className="mt-20 pt-10 border-t border-slate-100 dark:border-slate-800 no-pdf">
         <div className="bg-slate-50 dark:bg-slate-900/50 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8 border border-slate-100 dark:border-slate-800/50">
            <div className="h-24 w-24 rounded-full border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden shrink-0">
             <img 
@@ -226,19 +284,105 @@ const PostDetail = () => {
           </div>
           <div className="text-center md:text-left flex-1">
             <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Written by {post.authorName}</h3>
-            <p className="text-slate-500 dark:text-slate-400 mb-6 max-w-md">Dedicated to exploring the intersections of technology and human creativity. Founder of the BlogSpace community.</p>
+            <p className="text-slate-500 dark:text-slate-400 mb-6 max-w-md">
+              {authorProfile?.bio || "Dedicated to exploring the intersections of technology and human creativity. Founder of the BlogSpace community."}
+            </p>
             <div className="flex justify-center md:justify-start gap-4">
-              <button className="px-6 py-2 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">Follow</button>
-              <button className="px-6 py-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">Profile</button>
+              <button 
+                onClick={handleFollow}
+                className={`px-6 py-2 font-bold rounded-xl transition-all shadow-lg ${
+                  isFollowing 
+                    ? 'bg-transparent border-2 border-primary text-primary hover:bg-primary/5 shadow-none' 
+                    : 'bg-primary border-2 border-primary text-white hover:bg-primary/90 shadow-primary/20'
+                }`}
+              >
+                {isFollowing ? 'Following' : 'Follow'}
+              </button>
+              <button 
+                onClick={handleProfileClick}
+                className="px-6 py-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+              >
+                Profile
+              </button>
             </div>
           </div>
         </div>
       </div>
       
-      <div className="mt-20">
+      <div className="mt-20 no-pdf">
         <CommentSection postId={post.id} postAuthorId={post.authorId} />
       </div>
     </main>
+
+      {/* Author Profile Modal */}
+      {showProfileModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 no-pdf">
+          <div 
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-md cursor-pointer animate-fade-in"
+            onClick={() => setShowProfileModal(false)}
+          ></div>
+          <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-[2.5rem] p-10 shadow-2xl border border-slate-100 dark:border-slate-800 animate-bounceIn z-10 flex flex-col items-center text-center mx-4">
+            
+            <button 
+              onClick={() => setShowProfileModal(false)}
+              className="absolute top-6 right-6 w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            >
+              <span className="material-symbols-outlined text-xl">close</span>
+            </button>
+
+            <div className="h-28 w-28 rounded-full border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden mb-6 relative">
+               <img 
+                 className="w-full h-full object-cover" 
+                 alt={post.authorName} 
+                 src={`https://ui-avatars.com/api/?name=${encodeURIComponent(post.authorName)}&background=10b981&color=fff&size=200`}
+               />
+               <div className="absolute inset-0 rounded-full ring-2 ring-primary/20 ring-inset"></div>
+            </div>
+
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 rounded-full text-primary text-[10px] font-black uppercase tracking-widest mb-4">
+              <span className="material-symbols-outlined text-xs">verified</span>
+              Verified Author
+            </div>
+
+            <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-3">
+              {post.authorName}
+            </h2>
+
+            <p className="text-slate-500 dark:text-slate-400 leading-relaxed mb-8">
+              {authorProfile?.bio || "Dedicated to exploring the intersections of technology and human creativity. Founder of the BlogSpace community and expert in digital architecture."}
+            </p>
+
+            <div className="w-full grid grid-cols-2 gap-4 mb-8">
+               <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 flex flex-col items-center">
+                  <span className="text-2xl font-black text-slate-900 dark:text-white mb-1">
+                     {authorProfile ? formatCount(authorProfile.followerCount) : '...'}
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Followers</span>
+               </div>
+               <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 flex flex-col items-center">
+                  <span className="text-2xl font-black text-slate-900 dark:text-white mb-1">
+                     {authorProfile ? formatCount(authorProfile.articleCount) : '...'}
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Articles</span>
+               </div>
+            </div>
+
+            <button 
+              onClick={() => {
+                handleFollow();
+              }}
+              className={`w-full py-4 font-black rounded-2xl transition-all shadow-lg ${
+                  isFollowing 
+                    ? 'bg-transparent border-2 border-primary text-primary hover:bg-primary/5 shadow-none' 
+                    : 'bg-primary border-2 border-primary text-white hover:bg-primary/90 shadow-primary/20'
+              }`}
+            >
+              {isFollowing ? 'Following ' + post.authorName : 'Follow ' + post.authorName}
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
