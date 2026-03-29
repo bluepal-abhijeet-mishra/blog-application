@@ -125,29 +125,84 @@ const PostDetail = () => {
 
   const handleDownloadPdf = () => {
     const element = document.getElementById('pdf-content');
-    const opt = {
-      margin: [15, 15],
-      filename: `${post.slug}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      pagebreak: { mode: ['css', 'avoid-all', 'legacy'] },
-      html2canvas: { 
-        scale: 2, 
-        useCORS: true,
-        windowWidth: element ? element.scrollWidth : 800,
-        ignoreElements: (node) => {
-          return node.classList && node.classList.contains('no-pdf');
-        }
-      },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
+    if (!element) return;
 
-    import('html2pdf.js').then((html2pdf) => {
-      html2pdf.default().from(element).set(opt).save();
-      toast.success('Generating PDF...', {
-        icon: '📄',
-        style: { borderRadius: '12px', background: '#1e293b', color: '#fff' }
-      });
+    // Force light mode momentarily
+    const isDark = document.documentElement.classList.contains('dark');
+    if (isDark) {
+      document.documentElement.classList.remove('dark');
+    }
+
+    toast.loading('Analyzing layout dimensions... Generating PDF...', {
+      id: 'pdf-toast',
+      style: { borderRadius: '12px', background: '#1e293b', color: '#fff' }
     });
+
+    // 1. Inject an ultra-aggressive global stylesheet to override ProseMirror's live DOM 
+    //    reversions, strictly bounding the physical height of any internal images to 500px,
+    //    and enforcing mathematical page break fits on text blocks.
+    const styleId = 'pdf-strict-overrides';
+    let styleEl = document.getElementById(styleId);
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = styleId;
+      document.head.appendChild(styleEl);
+    }
+    styleEl.innerHTML = `
+      #pdf-content {
+        width: 800px !important;
+        max-width: 800px !important;
+      }
+      #pdf-content img {
+        max-height: 500px !important;
+        object-fit: contain !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      #pdf-content p, #pdf-content h1, #pdf-content h2, #pdf-content h3, #pdf-content li {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+    `;
+
+    // 2. Give browser a momentarily slice to repaint the stylesheet
+    setTimeout(() => {
+      const opt = {
+        margin: [20, 20, 20, 20],
+        filename: `${post.slug}-export.pdf`,
+        image: { type: 'jpeg', quality: 1 },
+        pagebreak: { mode: 'css' },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          windowWidth: 800,
+          scrollY: 0,
+          height: element.scrollHeight,
+          windowHeight: element.scrollHeight,
+          ignoreElements: (node) => node.classList && node.classList.contains('no-pdf')
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      import('html2pdf.js').then((html2pdf) => {
+        html2pdf.default().from(element).set(opt).save().then(() => {
+          // Clean up the intrusive global stylesheet
+          if (styleEl && styleEl.parentNode) {
+            styleEl.parentNode.removeChild(styleEl);
+          }
+          if (isDark) document.documentElement.classList.add('dark');
+          toast.success('PDF Downloaded successfully!', { id: 'pdf-toast' });
+        }).catch((err) => {
+          console.error('PDF Error:', err);
+          if (styleEl && styleEl.parentNode) {
+            styleEl.parentNode.removeChild(styleEl);
+          }
+          if (isDark) document.documentElement.classList.add('dark');
+          toast.error('PDF Generation Failed', { id: 'pdf-toast' });
+        });
+      });
+    }, 150);
   };
 
   if (isLoading) return <div className="max-w-[740px] mx-auto px-6 py-12 text-slate-500">Loading...</div>;
@@ -184,7 +239,7 @@ const PostDetail = () => {
       )}
 
       <main className="flex-1 max-w-[800px] py-12 md:py-20 animate-fade-in mx-auto lg:mx-0">
-      <div id="pdf-content" className="w-full bg-background-light dark:bg-background-dark">
+      <div id="pdf-content" className="w-full bg-white dark:bg-transparent px-2">
       <div className="flex flex-wrap items-center gap-3 mb-8">
         {post.category && (
           <span className="px-4 py-1.5 bg-primary/10 text-primary text-xs font-bold rounded-full uppercase tracking-widest shadow-sm shadow-primary/5">

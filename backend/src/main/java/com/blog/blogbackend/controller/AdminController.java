@@ -59,7 +59,13 @@ public class AdminController {
     @PatchMapping("/users/{id}/role")
     public ResponseEntity<Void> updateUserRole(@PathVariable UUID id, @RequestBody Map<String, String> request) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-        user.setRole(Role.valueOf(request.get("role")));
+        Role newRole = Role.valueOf(request.get("role"));
+
+        if (newRole == Role.ADMIN) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        user.setRole(newRole);
         userRepository.save(user);
         return ResponseEntity.noContent().build();
     }

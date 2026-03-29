@@ -144,6 +144,41 @@ const Sidebar = ({ isExpanded, setIsExpanded }) => {
             );
           })}
 
+          {/* My Public Feed (Author/Admin Only) */}
+          {(user.role === 'AUTHOR' || user.role === 'ADMIN') && (
+            <Link
+              to={`/feed?authorId=${user.id}`}
+              className={`flex items-center h-12 rounded-xl transition-all duration-200 group relative ${
+                location.search.includes(`authorId=${user.id}`)
+                  ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                  : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <div className="size-12 shrink-0 flex items-center justify-center">
+                <span className="material-symbols-outlined text-[23px]">contact_page</span>
+              </div>
+              
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    className="text-sm font-bold whitespace-nowrap"
+                  >
+                    My Public Feed
+                  </motion.span>
+                )}
+              </AnimatePresence>
+
+              {!isExpanded && (
+                 <div className="absolute left-full ml-4 px-3 py-1.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all pointer-events-none z-50 whitespace-nowrap shadow-xl border border-white/5">
+                  My Public Feed
+                </div>
+              )}
+            </Link>
+          )}
+
           {/* Special Actions (Reader Only) */}
           {user.role === 'READER' && (
             <div className="pt-4 border-t border-slate-100 dark:border-white/5 mt-4 space-y-1.5">

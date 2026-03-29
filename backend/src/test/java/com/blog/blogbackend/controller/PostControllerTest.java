@@ -60,7 +60,7 @@ public class PostControllerTest {
 
         Page<PostResponse> page = new PageImpl<>(Collections.singletonList(postResponse));
 
-        when(postService.getPublishedPosts(any(), any(), any())).thenReturn(page);
+        when(postService.getPublishedPosts(any(), any(), any(), any())).thenReturn(page);
 
         mockMvc.perform(get("/api/posts")
                         .param("page", "0")

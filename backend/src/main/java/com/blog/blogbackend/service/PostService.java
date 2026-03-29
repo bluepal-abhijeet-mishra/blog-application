@@ -173,9 +173,11 @@ public class PostService {
         return mapToResponse(post);
     }
 
-    public Page<PostResponse> getPublishedPosts(String tag, String category, Pageable pageable) {
+    public Page<PostResponse> getPublishedPosts(String tag, String category, UUID authorId, Pageable pageable) {
         Page<Post> posts;
-        if (tag != null) {
+        if (authorId != null) {
+            posts = postRepository.findByAuthorIdAndStatus(authorId, PostStatus.PUBLISHED, pageable);
+        } else if (tag != null) {
             posts = postRepository.findByTagSlug(tag, pageable);
         } else if (category != null) {
             posts = postRepository.findByCategorySlug(category, pageable);

@@ -110,4 +110,22 @@ public class AdminControllerTest {
                         .with(csrf()))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void updateUserRole_ToAdmin_ShouldReturnBadRequest() throws Exception {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder().id(userId).role(Role.AUTHOR).build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        Map<String, String> request = new HashMap<>();
+        request.put("role", "ADMIN");
+
+        mockMvc.perform(patch("/api/admin/users/" + userId + "/role")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
 }

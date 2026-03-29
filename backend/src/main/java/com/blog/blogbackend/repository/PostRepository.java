@@ -21,6 +21,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
     Page<Post> findByAuthorId(UUID authorId, Pageable pageable);
     List<Post> findAllByAuthorId(UUID authorId);
+    Page<Post> findByAuthorIdAndStatus(UUID authorId, PostStatus status, Pageable pageable);
 
     @Query("SELECT p FROM Post p JOIN p.tags t WHERE t.slug = :tagSlug AND p.status = 'PUBLISHED'")
     Page<Post> findByTagSlug(@Param("tagSlug") String tagSlug, Pageable pageable);

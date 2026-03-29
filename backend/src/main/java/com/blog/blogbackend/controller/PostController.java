@@ -30,6 +30,7 @@ public class PostController {
     public ResponseEntity<Page<PostResponse>> getPosts(
             @RequestParam(required = false) @Size(max = 50, message = "Tag parameter too long") String tag,
             @RequestParam(required = false) @Size(max = 50, message = "Category parameter too long") String category,
+            @RequestParam(required = false) UUID authorId,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size) {
         
@@ -37,7 +38,7 @@ public class PostController {
         size = Math.min(size, 50);
         
         Pageable pageable = PageRequest.of(page, size, Sort.by("publishedAt").descending());
-        return ResponseEntity.ok(postService.getPublishedPosts(tag, category, pageable));
+        return ResponseEntity.ok(postService.getPublishedPosts(tag, category, authorId, pageable));
     }
 
     @GetMapping("/id/{id}")
