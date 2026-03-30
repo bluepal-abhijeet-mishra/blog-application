@@ -108,82 +108,148 @@ const PostDetail = () => {
     const element = document.getElementById('pdf-content');
     if (!element) return;
 
-    // Force light mode momentarily
-    const isDark = document.documentElement.classList.contains('dark');
-    if (isDark) {
-      document.documentElement.classList.remove('dark');
-    }
-
-    toast.loading('Analyzing layout dimensions... Generating PDF...', {
+    toast.loading('Preparing your PDF...', {
       id: 'pdf-toast',
-      style: { borderRadius: '12px', background: '#1e293b', color: '#fff' }
+      style: { borderRadius: '12px', background: '#1e293b', color: '#fff' },
     });
 
-    // 1. Inject an ultra-aggressive global stylesheet to override ProseMirror's live DOM 
-    //    reversions, strictly bounding the physical height of any internal images to 500px,
-    //    and enforcing mathematical page break fits on text blocks.
-    const styleId = 'pdf-strict-overrides';
-    let styleEl = document.getElementById(styleId);
-    if (!styleEl) {
-      styleEl = document.createElement('style');
-      styleEl.id = styleId;
-      document.head.appendChild(styleEl);
-    }
-    styleEl.innerHTML = `
-      #pdf-content {
-        width: 800px !important;
-        max-width: 800px !important;
-      }
-      #pdf-content img {
-        max-height: 500px !important;
-        object-fit: contain !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-      }
-      #pdf-content p, #pdf-content h1, #pdf-content h2, #pdf-content h3, #pdf-content li {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-      }
-    `;
+    // Clone the content so we can modify it for print without affecting the page
+    const clone = element.cloneNode(true);
+    clone.querySelectorAll('.no-pdf').forEach((el) => el.remove());
 
-    // 2. Give browser a momentarily slice to repaint the stylesheet
-    setTimeout(() => {
-      const opt = {
-        margin: [20, 20, 20, 20],
-        filename: `${post.slug}-export.pdf`,
-        image: { type: 'jpeg', quality: 1 },
-        pagebreak: { mode: 'css' },
-        html2canvas: { 
-          scale: 2, 
-          useCORS: true,
-          backgroundColor: '#ffffff',
-          windowWidth: 800,
-          scrollY: 0,
-          height: element.scrollHeight,
-          windowHeight: element.scrollHeight,
-          ignoreElements: (node) => node.classList && node.classList.contains('no-pdf')
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
+    // Extract article body HTML from the clone
+    const articleEl = clone.querySelector('article') || clone.querySelector('.prose');
+    const bodyHtml = articleEl ? articleEl.innerHTML : clone.innerHTML;
 
-      import('html2pdf.js').then((html2pdf) => {
-        html2pdf.default().from(element).set(opt).save().then(() => {
-          // Clean up the intrusive global stylesheet
-          if (styleEl && styleEl.parentNode) {
-            styleEl.parentNode.removeChild(styleEl);
-          }
-          if (isDark) document.documentElement.classList.add('dark');
-          toast.success('PDF Downloaded successfully!', { id: 'pdf-toast' });
-        }).catch((err) => {
-          console.error('PDF Error:', err);
-          if (styleEl && styleEl.parentNode) {
-            styleEl.parentNode.removeChild(styleEl);
-          }
-          if (isDark) document.documentElement.classList.add('dark');
-          toast.error('PDF Generation Failed', { id: 'pdf-toast' });
-        });
+    // Build a clean, self-contained print document
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (!printWindow) {
+      toast.error('Please allow pop-ups to download PDF.', {
+        id: 'pdf-toast',
+        style: { borderRadius: '12px', background: '#1e293b', color: '#fff' },
       });
-    }, 150);
+      return;
+    }
+
+    const dateStr = post.publishedAt
+      ? new Date(post.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+      : 'Draft';
+
+    const categoryHtml = post.category ? `<span class="pdf-category">${post.category.name}</span>` : '';
+    const tagsHtml = (post.tags || []).map(t => `<span class="pdf-tag">#${t.name}</span>`).join('');
+
+    printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${post.title}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      color: #1e293b; background: #fff;
+      padding: 48px 56px; line-height: 1.75;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Outfit', 'Inter', sans-serif;
+      color: #0f172a; line-height: 1.25;
+      margin-top: 1.5em; margin-bottom: 0.5em;
+      page-break-after: avoid;
+    }
+    h1 { font-size: 28pt; font-weight: 800; margin-top: 0; }
+    h2 { font-size: 20pt; font-weight: 700; }
+    h3 { font-size: 16pt; font-weight: 700; }
+    p { margin-bottom: 0.9em; font-size: 11pt; }
+    img {
+      max-width: 100%; height: auto; max-height: 420px;
+      object-fit: contain; border-radius: 12px;
+      display: block; margin: 20px auto;
+      page-break-inside: avoid;
+    }
+    a { color: #10b981; text-decoration: none; }
+    blockquote {
+      border-left: 4px solid #10b981;
+      padding: 12px 20px; margin: 20px 0;
+      background: #f8fafc; border-radius: 0 8px 8px 0;
+      font-style: italic; color: #475569;
+    }
+    ul, ol { padding-left: 24px; margin-bottom: 1em; }
+    li { margin-bottom: 0.4em; font-size: 11pt; }
+    pre, code {
+      font-family: 'Consolas', 'Monaco', monospace;
+      background: #f1f5f9; border-radius: 6px; font-size: 10pt;
+    }
+    pre { padding: 16px; margin: 16px 0; overflow-x: auto; white-space: pre-wrap; }
+    code { padding: 2px 6px; }
+    pre code { padding: 0; background: none; }
+    .pdf-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .pdf-category {
+      padding: 4px 14px; background: #ecfdf5; color: #10b981;
+      font-size: 8pt; font-weight: 800; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .pdf-tag {
+      padding: 3px 10px; background: #f1f5f9; color: #64748b;
+      font-size: 7pt; font-weight: 700; border-radius: 6px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .pdf-meta {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 0; border-top: 1px solid #e2e8f0;
+      border-bottom: 1px solid #e2e8f0; margin-bottom: 28px;
+    }
+    .pdf-avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #e2e8f0; }
+    .pdf-author-name { font-weight: 700; font-size: 11pt; color: #0f172a; }
+    .pdf-date { font-size: 9pt; color: #94a3b8; margin-top: 2px; }
+    .pdf-cover { margin-bottom: 32px; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; }
+    .pdf-cover img { width: 100%; max-height: 400px; object-fit: cover; border-radius: 0; margin: 0; }
+    .pdf-body { font-size: 11pt; }
+    .pdf-body img { max-height: 380px; }
+    .pdf-footer {
+      margin-top: 48px; padding-top: 20px; border-top: 1px solid #e2e8f0;
+      text-align: center; font-size: 8pt; color: #94a3b8;
+    }
+    @media print {
+      body { padding: 20px 28px; }
+      img { page-break-inside: avoid; }
+      h1, h2, h3 { page-break-after: avoid; }
+      p, li, blockquote { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="pdf-badges">${categoryHtml}${tagsHtml}</div>
+  <h1>${post.title}</h1>
+  <div class="pdf-meta">
+    <img class="pdf-avatar" src="https://ui-avatars.com/api/?name=${encodeURIComponent(post.authorName)}&background=10b981&color=fff&size=88" alt="${post.authorName}" />
+    <div>
+      <div class="pdf-author-name">${post.authorName}</div>
+      <div class="pdf-date">${dateStr} &middot; 5 min read</div>
+    </div>
+  </div>
+  <div class="pdf-cover">
+    <img src="${coverImage}" alt="${post.title}" onerror="this.parentElement.style.display='none'" />
+  </div>
+  <div class="pdf-body">${bodyHtml}</div>
+  <div class="pdf-footer">Exported from BlogSpace &middot; ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+</body>
+</html>`);
+
+    printWindow.document.close();
+
+    // Wait for fonts & images, then trigger the print dialog
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+        toast.success('Use "Save as PDF" in the print dialog!', {
+          id: 'pdf-toast',
+          style: { borderRadius: '12px', background: '#1e293b', color: '#fff' },
+        });
+      }, 600);
+    };
   };
 
   if (isLoading) return <div className="max-w-[740px] mx-auto px-6 py-12 text-slate-500">Loading...</div>;
