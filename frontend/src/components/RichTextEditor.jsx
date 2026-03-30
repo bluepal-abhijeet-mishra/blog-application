@@ -1,10 +1,11 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { Extension } from '@tiptap/core';
 import { Plugin } from '@tiptap/pm/state';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
+import InputModal from './InputModal';
 import {
   Bold,
   Italic,
@@ -130,26 +131,8 @@ const EditorButton = ({ onClick, isActive = false, title, children }) => (
   </button>
 );
 
-const MenuBar = ({ editor }) => {
+const MenuBar = ({ editor, onOpenLinkModal, onOpenImageModal }) => {
   if (!editor) return null;
-
-  const addLink = () => {
-    const existingUrl = editor.getAttributes('link').href || '';
-    const url = window.prompt('Enter URL', existingUrl);
-    if (url === null) return;
-    if (url.trim() === '') {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run();
-      return;
-    }
-    editor.chain().focus().extendMarkRange('link').setLink({ href: url.trim() }).run();
-  };
-
-  const addImage = () => {
-    const url = window.prompt('Image URL');
-    if (url?.trim()) {
-      editor.chain().focus().setImage({ src: url.trim() }).run();
-    }
-  };
 
   return (
     <div className="border-b border-slate-100 dark:border-slate-800 p-3 mb-4 flex flex-wrap gap-1.5 bg-slate-50/50 dark:bg-slate-900/50">
@@ -189,13 +172,13 @@ const MenuBar = ({ editor }) => {
 
       <div className="w-px h-6 bg-slate-200 dark:bg-slate-800 mx-1 self-center" />
 
-      <EditorButton onClick={addLink} isActive={editor.isActive('link')} title="Add/Edit Link">
+      <EditorButton onClick={onOpenLinkModal} isActive={editor.isActive('link')} title="Add/Edit Link">
         <LinkIcon className="w-4 h-4" />
       </EditorButton>
       <EditorButton onClick={() => editor.chain().focus().unsetLink().run()} title="Remove Link">
         <Unlink className="w-4 h-4" />
       </EditorButton>
-      <EditorButton onClick={addImage} title="Insert Image URL">
+      <EditorButton onClick={onOpenImageModal} title="Insert Image URL">
         <ImageIcon className="w-4 h-4" />
       </EditorButton>
 
@@ -213,6 +196,7 @@ const MenuBar = ({ editor }) => {
 
 const RichTextEditor = ({ value, onChange }) => {
   const parsedValue = useMemo(() => parseContent(value), [value]);
+  const [modalConfig, setModalConfig] = useState({ isOpen: false, type: null, initialValue: '' });
 
   const editor = useEditor({
     extensions: [
@@ -230,7 +214,7 @@ const RichTextEditor = ({ value, onChange }) => {
     editorProps: {
       attributes: {
         class:
-          'outline-none min-h-[500px] text-[17px] leading-8 text-slate-700 dark:text-slate-200',
+             'outline-none min-h-[500px] text-[17px] leading-8 text-slate-700 dark:text-slate-200 p-8',
       },
     },
     onUpdate: ({ editor: currentEditor }) => {
@@ -247,12 +231,54 @@ const RichTextEditor = ({ value, onChange }) => {
     }
   }, [editor, parsedValue]);
 
+  const handleOpenLinkModal = useCallback(() => {
+    if (!editor) return;
+    const existingUrl = editor.getAttributes('link').href || '';
+    setModalConfig({ isOpen: true, type: 'link', initialValue: existingUrl });
+  }, [editor]);
+
+  const handleOpenImageModal = useCallback(() => {
+    setModalConfig({ isOpen: true, type: 'image', initialValue: '' });
+  }, []);
+
+  const handleConfirmModal = (url) => {
+    if (!editor) return;
+
+    if (modalConfig.type === 'link') {
+      if (url.trim() === '') {
+        editor.chain().focus().extendMarkRange('link').unsetLink().run();
+      } else {
+        editor.chain().focus().extendMarkRange('link').setLink({ href: url.trim() }).run();
+      }
+    } else if (modalConfig.type === 'image') {
+      if (url.trim()) {
+        editor.chain().focus().setImage({ src: url.trim() }).run();
+      }
+    }
+  };
+
   return (
-    <div className="border border-slate-200 dark:border-slate-800 rounded-3xl bg-white dark:bg-slate-900 overflow-hidden focus-within:ring-4 focus-within:ring-primary/5 transition-all duration-300 shadow-sm">
-      <MenuBar editor={editor} />
-      <div className="px-8 py-6 prose prose-lg dark:prose-invert max-w-none prose-headings:tracking-tight prose-a:text-primary prose-code:text-primary">
+    <div className="border border-slate-200 dark:border-slate-800 rounded-3xl bg-white dark:bg-slate-900 overflow-hidden focus-within:ring-4 focus-within:ring-primary/5 transition-all duration-300 shadow-sm relative">
+      <MenuBar 
+        editor={editor} 
+        onOpenLinkModal={handleOpenLinkModal}
+        onOpenImageModal={handleOpenImageModal}
+      />
+      <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:tracking-tight prose-a:text-primary prose-code:text-primary">
         <EditorContent editor={editor} />
       </div>
+
+      <InputModal
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        onConfirm={handleConfirmModal}
+        title={modalConfig.type === 'link' ? "Add Connection" : "Insert Visual"}
+        message={modalConfig.type === 'link' ? "Enter the destination URL for your link." : "Provide the direct URL to the image you want to embed."}
+        placeholder="https://..."
+        icon={modalConfig.type === 'link' ? "link" : "image"}
+        confirmText={modalConfig.type === 'link' ? "Apply Link" : "Insert Image"}
+        initialValue={modalConfig.initialValue}
+      />
     </div>
   );
 };

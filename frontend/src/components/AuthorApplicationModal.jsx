@@ -2,10 +2,27 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import applicationService from '../api/services/applicationService';
 import toast from 'react-hot-toast';
+import ConfirmationModal from './ConfirmationModal';
 
 const AuthorApplicationModal = ({ isOpen, onClose }) => {
   const [bio, setBio] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+
+  const handleClose = () => {
+    if (bio.trim()) {
+      setShowCancelConfirm(true);
+    } else {
+      onClose();
+      setBio('');
+    }
+  };
+
+  const handleConfirmCancel = () => {
+    setShowCancelConfirm(false);
+    onClose();
+    setBio('');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,6 +36,7 @@ const AuthorApplicationModal = ({ isOpen, onClose }) => {
       await applicationService.submitApplication(bio);
       toast.success('Application submitted! Our administrators will review it shortly.');
       onClose();
+      setBio('');
     } catch (err) {
       toast.error(err.response?.data || 'Failed to submit application.');
     } finally {
@@ -43,7 +61,7 @@ const AuthorApplicationModal = ({ isOpen, onClose }) => {
                   <p className="text-slate-500 text-sm mt-1">Tell us about your expertise and why you want to write on BlogSpace.</p>
                 </div>
                 <button 
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
                 >
                   <span className="material-symbols-outlined">close</span>
@@ -65,7 +83,7 @@ const AuthorApplicationModal = ({ isOpen, onClose }) => {
                 <div className="flex gap-4">
                   <button
                     type="button"
-                    onClick={onClose}
+                    onClick={handleClose}
                     className="flex-1 px-6 py-3 rounded-xl font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
                   >
                     Cancel
@@ -95,6 +113,17 @@ const AuthorApplicationModal = ({ isOpen, onClose }) => {
               </p>
             </div>
           </motion.div>
+          
+          <ConfirmationModal
+            isOpen={showCancelConfirm}
+            onClose={() => setShowCancelConfirm(false)}
+            onConfirm={handleConfirmCancel}
+            title="Discard changes?"
+            message="You have unsaved changes in your application. Are you sure you want to close this and discard your progress?"
+            confirmText="Discard Changes"
+            cancelText="Keep Editing"
+            type="danger"
+          />
         </div>
       )}
     </AnimatePresence>

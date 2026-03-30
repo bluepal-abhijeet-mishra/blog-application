@@ -228,7 +228,7 @@ const Sidebar = ({ isExpanded, setIsExpanded }) => {
           </div>
 
           <button
-            onClick={() => { logout(); navigate('/'); }}
+            onClick={() => { logout(); navigate('/login'); }}
             className="flex items-center w-full h-12 rounded-xl text-slate-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 transition-all group relative"
           >
             <div className="size-12 shrink-0 flex items-center justify-center">

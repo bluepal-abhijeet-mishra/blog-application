@@ -256,7 +256,7 @@ const Navbar = () => {
                     Saved Posts
                   </Link>
                   <button
-                    onClick={() => { logout(); navigate('/'); }}
+                    onClick={() => { logout(); navigate('/login'); }}
                     className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-colors"
                   >
                     <span className="material-symbols-outlined text-lg">logout</span>

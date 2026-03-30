@@ -72,7 +72,7 @@ class PostServiceTest {
         authenticate(reader.getEmail());
         when(userRepository.findByEmail(reader.getEmail())).thenReturn(Optional.of(reader));
         when(postRepository.findById(post.getId())).thenReturn(Optional.of(post));
-        when(savedPostRepository.findByUserAndPost(reader, post)).thenReturn(Optional.empty());
+        when(savedPostRepository.findByUserIdAndPostId(reader.getId(), post.getId())).thenReturn(Optional.empty());
 
         BookmarkResponse response = postService.addBookmark(post.getId());
 
@@ -94,7 +94,7 @@ class PostServiceTest {
         authenticate(reader.getEmail());
         when(userRepository.findByEmail(reader.getEmail())).thenReturn(Optional.of(reader));
         when(postRepository.findById(post.getId())).thenReturn(Optional.of(post));
-        when(savedPostRepository.findByUserAndPost(reader, post)).thenReturn(Optional.of(savedPost));
+        when(savedPostRepository.findByUserIdAndPostId(reader.getId(), post.getId())).thenReturn(Optional.of(savedPost));
 
         BookmarkResponse response = postService.removeBookmark(post.getId());
 

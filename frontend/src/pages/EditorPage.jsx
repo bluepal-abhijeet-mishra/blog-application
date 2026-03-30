@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useParams, Link, useBlocker } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 import postService from '../api/services/postService';
 import metadataService from '../api/services/metadataService';
 import categoryRequestService from '../api/services/categoryRequestService';
@@ -772,33 +773,123 @@ const EditorPage = () => {
         </div>
       </main>
 
-      {isPreviewOpen && (
-        <div className="fixed inset-0 z-[120] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-6">
-          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl">
-            <div className="sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-100 dark:border-slate-800 px-8 py-4 flex items-center justify-between z-10">
-              <h3 className="text-sm font-black uppercase tracking-widest text-slate-500">Story Preview</h3>
-              <button onClick={() => setIsPreviewOpen(false)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            <div className="p-8 md:p-12">
-              <div className="mb-8 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
-                <img
-                  src={resolvedCoverPreview}
-                  alt={title || 'Story cover'}
-                  className="w-full h-64 object-cover"
-                  onError={(event) => {
-                    event.currentTarget.src = '/post-cover-placeholder.svg';
-                  }}
-                />
+      <AnimatePresence>
+        {isPreviewOpen && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 md:p-10 pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsPreviewOpen(false)}
+              className="absolute inset-0 bg-slate-950/40 backdrop-blur-md pointer-events-auto"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 40 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 40 }}
+              className="relative w-full max-w-5xl max-h-full bg-white dark:bg-slate-900 rounded-[40px] shadow-[0_32px_120px_-20px_rgba(0,0,0,0.5)] overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col pointer-events-auto"
+            >
+              {/* Preview Header Bar */}
+              <div className="sticky top-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800 px-8 py-5 flex items-center justify-between z-30">
+                <div className="flex items-center gap-3">
+                  <div className="size-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                    <span className="material-symbols-outlined text-xl">visibility</span>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">Live Preview</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">How readers see your story</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsPreviewOpen(false)} 
+                  className="size-10 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-500 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all flex items-center justify-center"
+                >
+                  <span className="material-symbols-outlined text-2xl">close</span>
+                </button>
               </div>
-              <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white mb-4">{title || 'Untitled Story'}</h1>
-              <p className="text-slate-500 mb-8">{excerpt || 'No excerpt yet.'}</p>
-              <ReadOnlyEditor content={content} />
-            </div>
+
+              {/* Preview Content Area */}
+              <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar">
+                <div className="max-w-4xl mx-auto py-12 px-8 md:px-12">
+                  
+                  {/* Category & Tags Header */}
+                  <div className="flex flex-wrap items-center gap-2 mb-6">
+                    {categoryId && (
+                      <span className="bg-primary text-white text-[10px] px-3.5 py-1.5 rounded-full font-black uppercase tracking-widest shadow-lg shadow-primary/20">
+                        {categories?.find(c => c.id === categoryId)?.name || 'Domain'}
+                      </span>
+                    )}
+                    {tagArray.map(tag => (
+                      <span key={tag} className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] px-3 py-1.5 rounded-lg font-black uppercase tracking-widest">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  <h1 className="text-5xl md:text-6xl font-black tracking-tight text-slate-900 dark:text-white mb-8 leading-[1.1]">
+                    {title || 'Untitled Masterpiece'}
+                  </h1>
+
+                  {/* Author Identity & Meta */}
+                  <div className="flex items-center gap-4 mb-10 pb-8 border-b border-slate-100 dark:border-white/5">
+                    <img
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.displayName || 'U')}&background=10b981&color=fff&bold=true&size=100`}
+                      className="size-12 rounded-2xl border-2 border-white dark:border-slate-800 shadow-md"
+                      alt="Author"
+                    />
+                    <div>
+                      <p className="text-sm font-black text-slate-900 dark:text-white leading-none">{user?.displayName}</p>
+                      <div className="flex items-center gap-2 mt-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                        <span>{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        <span className="size-1 rounded-full bg-slate-300 dark:bg-slate-700" />
+                        <span>{readingTime} min read</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Cinematic Cover */}
+                  <div className="mb-12 rounded-[32px] overflow-hidden border border-slate-200 dark:border-slate-700 shadow-2xl relative group">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                    <img
+                      src={resolvedCoverPreview}
+                      alt={title || 'Story cover'}
+                      className="w-full h-[480px] object-cover transition-transform duration-700 group-hover:scale-105"
+                      onError={(event) => {
+                        event.currentTarget.src = '/post-cover-placeholder.svg';
+                      }}
+                    />
+                  </div>
+
+                  {/* Excerpt/Summary */}
+                  <div className="max-w-3xl mx-auto mb-12 italic border-l-4 border-primary pl-6 py-2">
+                    <p className="text-xl text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                      {excerpt || 'Capturing the essence of the story...'}
+                    </p>
+                  </div>
+
+                  {/* Real Content Renders Here */}
+                  <article className="max-w-3xl mx-auto">
+                    <div className="prose prose-xl dark:prose-invert prose-headings:font-black prose-headings:tracking-tight prose-a:text-primary prose-img:rounded-3xl prose-pre:bg-slate-900 prose-pre:rounded-2xl">
+                      <ReadOnlyEditor content={content} />
+                    </div>
+                  </article>
+
+                  {/* End of Story Marker */}
+                  <div className="mt-20 pt-10 border-t border-slate-100 dark:border-white/5 flex flex-col items-center">
+                    <div className="flex gap-1.5 mb-6">
+                      <span className="size-1.5 rounded-full bg-primary" />
+                      <span className="size-1.5 rounded-full bg-primary/40" />
+                      <span className="size-1.5 rounded-full bg-primary/10" />
+                    </div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Section Complete</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {canRequestCategory && isCategoryRequestOpen && (
         <div className="fixed inset-0 z-[130] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-6">
