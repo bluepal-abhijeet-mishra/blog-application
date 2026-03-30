@@ -1,6 +1,7 @@
 package com.blog.blogbackend.service;
 
 import com.blog.blogbackend.dto.AuthorStatsResponse;
+import com.blog.blogbackend.dto.BookmarkResponse;
 import com.blog.blogbackend.dto.CategoryDto;
 import com.blog.blogbackend.dto.PostRequest;
 import com.blog.blogbackend.dto.PostResponse;
@@ -221,19 +222,57 @@ public class PostService {
 
     public Page<PostResponse> getSavedPosts(Pageable pageable) {
         User user = getCurrentUser();
-        return savedPostRepository.findByUserOrderByCreatedAtDesc(user, pageable)
+        return savedPostRepository.findVisibleSavedPosts(
+                        user,
+                        user.getId(),
+                        PostStatus.PUBLISHED,
+                        user.getRole() == Role.ADMIN,
+                        pageable
+                )
                 .map(savedPost -> mapToResponse(savedPost.getPost(), user));
     }
 
     @Transactional
-    public void toggleSave(UUID postId) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+    public BookmarkResponse addBookmark(UUID postId) {
         User user = getCurrentUser();
-        
-        savedPostRepository.findByUserAndPost(user, post).ifPresentOrElse(
-            savedPostRepository::delete,
-            () -> savedPostRepository.save(SavedPost.builder().user(user).post(post).build())
-        );
+        Post post = getBookmarkablePost(postId, user);
+
+        if (savedPostRepository.findByUserIdAndPostId(user.getId(), post.getId()).isPresent()) {
+            return buildBookmarkResponse(true, post, "Post already bookmarked");
+        }
+
+        savedPostRepository.save(SavedPost.builder().user(user).post(post).build());
+        post.setLikeCount(post.getLikeCount() + 1);
+        postRepository.save(post);
+
+        return buildBookmarkResponse(true, post, "Post added to bookmarks");
+    }
+
+    @Transactional
+    public BookmarkResponse removeBookmark(UUID postId) {
+        User user = getCurrentUser();
+        Post post = getBookmarkablePost(postId, user);
+
+        return savedPostRepository.findByUserIdAndPostId(user.getId(), post.getId())
+                .map(savedPost -> {
+                    savedPostRepository.delete(savedPost);
+                    post.setLikeCount(Math.max(0, post.getLikeCount() - 1));
+                    postRepository.save(post);
+                    return buildBookmarkResponse(false, post, "Post removed from bookmarks");
+                })
+                .orElseGet(() -> buildBookmarkResponse(false, post, "Post was not bookmarked"));
+    }
+
+    @Transactional
+    public BookmarkResponse toggleSave(UUID postId) {
+        User user = getCurrentUser();
+        Post post = getBookmarkablePost(postId, user);
+
+        if (savedPostRepository.findByUserIdAndPostId(user.getId(), post.getId()).isPresent()) {
+            return removeBookmark(postId);
+        }
+
+        return addBookmark(postId);
     }
 
     private PostResponse mapToResponse(Post post) {
@@ -302,7 +341,7 @@ public class PostService {
     private PostResponse mapToResponse(Post post, User user) {
         boolean isSaved = false;
         if (user != null) {
-            isSaved = savedPostRepository.existsByUserAndPost(user, post);
+            isSaved = savedPostRepository.existsByUserIdAndPostId(user.getId(), post.getId());
         }
 
         return PostResponse.builder()
@@ -341,14 +380,34 @@ public class PostService {
         return trimmed.isEmpty() ? null : trimmed;
     }
 
+    private BookmarkResponse buildBookmarkResponse(boolean saved, Post post, String message) {
+        return BookmarkResponse.builder()
+                .saved(saved)
+                .bookmarkCount(post.getLikeCount())
+                .message(message)
+                .build();
+    }
+
+    private Post getBookmarkablePost(UUID postId, User user) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+        if (post.getStatus() == PostStatus.PUBLISHED || canManagePost(post, user)) {
+            return post;
+        }
+        throw new RuntimeException("Post not found");
+    }
+
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     private void assertCanManagePost(Post post, User currentUser) {
-        if (!post.getAuthor().getId().equals(currentUser.getId()) && currentUser.getRole() != Role.ADMIN) {
+        if (!canManagePost(post, currentUser)) {
             throw new RuntimeException("Unauthorized");
         }
+    }
+
+    private boolean canManagePost(Post post, User currentUser) {
+        return post.getAuthor().getId().equals(currentUser.getId()) || currentUser.getRole() == Role.ADMIN;
     }
 }

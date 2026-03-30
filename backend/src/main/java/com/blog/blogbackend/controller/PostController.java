@@ -1,5 +1,6 @@
 package com.blog.blogbackend.controller;
 
+import com.blog.blogbackend.dto.BookmarkResponse;
 import com.blog.blogbackend.dto.PostRequest;
 import com.blog.blogbackend.dto.PostResponse;
 import com.blog.blogbackend.service.PostService;
@@ -139,9 +140,20 @@ public class PostController {
 
     @PostMapping("/{id}/save")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> toggleSave(@PathVariable UUID id) {
-        postService.toggleSave(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<BookmarkResponse> toggleSave(@PathVariable UUID id) {
+        return ResponseEntity.ok(postService.toggleSave(id));
+    }
+
+    @PutMapping("/{id}/bookmark")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BookmarkResponse> addBookmark(@PathVariable UUID id) {
+        return ResponseEntity.ok(postService.addBookmark(id));
+    }
+
+    @DeleteMapping("/{id}/bookmark")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BookmarkResponse> removeBookmark(@PathVariable UUID id) {
+        return ResponseEntity.ok(postService.removeBookmark(id));
     }
 
     @GetMapping("/saved-posts")

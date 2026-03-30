@@ -1,6 +1,7 @@
 package com.blog.blogbackend.controller;
 
 import com.blog.blogbackend.dto.CategoryDto;
+import com.blog.blogbackend.dto.BookmarkResponse;
 import com.blog.blogbackend.dto.PostRequest;
 import com.blog.blogbackend.dto.PostResponse;
 import com.blog.blogbackend.entity.PostStatus;
@@ -143,5 +144,45 @@ public class PostControllerTest {
         mockMvc.perform(delete("/api/posts/" + postId)
                         .with(csrf()))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser
+    public void addBookmark_ShouldReturnBookmarkState() throws Exception {
+        UUID postId = UUID.randomUUID();
+        BookmarkResponse response = BookmarkResponse.builder()
+                .saved(true)
+                .bookmarkCount(3)
+                .message("Post added to bookmarks")
+                .build();
+
+        when(postService.addBookmark(postId)).thenReturn(response);
+
+        mockMvc.perform(put("/api/posts/" + postId + "/bookmark")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.saved").value(true))
+                .andExpect(jsonPath("$.bookmarkCount").value(3))
+                .andExpect(jsonPath("$.message").value("Post added to bookmarks"));
+    }
+
+    @Test
+    @WithMockUser
+    public void removeBookmark_ShouldReturnBookmarkState() throws Exception {
+        UUID postId = UUID.randomUUID();
+        BookmarkResponse response = BookmarkResponse.builder()
+                .saved(false)
+                .bookmarkCount(2)
+                .message("Post removed from bookmarks")
+                .build();
+
+        when(postService.removeBookmark(postId)).thenReturn(response);
+
+        mockMvc.perform(delete("/api/posts/" + postId + "/bookmark")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.saved").value(false))
+                .andExpect(jsonPath("$.bookmarkCount").value(2))
+                .andExpect(jsonPath("$.message").value("Post removed from bookmarks"));
     }
 }

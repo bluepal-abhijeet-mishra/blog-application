@@ -1,6 +1,6 @@
 import React from 'react';
 import { Toaster } from 'react-hot-toast';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { createBrowserRouter, createRoutesFromElements, RouterProvider, Route, Outlet } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
@@ -51,6 +51,42 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route element={<Layout><Outlet /></Layout>}>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/feed" element={<Home />} />
+      <Route path="/tags/:slug" element={<Home />} />
+      <Route path="/categories/:slug" element={<Home />} />
+      <Route path="/login" element={<AuthContainer initialMode="login" />} />
+      <Route path="/register" element={<AuthContainer initialMode="register" />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/posts/:slug" element={<PostDetail />} />
+      <Route path="/search" element={<SearchResults />} />
+
+      {/* Reader routes */}
+      <Route element={<ProtectedRoute roles={['READER', 'AUTHOR', 'ADMIN']} />}>
+        <Route path="/my-applications" element={<MyApplications />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/saved-posts" element={<SavedPosts />} />
+      </Route>
+
+      {/* Author/Admin Routes */}
+      <Route element={<ProtectedRoute roles={['AUTHOR', 'ADMIN']} />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/editor" element={<EditorPage />} />
+        <Route path="/editor/:id" element={<EditorPage />} />
+      </Route>
+
+      {/* Admin Routes */}
+      <Route element={<ProtectedRoute roles={['ADMIN']} />}>
+        <Route path="/admin" element={<AdminPanel />} />
+      </Route>
+    </Route>
+  )
+);
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -93,41 +129,7 @@ function App() {
               },
             }} 
           />
-          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <Layout>
-              <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/feed" element={<Home />} />
-                <Route path="/tags/:slug" element={<Home />} />
-                <Route path="/categories/:slug" element={<Home />} />
-                <Route path="/login" element={<AuthContainer initialMode="login" />} />
-                <Route path="/register" element={<AuthContainer initialMode="register" />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/posts/:slug" element={<PostDetail />} />
-                <Route path="/search" element={<SearchResults />} />
-
-                {/* Reader routes */}
-                <Route element={<ProtectedRoute roles={['READER', 'AUTHOR', 'ADMIN']} />}>
-                  <Route path="/my-applications" element={<MyApplications />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/saved-posts" element={<SavedPosts />} />
-                </Route>
-
-                {/* Author/Admin Routes */}
-                <Route element={<ProtectedRoute roles={['AUTHOR', 'ADMIN']} />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/editor" element={<EditorPage />} />
-                  <Route path="/editor/:id" element={<EditorPage />} />
-                </Route>
-
-                {/* Admin Routes */}
-                <Route element={<ProtectedRoute roles={['ADMIN']} />}>
-                  <Route path="/admin" element={<AdminPanel />} />
-                </Route>
-              </Routes>
-            </Layout>
-          </Router>
+          <RouterProvider router={router} />
         </AuthProvider>
       </ErrorBoundary>
     </QueryClientProvider>

@@ -54,9 +54,20 @@ const postService = {
     const response = await api.get('/posts/stats');
     return response.data;
   },
-  
+
+  addBookmark: async (id) => {
+    const response = await api.put(`/posts/${id}/bookmark`);
+    return response.data;
+  },
+
+  removeBookmark: async (id) => {
+    const response = await api.delete(`/posts/${id}/bookmark`);
+    return response.data;
+  },
+
   toggleSave: async (id) => {
-    await api.post(`/posts/${id}/save`);
+    const response = await api.post(`/posts/${id}/save`);
+    return response.data;
   },
 
   getSavedPosts: async (params) => {

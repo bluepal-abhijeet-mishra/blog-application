@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link, useBlocker } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import postService from '../api/services/postService';
 import metadataService from '../api/services/metadataService';
@@ -129,6 +129,11 @@ const EditorPage = () => {
   const currentPayload = useMemo(() => buildPayload(), [buildPayload]);
   const currentSignature = useMemo(() => JSON.stringify(currentPayload), [currentPayload]);
   const isDirty = isReady && currentSignature !== baselineSignature;
+
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      isDirty && currentLocation.pathname !== nextLocation.pathname
+  );
 
   const words = useMemo(() => (editorText ? editorText.split(/\s+/).filter(Boolean).length : 0), [editorText]);
   const chars = editorText.length;
@@ -865,6 +870,17 @@ const EditorPage = () => {
         confirmText="Restore Draft"
         cancelText="Discard Draft"
         type="primary"
+      />
+
+      <ConfirmationModal
+        isOpen={blocker.state === 'blocked'}
+        onClose={() => blocker.state === 'blocked' && blocker.reset()}
+        onConfirm={() => blocker.state === 'blocked' && blocker.proceed()}
+        title="Discard Unsaved Changes?"
+        message="You have unsaved changes. Are you sure you want to leave without saving? Your changes will be lost."
+        confirmText="Discard & Leave"
+        cancelText="Stay Here"
+        type="danger"
       />
     </div>
   );

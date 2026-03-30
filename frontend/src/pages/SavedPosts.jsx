@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
 import postService from '../api/services/postService';
@@ -21,6 +22,19 @@ const SavedPosts = () => {
       }
     },
   });
+
+  useEffect(() => {
+    if (!postsData || isLoading || error) {
+      return;
+    }
+
+    const lastPage = Math.max(0, (postsData.totalPages || 1) - 1);
+    if (page > lastPage) {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set('page', lastPage.toString());
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [error, isLoading, page, postsData, searchParams, setSearchParams]);
 
   const updatePage = (newPage) => {
     const newParams = new URLSearchParams(searchParams);
@@ -48,6 +62,9 @@ const SavedPosts = () => {
           <p className="text-slate-500 dark:text-slate-400 text-lg font-medium max-w-lg leading-relaxed">
             Your personal collection of valuable insights, technical references, and curated knowledge.
           </p>
+          <p className="mt-4 text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+            Use the `Remove` action on any card to take it out of your bookmarks instantly.
+          </p>
           <div className="h-px bg-slate-100 dark:bg-slate-800 mt-12"></div>
         </motion.div>
 
@@ -62,7 +79,7 @@ const SavedPosts = () => {
           <>
             <div className="space-y-16">
               {postsData.content.map((post) => (
-                <PostCard key={post.id} post={post} />
+                <PostCard key={post.id} post={{ ...post, isSaved: true }} bookmarkActionVariant="saved-library" />
               ))}
             </div>
 

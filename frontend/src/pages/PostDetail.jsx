@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import postService from '../api/services/postService';
 import userService from '../api/services/userService';
@@ -8,10 +8,10 @@ import ReadOnlyEditor from '../components/ReadOnlyEditor';
 import CommentSection from '../components/CommentSection';
 import { format } from 'date-fns';
 import { getPostCoverImage } from '../utils/postMedia';
+import useBookmarkMutation from '../hooks/useBookmarkMutation';
 
 const PostDetail = () => {
   const { slug } = useParams();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showProfileModal, setShowProfileModal] = useState(false);
 
@@ -45,7 +45,6 @@ const PostDetail = () => {
         };
       });
       toast.success(isNowFollowing ? `You are now following ${post.authorName}` : `Unfollowed ${post.authorName}`, {
-        icon: isNowFollowing ? '✅' : '👋',
         style: { borderRadius: '12px', background: '#1e293b', color: '#fff' }
       });
     },
@@ -55,6 +54,7 @@ const PostDetail = () => {
   });
 
   const isFollowing = authorProfile?.isFollowing || false;
+  const { bookmarkMutation, handleBookmarkToggle } = useBookmarkMutation(post || {});
   
   const formatCount = (count) => {
     if (count >= 1000000) return (count / 1000000).toFixed(1) + 'M';
@@ -62,29 +62,10 @@ const PostDetail = () => {
     return count.toString();
   };
 
-  const saveMutation = useMutation({
-    mutationFn: () => postService.toggleSave(post.id),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['post', slug]);
-      toast.success(post.isSaved ? 'Removed from bookmarks' : 'Added to bookmarks', {
-        icon: post.isSaved ? '🗑️' : '🔖',
-        style: {
-          borderRadius: '12px',
-          background: '#1e293b',
-          color: '#fff',
-        },
-      });
-    },
-    onError: (err) => {
-      toast.error(err.message || 'Action failed');
-    }
-  });
-
   const handleShare = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
       toast.success('Link copied to clipboard!', {
-        icon: '📋',
         style: {
           borderRadius: '12px',
           background: '#1e293b',
@@ -293,8 +274,8 @@ const PostDetail = () => {
             <span className="material-symbols-outlined text-xl">share</span>
           </button>
           <button 
-            onClick={() => saveMutation.mutate()}
-            disabled={saveMutation.isPending}
+            onClick={handleBookmarkToggle}
+            disabled={bookmarkMutation.isPending}
             className={`size-10 flex items-center justify-center rounded-full border transition-all active:scale-95 ${
               post.isSaved 
                 ? 'bg-primary/10 border-primary text-primary shadow-sm shadow-primary/10' 
