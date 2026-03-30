@@ -59,6 +59,11 @@ const postService = {
     await api.post(`/posts/${id}/save`);
   },
 
+  getSavedPosts: async (params) => {
+    const response = await api.get('/posts/saved-posts', { params });
+    return response.data;
+  },
+
   incrementShare: async (id) => {
     await api.post(`/posts/${id}/share`);
   },

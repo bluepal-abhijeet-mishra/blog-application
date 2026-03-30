@@ -17,6 +17,7 @@ import AuthContainer from './pages/AuthContainer';
 import Profile from './pages/Profile';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import SavedPosts from './pages/SavedPosts';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -110,6 +111,7 @@ function App() {
                 <Route element={<ProtectedRoute roles={['READER', 'AUTHOR', 'ADMIN']} />}>
                   <Route path="/my-applications" element={<MyApplications />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/saved-posts" element={<SavedPosts />} />
                 </Route>
 
                 {/* Author/Admin Routes */}

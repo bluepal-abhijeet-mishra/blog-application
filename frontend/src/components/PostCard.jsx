@@ -1,11 +1,39 @@
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import postService from '../api/services/postService';
+import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 import { getPostCoverImage } from '../utils/postMedia';
 
 const PostCard = ({ post }) => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  
   const publishDate = post.publishedAt ? new Date(post.publishedAt) : new Date(post.createdAt);
   const coverImage = getPostCoverImage(post);
+
+  const saveMutation = useMutation({
+    mutationFn: () => postService.toggleSave(post.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['savedPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['post', post.slug] });
+      
+      toast.success(post.isSaved ? 'Removed from bookmarks' : 'Added to bookmarks', {
+        icon: post.isSaved ? '🗑️' : '🔖',
+        style: {
+          borderRadius: '12px',
+          background: '#1e293b',
+          color: '#fff',
+        },
+      });
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Failed to update bookmark');
+    }
+  });
 
   return (
     <motion.article 
@@ -85,13 +113,43 @@ const PostCard = ({ post }) => {
             </div>
           </div>
           
-          <Link 
-            to={`/posts/${post.slug}`} 
-            className="flex items-center gap-2 text-primary text-[11px] font-black uppercase tracking-widest group/btn"
-          >
-            Full Insight
-            <span className="material-symbols-outlined text-lg group-hover/btn:translate-x-1 transition-transform">arrow_forward</span>
-          </Link>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!user) {
+                  toast.error('Sign in to manage bookmarks', {
+                    style: { borderRadius: '12px', background: '#1e293b', color: '#fff' }
+                  });
+                  return;
+                }
+                saveMutation.mutate();
+              }}
+              disabled={saveMutation.isPending}
+              className={`size-8 flex items-center justify-center rounded-xl transition-all active:scale-95 ${
+                post.isSaved 
+                  ? 'bg-primary/10 text-primary hover:bg-rose-500/10 hover:text-rose-500 group/save' 
+                  : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary group/save'
+              }`}
+              title={post.isSaved ? "Remove Bookmark" : "Save this Post"}
+            >
+              <span 
+                className={`material-symbols-outlined text-[18px] transition-transform group-hover/save:scale-110`}
+                style={{ fontVariationSettings: post.isSaved ? "'FILL' 1" : "'FILL' 0" }}
+              >
+                {post.isSaved ? "bookmark" : "bookmark_add"}
+              </span>
+            </button>
+
+            <Link 
+              to={`/posts/${post.slug}`} 
+              className="flex items-center gap-2 text-primary text-[11px] font-black uppercase tracking-widest group/btn"
+            >
+              Full Insight
+              <span className="material-symbols-outlined text-lg group-hover/btn:translate-x-1 transition-transform">arrow_forward</span>
+            </Link>
+          </div>
         </div>
       </div>
     </motion.article>

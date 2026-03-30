@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import AdminCharts from '../components/AdminCharts';
 import Pagination from '../components/Pagination';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 const EMPTY_ANALYTICS_STATS = {
   totalUsers: 0,
@@ -70,6 +71,8 @@ const Dashboard = () => {
   const isAdmin = user?.role === 'ADMIN';
 
   const [page, setPage] = useState(0);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState(null);
   const { data: postsData, isLoading: isLoadingPosts } = useQuery({
     queryKey: ['my-posts', page],
     queryFn: () => postService.getMyPosts({ page, size: 5 }),
@@ -148,9 +151,15 @@ const Dashboard = () => {
       if (isAdmin) {
         queryClient.invalidateQueries({ queryKey: ['admin-stats', 'dashboard'] });
       }
-      toast.success('Asset purged.');
+      toast.success('Post deleted successfully.');
+      setDeleteModalOpen(false);
+      setPostToDelete(null);
     },
-    onError: (err) => toast.error(err.message || 'Purge failed.'),
+    onError: (err) => {
+      toast.error(err.message || 'Failed to delete post.');
+      setDeleteModalOpen(false);
+      setPostToDelete(null);
+    },
   });
 
   if (isLoadingPosts || isLoadingStats || (isAdmin && isAdminStatsLoading)) {
@@ -389,19 +398,18 @@ const Dashboard = () => {
                                 Activate
                               </button>
                             )}
-                            <Link to={`/editor/${post.id}`} className="size-11 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 text-slate-400 hover:text-primary transition-all border border-slate-100 dark:border-white/10 hover:border-primary/30 shadow-sm" title="Modify Asset">
-                              <span className="material-symbols-outlined text-lg">settings_suggest</span>
+                            <Link to={`/editor/${post.id}`} className="size-11 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 text-slate-400 hover:text-primary transition-all border border-slate-100 dark:border-white/10 hover:border-primary/30 shadow-sm" title="Update">
+                              <span className="material-symbols-outlined text-lg">edit</span>
                             </Link>
                             <button
                               onClick={() => {
-                                if (confirm('Irreversible Operation: Purge this intelligence asset?')) {
-                                  deleteMutation.mutate(post.id);
-                                }
+                                setPostToDelete(post.id);
+                                setDeleteModalOpen(true);
                               }}
                               className="size-11 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 text-slate-400 hover:text-rose-500 transition-all border border-slate-100 dark:border-white/10 hover:border-rose-500/30 shadow-sm"
-                              title="Purge Sequence"
+                              title="Delete"
                             >
-                              <span className="material-symbols-outlined text-lg">delete_sweep</span>
+                              <span className="material-symbols-outlined text-lg">delete</span>
                             </button>
                           </div>
                         </td>
@@ -439,6 +447,24 @@ const Dashboard = () => {
           </p>
         </motion.div>
       </div>
+
+      <ConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setPostToDelete(null);
+        }}
+        onConfirm={() => {
+          if (postToDelete) {
+            deleteMutation.mutate(postToDelete);
+          }
+        }}
+        title="Delete Post"
+        message="Are you sure you want to delete this post? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 };

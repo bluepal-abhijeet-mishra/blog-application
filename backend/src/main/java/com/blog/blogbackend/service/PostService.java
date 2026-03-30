@@ -219,6 +219,12 @@ public class PostService {
                 .build();
     }
 
+    public Page<PostResponse> getSavedPosts(Pageable pageable) {
+        User user = getCurrentUser();
+        return savedPostRepository.findByUserOrderByCreatedAtDesc(user, pageable)
+                .map(savedPost -> mapToResponse(savedPost.getPost(), user));
+    }
+
     @Transactional
     public void toggleSave(UUID postId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));

@@ -251,6 +251,10 @@ const Navbar = () => {
                     <span className="material-symbols-outlined text-lg">person</span>
                     Profile Settings
                   </Link>
+                  <Link to="/saved-posts" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                    <span className="material-symbols-outlined text-lg">collections_bookmark</span>
+                    Saved Posts
+                  </Link>
                   <button
                     onClick={() => { logout(); navigate('/'); }}
                     className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-colors"

@@ -144,6 +144,17 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/saved-posts")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Page<PostResponse>> getSavedPosts(
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) int size) {
+        
+        size = Math.min(size, 50);
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(postService.getSavedPosts(pageable));
+    }
+
     @GetMapping("/stats")
     @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     public ResponseEntity<com.blog.blogbackend.dto.AuthorStatsResponse> getStats() {
