@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useParams, Link, useBlocker } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -72,9 +72,11 @@ const EditorPage = () => {
   const [lastLocalSaveAt, setLastLocalSaveAt] = useState(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isCategoryRequestOpen, setIsCategoryRequestOpen] = useState(false);
+  const [isCategoryDiscardConfirmOpen, setIsCategoryDiscardConfirmOpen] = useState(false);
   const [requestedCategoryName, setRequestedCategoryName] = useState('');
   const [requestedCategoryReason, setRequestedCategoryReason] = useState('');
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+  const isSubmittingRef = useRef(false);
   const [pendingDraft, setPendingDraft] = useState(null);
 
   const storageKey = `editor-draft-${id || 'new'}`;
@@ -133,7 +135,7 @@ const EditorPage = () => {
 
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      isDirty && currentLocation.pathname !== nextLocation.pathname
+      !isSubmittingRef.current && isDirty && currentLocation.pathname !== nextLocation.pathname
   );
 
   const words = useMemo(() => (editorText ? editorText.split(/\s+/).filter(Boolean).length : 0), [editorText]);
@@ -297,11 +299,13 @@ const EditorPage = () => {
       localStorage.removeItem(storageKey);
       setBaselineSignature(savedSignature);
       if (publish) {
+        isSubmittingRef.current = true;
         toast.success('Story published successfully.');
         navigate('/dashboard');
       } else {
         toast.success('Draft saved.');
         if (!id && finalId) {
+          isSubmittingRef.current = true;
           navigate(`/editor/${finalId}`, { replace: true });
         }
       }
@@ -329,6 +333,21 @@ const EditorPage = () => {
       toast.error(err.response?.data || err.message || 'Failed to submit category request.');
     },
   });
+  
+  const handleCategoryModalClose = useCallback(() => {
+    if (requestedCategoryName.trim() || requestedCategoryReason.trim()) {
+      setIsCategoryDiscardConfirmOpen(true);
+    } else {
+      setIsCategoryRequestOpen(false);
+    }
+  }, [requestedCategoryName, requestedCategoryReason]);
+
+  const handleDiscardCategoryRequest = useCallback(() => {
+    setIsCategoryDiscardConfirmOpen(false);
+    setIsCategoryRequestOpen(false);
+    setRequestedCategoryName('');
+    setRequestedCategoryReason('');
+  }, []);
 
   const mergeIncomingTags = useCallback((existingTags, rawTagInput) => {
     const incomingTags = splitRawTags(rawTagInput);
@@ -897,7 +916,7 @@ const EditorPage = () => {
             <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
               <h3 className="text-sm font-black uppercase tracking-widest text-slate-500">Request Category</h3>
               <button
-                onClick={() => setIsCategoryRequestOpen(false)}
+                onClick={handleCategoryModalClose}
                 className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 <span className="material-symbols-outlined">close</span>
@@ -928,7 +947,7 @@ const EditorPage = () => {
               </div>
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button
-                  onClick={() => setIsCategoryRequestOpen(false)}
+                  onClick={handleCategoryModalClose}
                   className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 font-bold text-xs uppercase tracking-widest"
                 >
                   Cancel
@@ -971,6 +990,17 @@ const EditorPage = () => {
         message="You have unsaved changes. Are you sure you want to leave without saving? Your changes will be lost."
         confirmText="Discard & Leave"
         cancelText="Stay Here"
+        type="danger"
+      />
+
+      <ConfirmationModal
+        isOpen={isCategoryDiscardConfirmOpen}
+        onClose={() => setIsCategoryDiscardConfirmOpen(false)}
+        onConfirm={handleDiscardCategoryRequest}
+        title="Discard Unsaved Request?"
+        message="You have entered details for a new category request. Are you sure you want to discard them? Your changes will be lost."
+        confirmText="Discard & Close"
+        cancelText="Keep Editing"
         type="danger"
       />
     </div>
