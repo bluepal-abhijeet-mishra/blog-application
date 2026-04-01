@@ -1,13 +1,20 @@
 package com.blog.blogbackend.controller;
 
-import com.blog.blogbackend.entity.Role;
-import com.blog.blogbackend.entity.User;
-import com.blog.blogbackend.repository.CommentRepository;
-import com.blog.blogbackend.repository.PostRepository;
-import com.blog.blogbackend.repository.UserRepository;
-import com.blog.blogbackend.security.JwtTokenProvider;
-import com.blog.blogbackend.security.CustomUserDetailsService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,14 +24,14 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
-import java.util.*;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import com.blog.blogbackend.entity.Role;
+import com.blog.blogbackend.entity.User;
+import com.blog.blogbackend.repository.CommentRepository;
+import com.blog.blogbackend.repository.PostRepository;
+import com.blog.blogbackend.repository.UserRepository;
+import com.blog.blogbackend.security.CustomUserDetailsService;
+import com.blog.blogbackend.security.JwtTokenProvider;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(AdminController.class)
 @AutoConfigureMockMvc(addFilters = false)
