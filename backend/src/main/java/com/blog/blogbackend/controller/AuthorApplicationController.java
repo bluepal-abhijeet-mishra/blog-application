@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.blog.blogbackend.dto.AuthorApplicationDto;
+import com.blog.blogbackend.dto.MessageResponse;
 import com.blog.blogbackend.entity.AuthorApplicationStatus;
 import com.blog.blogbackend.entity.User;
 import com.blog.blogbackend.repository.UserRepository;
@@ -34,16 +35,12 @@ public class AuthorApplicationController {
 
     @PostMapping
     @PreAuthorize("hasRole('READER')")
-    public ResponseEntity<?> submitApplication(
+    public ResponseEntity<MessageResponse> submitApplication(
             @AuthenticationPrincipal UserDetails principal,
             @RequestBody AuthorApplicationDto dto) {
-        try {
-            User user = getAuthenticatedUser(principal);
-            applicationService.submitApplication(user, dto);
-            return ResponseEntity.ok("Application submitted successfully.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        User user = getAuthenticatedUser(principal);
+        applicationService.submitApplication(user, dto);
+        return ResponseEntity.ok(new MessageResponse("Application submitted successfully."));
     }
 
     @GetMapping("/my")
@@ -61,24 +58,16 @@ public class AuthorApplicationController {
 
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> approveApplication(@PathVariable UUID id) {
-        try {
-            applicationService.approveApplication(id);
-            return ResponseEntity.ok("Application approved. User is now an AUTHOR.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<MessageResponse> approveApplication(@PathVariable UUID id) {
+        applicationService.approveApplication(id);
+        return ResponseEntity.ok(new MessageResponse("Application approved. User is now an AUTHOR."));
     }
 
     @PutMapping("/{id}/reject")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> rejectApplication(@PathVariable UUID id, @RequestBody String reason) {
-        try {
-            applicationService.rejectApplication(id, reason);
-            return ResponseEntity.ok("Application rejected.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<MessageResponse> rejectApplication(@PathVariable UUID id, @RequestBody String reason) {
+        applicationService.rejectApplication(id, reason);
+        return ResponseEntity.ok(new MessageResponse("Application rejected."));
     }
 
     private User getAuthenticatedUser(UserDetails principal) {

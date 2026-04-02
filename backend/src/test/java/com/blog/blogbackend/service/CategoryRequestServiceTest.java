@@ -147,4 +147,36 @@ class CategoryRequestServiceTest {
 
         assertEquals(CategoryRequestStatus.REJECTED, result.getStatus());
     }
+
+    @Test
+    void approveRequest_NotFound() {
+        UUID requestId = UUID.randomUUID();
+        when(categoryRequestRepository.findById(requestId)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> categoryRequestService.approveRequest(user, requestId, new CategoryRequestDecisionRequest()));
+    }
+
+    @Test
+    void rejectRequest_NotFound() {
+        UUID requestId = UUID.randomUUID();
+        when(categoryRequestRepository.findById(requestId)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> categoryRequestService.rejectRequest(user, requestId, new CategoryRequestDecisionRequest()));
+    }
+
+    @Test
+    void getAllRequests_WithStatus() {
+        when(categoryRequestRepository.findByStatusOrderByCreatedAtDesc(CategoryRequestStatus.PENDING)).thenReturn(Collections.emptyList());
+
+        List<CategoryRequestDto> result = categoryRequestService.getAllRequests(CategoryRequestStatus.PENDING);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getAllRequests_WithoutStatus() {
+        when(categoryRequestRepository.findAllByOrderByCreatedAtDesc()).thenReturn(Collections.emptyList());
+
+        List<CategoryRequestDto> result = categoryRequestService.getAllRequests(null);
+        assertTrue(result.isEmpty());
+    }
 }

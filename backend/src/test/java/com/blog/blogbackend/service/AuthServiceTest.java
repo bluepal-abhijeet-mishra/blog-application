@@ -1,8 +1,6 @@
 package com.blog.blogbackend.service;
 
-import com.blog.blogbackend.dto.AuthResponse;
-import com.blog.blogbackend.dto.LoginRequest;
-import com.blog.blogbackend.dto.RegisterRequest;
+import com.blog.blogbackend.dto.*;
 import com.blog.blogbackend.entity.Role;
 import com.blog.blogbackend.entity.User;
 import com.blog.blogbackend.repository.UserRepository;
@@ -16,13 +14,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +41,9 @@ class AuthServiceTest {
 
     @Mock
     private UserDetailsService userDetailsService;
+
+    @Mock
+    private PasswordResetNotificationService passwordResetNotificationService;
 
     @InjectMocks
     private AuthService authService;
@@ -129,5 +131,117 @@ class AuthServiceTest {
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> authService.login(request));
         assertEquals("User not found", exception.getMessage());
+    }
+
+    @Test
+    void forgotPasswordShouldReturnSuccessEvenIfUserNotFound() {
+        ForgotPasswordRequest request = new ForgotPasswordRequest("unknown@example.com");
+        when(userRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty());
+
+        MessageResponse response = authService.forgotPassword(request);
+
+        assertTrue(response.getMessage().contains("If an account with that email exists"));
+        verify(passwordResetNotificationService, never()).sendPasswordResetEmail(any(), any(), any(), anyLong());
+    }
+
+    @Test
+    void forgotPasswordShouldSendEmailWhenUserFound() {
+        ReflectionTestUtils.setField(authService, "appBaseUrl", "http://localhost:5173");
+        ReflectionTestUtils.setField(authService, "resetTokenExpiryMinutes", 30L);
+        
+        ForgotPasswordRequest request = new ForgotPasswordRequest("user@example.com");
+        User user = User.builder()
+                .email("user@example.com")
+                .displayName("Jane")
+                .build();
+        when(userRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.of(user));
+
+        MessageResponse response = authService.forgotPassword(request);
+
+        assertTrue(response.getMessage().contains("If an account with that email exists"));
+        verify(userRepository).save(user);
+        verify(passwordResetNotificationService).sendPasswordResetEmail(eq("user@example.com"), eq("Jane"), anyString(), eq(30L));
+        assertNotNull(user.getPasswordResetTokenHash());
+    }
+
+    @Test
+    void forgotPasswordShouldReturnSuccessIfOnCooldown() {
+        ReflectionTestUtils.setField(authService, "resetRequestCooldownSeconds", 60L);
+        ForgotPasswordRequest request = new ForgotPasswordRequest("user@example.com");
+        User user = User.builder()
+                .email("user@example.com")
+                .passwordResetRequestedAt(LocalDateTime.now().minusSeconds(30))
+                .build();
+        when(userRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.of(user));
+
+        MessageResponse response = authService.forgotPassword(request);
+
+        assertTrue(response.getMessage().contains("If an account with that email exists"));
+        verify(passwordResetNotificationService, never()).sendPasswordResetEmail(any(), any(), any(), anyLong());
+    }
+
+    @Test
+    void validateResetTokenShouldReturnTrueForValidToken() {
+        String token = "valid_token";
+        User user = User.builder()
+                .passwordResetExpiresAt(LocalDateTime.now().plusHours(1))
+                .build();
+        when(userRepository.findByPasswordResetTokenHash(anyString())).thenReturn(Optional.of(user));
+
+        ResetTokenValidationResponse response = authService.validateResetToken(token);
+
+        assertTrue(response.isValid());
+    }
+
+    @Test
+    void validateResetTokenShouldReturnFalseForExpiredToken() {
+        String token = "expired_token";
+        User user = User.builder()
+                .passwordResetExpiresAt(LocalDateTime.now().minusHours(1))
+                .build();
+        when(userRepository.findByPasswordResetTokenHash(anyString())).thenReturn(Optional.of(user));
+
+        ResetTokenValidationResponse response = authService.validateResetToken(token);
+
+        assertFalse(response.isValid());
+    }
+
+    @Test
+    void resetPasswordShouldWorkForValidToken() {
+        ResetPasswordRequest request = new ResetPasswordRequest("token", "newPassword");
+        User user = User.builder()
+                .password("oldEncodedPassword")
+                .passwordResetExpiresAt(LocalDateTime.now().plusHours(1))
+                .build();
+        when(userRepository.findByPasswordResetTokenHash(anyString())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+        when(passwordEncoder.encode(anyString())).thenReturn("newEncodedPassword");
+
+        MessageResponse response = authService.resetPassword(request);
+
+        assertEquals("Password reset successfully", response.getMessage());
+        assertEquals("newEncodedPassword", user.getPassword());
+        assertNull(user.getPasswordResetTokenHash());
+    }
+
+    @Test
+    void resetPasswordShouldThrowIfTokenInvalid() {
+        ResetPasswordRequest request = new ResetPasswordRequest("invalid", "newPass");
+        when(userRepository.findByPasswordResetTokenHash(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> authService.resetPassword(request));
+    }
+
+    @Test
+    void resetPasswordShouldThrowIfNewPasswordMatchesOld() {
+        ResetPasswordRequest request = new ResetPasswordRequest("token", "oldPassword");
+        User user = User.builder()
+                .password("oldEncodedPassword")
+                .passwordResetExpiresAt(LocalDateTime.now().plusHours(1))
+                .build();
+        when(userRepository.findByPasswordResetTokenHash(anyString())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class, () -> authService.resetPassword(request));
     }
 }

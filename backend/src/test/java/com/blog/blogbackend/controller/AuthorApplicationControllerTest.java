@@ -64,7 +64,7 @@ public class AuthorApplicationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Application submitted successfully."));
+                .andExpect(jsonPath("$.message").value("Application submitted successfully."));
     }
 
     @Test
@@ -90,6 +90,6 @@ public class AuthorApplicationControllerTest {
         mockMvc.perform(put("/api/applications/" + appId + "/approve")
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Application approved. User is now an AUTHOR."));
+                .andExpect(jsonPath("$.message").value("Application approved. User is now an AUTHOR."));
     }
 }

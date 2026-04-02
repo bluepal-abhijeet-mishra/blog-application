@@ -114,6 +114,38 @@ class AuthorApplicationServiceTest {
     }
 
     @Test
+    void approveApplication_NotFound() {
+        UUID appId = UUID.randomUUID();
+        when(applicationRepository.findById(appId)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> applicationService.approveApplication(appId));
+    }
+
+    @Test
+    void rejectApplication_NotFound() {
+        UUID appId = UUID.randomUUID();
+        when(applicationRepository.findById(appId)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> applicationService.rejectApplication(appId, "reason"));
+    }
+
+    @Test
+    void getAllApplications_WithStatus() {
+        when(applicationRepository.findByStatus(AuthorApplicationStatus.PENDING)).thenReturn(Collections.emptyList());
+
+        List<AuthorApplicationDto> result = applicationService.getAllApplications(AuthorApplicationStatus.PENDING);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getAllApplications_WithoutStatus() {
+        when(applicationRepository.findAll()).thenReturn(Collections.emptyList());
+
+        List<AuthorApplicationDto> result = applicationService.getAllApplications(null);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
     void getMyApplications_Success() {
         when(applicationRepository.findByUserId(user.getId())).thenReturn(Collections.emptyList());
 
