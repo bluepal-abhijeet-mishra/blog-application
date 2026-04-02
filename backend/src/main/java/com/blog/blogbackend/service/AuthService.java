@@ -39,7 +39,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private static final String PASSWORD_RESET_GENERIC_MESSAGE =
+    private static final String RESET_LINK_GENERIC_MESSAGE =
             "If an account with that email exists, a reset link has been sent.";
 
     private final UserRepository userRepository;
@@ -132,13 +132,13 @@ public class AuthService {
         Optional<User> optionalUser = userRepository.findByEmailIgnoreCase(normalizedEmail);
 
         if (optionalUser.isEmpty()) {
-            return MessageResponse.builder().message(PASSWORD_RESET_GENERIC_MESSAGE).build();
+            return MessageResponse.builder().message(RESET_LINK_GENERIC_MESSAGE).build();
         }
 
         User user = optionalUser.get();
         LocalDateTime now = LocalDateTime.now();
         if (isResetRequestOnCooldown(user, now)) {
-            return MessageResponse.builder().message(PASSWORD_RESET_GENERIC_MESSAGE).build();
+            return MessageResponse.builder().message(RESET_LINK_GENERIC_MESSAGE).build();
         }
 
         String rawResetToken = generateResetToken();
@@ -155,7 +155,7 @@ public class AuthService {
                 resetTokenExpiryMinutes
         );
 
-        return MessageResponse.builder().message(PASSWORD_RESET_GENERIC_MESSAGE).build();
+        return MessageResponse.builder().message(RESET_LINK_GENERIC_MESSAGE).build();
     }
 
     @Transactional(readOnly = true)

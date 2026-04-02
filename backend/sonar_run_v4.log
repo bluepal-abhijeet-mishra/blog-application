@@ -1,0 +1,575 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< com.blog:blog-backend >------------------------
+[INFO] Building blog-backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ blog-backend ---
+[INFO] Deleting D:\blog-application\blog-application\backend\target
+[INFO] 
+[INFO] --- jacoco:0.8.11:prepare-agent (default) @ blog-backend ---
+[INFO] argLine set to -javaagent:C:\\Users\\Admin\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.11\\org.jacoco.agent-0.8.11-runtime.jar=destfile=D:\\blog-application\\blog-application\\backend\\target\\jacoco.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ blog-backend ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 14 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ blog-backend ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 87 source files with javac [debug release 21] to target\classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ blog-backend ---
+[INFO] skip non existing resourceDirectory D:\blog-application\blog-application\backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ blog-backend ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 15 source files with javac [debug release 21] to target\test-classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] 
+[INFO] --- surefire:3.1.2:test (default-test) @ blog-backend ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.blog.blogbackend.controller.AdminControllerTest
+12:20:58.751 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.blog.blogbackend.controller.AdminControllerTest]: AdminControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+12:21:00.442 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.blog.blogbackend.BlogBackendApplication for test class com.blog.blogbackend.controller.AdminControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-04-01 12:21:02 - Starting AdminControllerTest using Java 21.0.10 with PID 15684 (started by Admin in D:\blog-application\blog-application\backend)
+2026-04-01 12:21:02 - No active profile set, falling back to 1 default profile: "default"
+2026-04-01 12:21:18 - 
+
+Using generated security password: e07d28b2-9ff6-4ef5-9b8b-868060f9dee5
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-01 12:21:18 - Initializing Spring TestDispatcherServlet ''
+2026-04-01 12:21:18 - Initializing Servlet ''
+2026-04-01 12:21:18 - Completed initialization in 3 ms
+2026-04-01 12:21:19 - Started AdminControllerTest in 18.2 seconds (process running for 27.659)
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 24.67 s -- in com.blog.blogbackend.controller.AdminControllerTest
+[INFO] Running com.blog.blogbackend.controller.AuthControllerTest
+2026-04-01 12:21:21 - Could not detect default configuration classes for test class [com.blog.blogbackend.controller.AuthControllerTest]: AuthControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-04-01 12:21:21 - Found @SpringBootConfiguration com.blog.blogbackend.BlogBackendApplication for test class com.blog.blogbackend.controller.AuthControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-04-01 12:21:21 - Starting AuthControllerTest using Java 21.0.10 with PID 15684 (started by Admin in D:\blog-application\blog-application\backend)
+2026-04-01 12:21:21 - No active profile set, falling back to 1 default profile: "default"
+2026-04-01 12:21:25 - Initializing Spring TestDispatcherServlet ''
+2026-04-01 12:21:25 - Initializing Servlet ''
+2026-04-01 12:21:25 - Completed initialization in 2 ms
+2026-04-01 12:21:25 - Started AuthControllerTest in 3.761 seconds (process running for 34.077)
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.810 s -- in com.blog.blogbackend.controller.AuthControllerTest
+[INFO] Running com.blog.blogbackend.controller.AuthorApplicationControllerTest
+2026-04-01 12:21:27 - Could not detect default configuration classes for test class [com.blog.blogbackend.controller.AuthorApplicationControllerTest]: AuthorApplicationControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-04-01 12:21:27 - Found @SpringBootConfiguration com.blog.blogbackend.BlogBackendApplication for test class com.blog.blogbackend.controller.AuthorApplicationControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-04-01 12:21:27 - Starting AuthorApplicationControllerTest using Java 21.0.10 with PID 15684 (started by Admin in D:\blog-application\blog-application\backend)
+2026-04-01 12:21:27 - No active profile set, falling back to 1 default profile: "default"
+2026-04-01 12:21:29 - 
+
+Using generated security password: 0306618e-2e95-4111-8a3d-4cedfd47fa6b
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-01 12:21:29 - Initializing Spring TestDispatcherServlet ''
+2026-04-01 12:21:29 - Initializing Servlet ''
+2026-04-01 12:21:29 - Completed initialization in 1 ms
+2026-04-01 12:21:29 - Started AuthorApplicationControllerTest in 1.643 seconds (process running for 37.91)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.942 s -- in com.blog.blogbackend.controller.AuthorApplicationControllerTest
+[INFO] Running com.blog.blogbackend.controller.CategoryRequestControllerTest
+2026-04-01 12:21:29 - Could not detect default configuration classes for test class [com.blog.blogbackend.controller.CategoryRequestControllerTest]: CategoryRequestControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-04-01 12:21:29 - Found @SpringBootConfiguration com.blog.blogbackend.BlogBackendApplication for test class com.blog.blogbackend.controller.CategoryRequestControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-04-01 12:21:29 - Starting CategoryRequestControllerTest using Java 21.0.10 with PID 15684 (started by Admin in D:\blog-application\blog-application\backend)
+2026-04-01 12:21:29 - No active profile set, falling back to 1 default profile: "default"
+2026-04-01 12:21:30 - 
+
+Using generated security password: 5a95aecb-0c10-4135-b2e0-54fc9a7bf7e9
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-01 12:21:30 - Initializing Spring TestDispatcherServlet ''
+2026-04-01 12:21:30 - Initializing Servlet ''
+2026-04-01 12:21:30 - Completed initialization in 1 ms
+2026-04-01 12:21:30 - Started CategoryRequestControllerTest in 1.068 seconds (process running for 39.146)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.199 s -- in com.blog.blogbackend.controller.CategoryRequestControllerTest
+[INFO] Running com.blog.blogbackend.controller.CommentControllerTest
+2026-04-01 12:21:30 - Could not detect default configuration classes for test class [com.blog.blogbackend.controller.CommentControllerTest]: CommentControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-04-01 12:21:30 - Found @SpringBootConfiguration com.blog.blogbackend.BlogBackendApplication for test class com.blog.blogbackend.controller.CommentControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-04-01 12:21:30 - Starting CommentControllerTest using Java 21.0.10 with PID 15684 (started by Admin in D:\blog-application\blog-application\backend)
+2026-04-01 12:21:30 - No active profile set, falling back to 1 default profile: "default"
+2026-04-01 12:21:31 - 
+
+Using generated security password: 8db39099-f59d-4132-b296-06710fea1458
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-01 12:21:31 - Initializing Spring TestDispatcherServlet ''
+2026-04-01 12:21:31 - Initializing Servlet ''
+2026-04-01 12:21:31 - Completed initialization in 1 ms
+2026-04-01 12:21:31 - Started CommentControllerTest in 1.094 seconds (process running for 40.506)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.403 s -- in com.blog.blogbackend.controller.CommentControllerTest
+[INFO] Running com.blog.blogbackend.controller.MetadataControllerTest
+2026-04-01 12:21:32 - Could not detect default configuration classes for test class [com.blog.blogbackend.controller.MetadataControllerTest]: MetadataControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-04-01 12:21:32 - Found @SpringBootConfiguration com.blog.blogbackend.BlogBackendApplication for test class com.blog.blogbackend.controller.MetadataControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-04-01 12:21:32 - Starting MetadataControllerTest using Java 21.0.10 with PID 15684 (started by Admin in D:\blog-application\blog-application\backend)
+2026-04-01 12:21:32 - No active profile set, falling back to 1 default profile: "default"
+2026-04-01 12:21:33 - 
+
+Using generated security password: b4ee9013-3cca-4258-a856-29c343c72e5a
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-01 12:21:33 - Initializing Spring TestDispatcherServlet ''
+2026-04-01 12:21:33 - Initializing Servlet ''
+2026-04-01 12:21:33 - Completed initialization in 1 ms
+2026-04-01 12:21:33 - Started MetadataControllerTest in 1.486 seconds (process running for 42.209)
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.578 s -- in com.blog.blogbackend.controller.MetadataControllerTest
+[INFO] Running com.blog.blogbackend.controller.NotificationControllerTest
+2026-04-01 12:21:33 - Could not detect default configuration classes for test class [com.blog.blogbackend.controller.NotificationControllerTest]: NotificationControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-04-01 12:21:33 - Found @SpringBootConfiguration com.blog.blogbackend.BlogBackendApplication for test class com.blog.blogbackend.controller.NotificationControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-04-01 12:21:33 - Starting NotificationControllerTest using Java 21.0.10 with PID 15684 (started by Admin in D:\blog-application\blog-application\backend)
+2026-04-01 12:21:33 - No active profile set, falling back to 1 default profile: "default"
+2026-04-01 12:21:34 - 
+
+Using generated security password: 96429192-1f74-43fe-9a6b-968d21930c3c
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-01 12:21:34 - Initializing Spring TestDispatcherServlet ''
+2026-04-01 12:21:34 - Initializing Servlet ''
+2026-04-01 12:21:34 - Completed initialization in 1 ms
+2026-04-01 12:21:34 - Started NotificationControllerTest in 1.194 seconds (process running for 43.537)
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.515 s -- in com.blog.blogbackend.controller.NotificationControllerTest
+[INFO] Running com.blog.blogbackend.controller.PostControllerTest
+2026-04-01 12:21:35 - Could not detect default configuration classes for test class [com.blog.blogbackend.controller.PostControllerTest]: PostControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-04-01 12:21:35 - Found @SpringBootConfiguration com.blog.blogbackend.BlogBackendApplication for test class com.blog.blogbackend.controller.PostControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-04-01 12:21:35 - Starting PostControllerTest using Java 21.0.10 with PID 15684 (started by Admin in D:\blog-application\blog-application\backend)
+2026-04-01 12:21:35 - No active profile set, falling back to 1 default profile: "default"
+2026-04-01 12:21:36 - 
+
+Using generated security password: cf37bc33-35a2-4053-8696-54dd79048fd0
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-01 12:21:36 - Initializing Spring TestDispatcherServlet ''
+2026-04-01 12:21:36 - Initializing Servlet ''
+2026-04-01 12:21:36 - Completed initialization in 0 ms
+2026-04-01 12:21:36 - Started PostControllerTest in 1.006 seconds (process running for 44.874)
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.274 s -- in com.blog.blogbackend.controller.PostControllerTest
+[INFO] Running com.blog.blogbackend.controller.RssFeedControllerTest
+2026-04-01 12:21:36 - Could not detect default configuration classes for test class [com.blog.blogbackend.controller.RssFeedControllerTest]: RssFeedControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-04-01 12:21:36 - Found @SpringBootConfiguration com.blog.blogbackend.BlogBackendApplication for test class com.blog.blogbackend.controller.RssFeedControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-04-01 12:21:36 - Starting RssFeedControllerTest using Java 21.0.10 with PID 15684 (started by Admin in D:\blog-application\blog-application\backend)
+2026-04-01 12:21:36 - No active profile set, falling back to 1 default profile: "default"
+2026-04-01 12:21:37 - 
+
+Using generated security password: de043607-3537-4333-92f8-e28bafffd855
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-01 12:21:37 - Initializing Spring TestDispatcherServlet ''
+2026-04-01 12:21:37 - Initializing Servlet ''
+2026-04-01 12:21:37 - Completed initialization in 1 ms
+2026-04-01 12:21:37 - Started RssFeedControllerTest in 0.806 seconds (process running for 45.948)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.981 s -- in com.blog.blogbackend.controller.RssFeedControllerTest
+[INFO] Running com.blog.blogbackend.controller.UserControllerTest
+2026-04-01 12:21:37 - Could not detect default configuration classes for test class [com.blog.blogbackend.controller.UserControllerTest]: UserControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-04-01 12:21:37 - Found @SpringBootConfiguration com.blog.blogbackend.BlogBackendApplication for test class com.blog.blogbackend.controller.UserControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-04-01 12:21:37 - Starting UserControllerTest using Java 21.0.10 with PID 15684 (started by Admin in D:\blog-application\blog-application\backend)
+2026-04-01 12:21:37 - No active profile set, falling back to 1 default profile: "default"
+2026-04-01 12:21:38 - 
+
+Using generated security password: 4a3446a2-121f-4bb4-b62e-afea184e1788
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-01 12:21:38 - Initializing Spring TestDispatcherServlet ''
+2026-04-01 12:21:38 - Initializing Servlet ''
+2026-04-01 12:21:38 - Completed initialization in 3 ms
+2026-04-01 12:21:38 - Started UserControllerTest in 0.658 seconds (process running for 46.784)
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.778 s -- in com.blog.blogbackend.controller.UserControllerTest
+[INFO] Running com.blog.blogbackend.service.AuthServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.444 s -- in com.blog.blogbackend.service.AuthServiceTest
+[INFO] Running com.blog.blogbackend.service.CommentServiceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.204 s -- in com.blog.blogbackend.service.CommentServiceTest
+[INFO] Running com.blog.blogbackend.service.PostServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.317 s -- in com.blog.blogbackend.service.PostServiceTest
+[INFO] Running com.blog.blogbackend.service.SlugServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.094 s -- in com.blog.blogbackend.service.SlugServiceTest
+[INFO] Running com.blog.blogbackend.service.UserServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.192 s -- in com.blog.blogbackend.service.UserServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 62, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.3.0:jar (default-jar) @ blog-backend ---
+[INFO] Building jar: D:\blog-application\blog-application\backend\target\blog-backend-0.0.1-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:3.2.3:repackage (repackage) @ blog-backend ---
+[INFO] Replacing main artifact D:\blog-application\blog-application\backend\target\blog-backend-0.0.1-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to D:\blog-application\blog-application\backend\target\blog-backend-0.0.1-SNAPSHOT.jar.original
+[INFO] 
+[INFO] --- jacoco:0.8.11:report (report) @ blog-backend ---
+[INFO] Loading execution data file D:\blog-application\blog-application\backend\target\jacoco.exec
+[INFO] Analyzed bundle 'blog-backend' with 40 classes
+[INFO] 
+[INFO] -----------------------< com.blog:blog-backend >------------------------
+[INFO] Building blog-backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- sonar:3.10.0.2594:sonar (default-cli) @ blog-backend ---
+Downloading from central: https://repo.maven.apache.org/maven2/org/sonarsource/scanner/api/sonar-scanner-api/2.16.3.1081/sonar-scanner-api-2.16.3.1081.pom
+Progress (1): 1.3 kB
+Progress (1): 3.7 kB
+Progress (1): 5.2 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/sonarsource/scanner/api/sonar-scanner-api/2.16.3.1081/sonar-scanner-api-2.16.3.1081.pom (5.2 kB at 4.1 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/sonarsource/scanner/api/sonar-scanner-api-parent/2.16.3.1081/sonar-scanner-api-parent-2.16.3.1081.pom
+Progress (1): 1.1 kB
+Progress (1): 2.7 kB
+Progress (1): 4.8 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/sonarsource/scanner/api/sonar-scanner-api-parent/2.16.3.1081/sonar-scanner-api-parent-2.16.3.1081.pom (4.8 kB at 99 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/sonarsource/parent/parent/60.0.52/parent-60.0.52.pom
+Progress (1): 859 B
+Progress (1): 2.5 kB
+Progress (1): 4.5 kB
+Progress (1): 6.3 kB
+Progress (1): 8.8 kB
+Progress (1): 11 kB 
+Progress (1): 14 kB
+Progress (1): 17 kB
+Progress (1): 20 kB
+Progress (1): 23 kB
+Progress (1): 25 kB
+Progress (1): 29 kB
+Progress (1): 30 kB
+Progress (1): 32 kB
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/sonarsource/parent/parent/60.0.52/parent-60.0.52.pom (32 kB at 760 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/sonarsource/scanner/api/sonar-scanner-api/2.16.3.1081/sonar-scanner-api-2.16.3.1081.jar
+Progress (1): 1.4/625 kB
+Progress (1): 2.7/625 kB
+Progress (1): 4.1/625 kB
+Progress (1): 5.5/625 kB
+Progress (1): 6.8/625 kB
+Progress (1): 8.2/625 kB
+Progress (1): 9.6/625 kB
+Progress (1): 11/625 kB 
+Progress (1): 12/625 kB
+Progress (1): 14/625 kB
+Progress (1): 15/625 kB
+Progress (1): 16/625 kB
+Progress (1): 18/625 kB
+Progress (1): 19/625 kB
+Progress (1): 21/625 kB
+Progress (1): 22/625 kB
+Progress (1): 23/625 kB
+Progress (1): 25/625 kB
+Progress (1): 26/625 kB
+Progress (1): 27/625 kB
+Progress (1): 29/625 kB
+Progress (1): 30/625 kB
+Progress (1): 31/625 kB
+Progress (1): 33/625 kB
+Progress (1): 34/625 kB
+Progress (1): 36/625 kB
+Progress (1): 37/625 kB
+Progress (1): 38/625 kB
+Progress (1): 42/625 kB
+Progress (1): 47/625 kB
+Progress (1): 51/625 kB
+Progress (1): 55/625 kB
+Progress (1): 59/625 kB
+Progress (1): 64/625 kB
+Progress (1): 68/625 kB
+Progress (1): 72/625 kB
+Progress (1): 76/625 kB
+Progress (1): 81/625 kB
+Progress (1): 85/625 kB
+Progress (1): 89/625 kB
+Progress (1): 93/625 kB
+Progress (1): 97/625 kB
+Progress (1): 102/625 kB
+Progress (1): 106/625 kB
+Progress (1): 110/625 kB
+Progress (1): 114/625 kB
+Progress (1): 119/625 kB
+Progress (1): 123/625 kB
+Progress (1): 127/625 kB
+Progress (1): 131/625 kB
+Progress (1): 135/625 kB
+Progress (1): 140/625 kB
+Progress (1): 144/625 kB
+Progress (1): 148/625 kB
+Progress (1): 152/625 kB
+Progress (1): 156/625 kB
+Progress (1): 161/625 kB
+Progress (1): 165/625 kB
+Progress (1): 169/625 kB
+Progress (1): 173/625 kB
+Progress (1): 178/625 kB
+Progress (1): 182/625 kB
+Progress (1): 186/625 kB
+Progress (1): 190/625 kB
+Progress (1): 195/625 kB
+Progress (1): 199/625 kB
+Progress (1): 203/625 kB
+Progress (1): 207/625 kB
+Progress (1): 224/625 kB
+Progress (1): 240/625 kB
+Progress (1): 256/625 kB
+Progress (1): 262/625 kB
+Progress (1): 279/625 kB
+Progress (1): 295/625 kB
+Progress (1): 311/625 kB
+Progress (1): 328/625 kB
+Progress (1): 344/625 kB
+Progress (1): 360/625 kB
+Progress (1): 377/625 kB
+Progress (1): 393/625 kB
+Progress (1): 410/625 kB
+Progress (1): 426/625 kB
+Progress (1): 442/625 kB
+Progress (1): 459/625 kB
+Progress (1): 475/625 kB
+Progress (1): 492/625 kB
+Progress (1): 508/625 kB
+Progress (1): 524/625 kB
+Progress (1): 541/625 kB
+Progress (1): 557/625 kB
+Progress (1): 573/625 kB
+Progress (1): 590/625 kB
+Progress (1): 606/625 kB
+Progress (1): 623/625 kB
+Progress (1): 625 kB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/sonarsource/scanner/api/sonar-scanner-api/2.16.3.1081/sonar-scanner-api-2.16.3.1081.jar (625 kB at 3.1 MB/s)
+[INFO] User cache: C:\Users\Admin\.sonar\cache
+[INFO] SonarQube version: 26.3.0.120487
+[WARNING] Direct modification of testCompileSourceRoots through iterator.remove() is deprecated and will not work in Maven 4.0.0. Please use the add/remove methods instead. If you're using a plugin that causes this warning, please upgrade to the latest version and report an issue if the warning persists. To disable these warnings, set -Dmaven.project.sourceRoots.warningsDisabled=true on the command line, in the .mvn/maven.config file, or in project POM properties.
+[INFO] Default locale: "en_IN", source code encoding: "UTF-8"
+[INFO] Load global settings
+[INFO] Load global settings (done) | time=1045ms
+[INFO] Server id: 147B411E-AZ1DHZuAB8c3EBu8G-9x
+[INFO] Loading required plugins
+[INFO] Load plugins index
+[INFO] Load plugins index (done) | time=423ms
+[INFO] Load/download plugins
+[INFO] Load/download plugins (done) | time=189ms
+[INFO] Process project properties
+[INFO] Process project properties (done) | time=124ms
+[INFO] Project key: blog-application
+[INFO] Base dir: D:\blog-application\blog-application\backend
+[INFO] Working dir: D:\blog-application\blog-application\backend\target\sonar
+[INFO] Load project settings for component key: 'blog-application'
+[INFO] Load project settings for component key: 'blog-application' (done) | time=96ms
+[INFO] Load quality profiles
+[INFO] Load quality profiles (done) | time=1828ms
+[INFO] Load active rules
+[INFO] Load active rules (done) | time=5448ms
+[INFO] Load analysis cache
+[INFO] Load analysis cache (4.4 kB) | time=354ms
+[INFO] Preprocessing files...
+[INFO] 2 languages detected in 103 preprocessed files (done) | time=1895ms
+[INFO] 0 files ignored because of scm ignore settings
+[INFO] Loading plugins for detected languages
+[INFO] Load/download plugins
+[INFO] Load/download plugins (done) | time=82ms
+[INFO] Load project repositories
+[INFO] Load project repositories (done) | time=259ms
+[INFO] Indexing files...
+[INFO] Project configuration:
+[INFO] 103 files indexed (done) | time=32ms
+[INFO] Quality profile for java: Sonar way
+[INFO] Quality profile for xml: Sonar way
+[INFO] ------------- Run sensors on module blog-application
+[INFO] Load metrics repository
+[INFO] Load metrics repository (done) | time=332ms
+[INFO] Sensor JavaSensor [java]
+[INFO] Configured Java source version (sonar.java.source): 21, preview features enabled (sonar.java.enablePreview): false
+[INFO] Server-side caching is enabled. The Java analyzer will not try to leverage data from a previous analysis.
+[INFO] Using ECJ batch to parse 87 Main java source files with batch size 105 KB.
+[INFO] Starting batch processing.
+[INFO] The Java analyzer cannot skip unchanged files in this context. A full analysis is performed for all files.
+[INFO] 54% analyzed
+[INFO] Slowest analyzed files (batch mode enabled):
+    src/main/java/com/blog/blogbackend/service/AuthorApplicationService.java (2230ms, 5093B)
+[INFO] 100% analyzed
+[INFO] Batch processing: Done.
+[INFO] Did not optimize analysis for any files, performed a full analysis for all 87 files.
+[WARNING] Unresolved imports/types have been detected during analysis. Enable DEBUG mode to see them.
+[WARNING] Use of preview features have been detected during analysis. Enable DEBUG mode to see them.
+[INFO] Using ECJ batch to parse 15 Test java source files with batch size 105 KB.
+[INFO] Starting batch processing.
+[INFO] 100% analyzed
+[INFO] Batch processing: Done.
+[INFO] Did not optimize analysis for any files, performed a full analysis for all 15 files.
+[INFO] No "Generated" source files to scan.
+[INFO] Sensor JavaSensor [java] (done) | time=31840ms
+[INFO] Sensor SurefireSensor [java]
+[INFO] parsing [D:\blog-application\blog-application\backend\target\surefire-reports]
+[INFO] Sensor SurefireSensor [java] (done) | time=407ms
+[INFO] Sensor XML Sensor [xml]
+[INFO] 1 source file to be analyzed
+[INFO] 1/1 source file has been analyzed
+[INFO] Sensor XML Sensor [xml] (done) | time=487ms
+[INFO] Sensor JaCoCo XML Report Importer [jacoco]
+[INFO] 'sonar.coverage.jacoco.xmlReportPaths' is not defined. Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml
+[INFO] Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.
+[INFO] Sensor JaCoCo XML Report Importer [jacoco] (done) | time=247ms
+[INFO] Sensor IaC hadolint report Sensor [iac]
+[INFO] Sensor IaC hadolint report Sensor [iac] (done) | time=1ms
+[INFO] Sensor Java Config Sensor [iac]
+[INFO] There are no files to be analyzed for the Java language
+[INFO] Sensor Java Config Sensor [iac] (done) | time=33ms
+[INFO] Sensor IaC Docker Sensor [iac]
+[INFO] There are no files to be analyzed for the Docker language
+[INFO] Sensor IaC Docker Sensor [iac] (done) | time=10ms
+[INFO] Sensor TextAndSecretsSensor [text]
+[INFO] Available processors: 4
+[INFO] Using 4 threads for analysis.
+[INFO] Start fetching files for the text and secrets analysis
+[INFO] Using Git CLI to retrieve dirty files
+[INFO] Retrieving language associated files and files included via "sonar.text.inclusions" that are tracked by git
+[INFO] Starting the text and secrets analysis
+[INFO] 103 source files to be analyzed for the text and secrets analysis
+[INFO] 103/103 source files have been analyzed for the text and secrets analysis
+[INFO] Sensor TextAndSecretsSensor [text] (done) | time=3679ms
+[INFO] ------------- Run sensors on project
+[INFO] Sensor JavaProjectSensor [java]
+[INFO] Sensor JavaProjectSensor [java] (done) | time=3ms
+[INFO] Sensor Zero Coverage Sensor
+[INFO] Sensor Zero Coverage Sensor (done) | time=2ms
+[INFO] Sensor Java CPD Block Indexer
+[INFO] Sensor Java CPD Block Indexer (done) | time=369ms
+[INFO] ------------- Gather SCA dependencies on project
+[INFO] Dependency analysis skipped
+[INFO] SCM Publisher SCM provider for this project is: git
+[INFO] SCM Publisher 7 source files to be analyzed
+[INFO] SCM Publisher 6/7 source files have been analyzed (done) | time=2847ms
+[WARNING] Missing blame information for the following files:
+[WARNING]   * pom.xml
+[WARNING] This may lead to missing/broken features in SonarQube
+[INFO] CPD Executor 32 files had no CPD blocks
+[INFO] CPD Executor Calculating CPD for 55 files
+[INFO] CPD Executor CPD calculation finished (done) | time=98ms
+[INFO] SCM revision ID '72622e39f1b9d4dbe4707c300dd3813ef2c3b875'
+[INFO] Analysis report generated in 693ms, dir size=737.3 kB
+[INFO] Analysis report compressed in 12871ms, zip size=306.4 kB
+[INFO] Analysis report uploaded in 229ms
+[INFO] ANALYSIS SUCCESSFUL, you can find the results at: http://localhost:9000/dashboard?id=blog-application
+[INFO] Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report
+[INFO] More about the report processing at http://localhost:9000/api/ce/task?id=3183c409-c866-4477-ba19-99d837eb4c9e
+[INFO] Analysis total time: 1:11.231 s
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  02:50 min
+[INFO] Finished at: 2026-04-01T12:23:07+05:30
+[INFO] ------------------------------------------------------------------------

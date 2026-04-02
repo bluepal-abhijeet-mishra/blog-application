@@ -7,7 +7,7 @@ import com.blog.blogbackend.service.PostService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,10 +22,10 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/posts")
 @Validated
+@RequiredArgsConstructor
 public class PostController {
 
-    @Autowired
-    private PostService postService;
+    private final PostService postService;
 
     @GetMapping
     public ResponseEntity<Page<PostResponse>> getPosts(

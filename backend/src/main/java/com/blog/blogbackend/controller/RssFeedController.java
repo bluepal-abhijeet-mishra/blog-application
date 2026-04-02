@@ -3,7 +3,7 @@ package com.blog.blogbackend.controller;
 import com.blog.blogbackend.entity.Post;
 import com.blog.blogbackend.entity.PostStatus;
 import com.blog.blogbackend.repository.PostRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -20,10 +20,10 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 @RestController
+@RequiredArgsConstructor
 public class RssFeedController {
 
-    @Autowired
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
 
     private static final DateTimeFormatter RFC_822_FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
     private static final MediaType RSS_MEDIA_TYPE = MediaType.parseMediaType("application/rss+xml; charset=UTF-8");

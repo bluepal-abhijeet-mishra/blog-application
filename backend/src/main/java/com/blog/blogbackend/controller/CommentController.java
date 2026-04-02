@@ -5,7 +5,7 @@ import com.blog.blogbackend.dto.CommentResponse;
 import com.blog.blogbackend.service.CommentService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,10 +19,10 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api")
 @Validated
+@RequiredArgsConstructor
 public class CommentController {
 
-    @Autowired
-    private CommentService commentService;
+    private final CommentService commentService;
 
     @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<Page<CommentResponse>> getComments(
