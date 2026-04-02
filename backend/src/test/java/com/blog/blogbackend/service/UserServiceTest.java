@@ -147,7 +147,8 @@ class UserServiceTest {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.toggleFollow(user.getId()));
+        UUID userId = user.getId();
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.toggleFollow(userId));
         assertEquals("You cannot follow yourself", exception.getMessage());
     }
 

@@ -1,5 +1,7 @@
 package com.blog.blogbackend.service;
 
+import lombok.RequiredArgsConstructor;
+
 import com.blog.blogbackend.dto.AuthResponse;
 import com.blog.blogbackend.dto.ForgotPasswordRequest;
 import com.blog.blogbackend.dto.LoginRequest;
@@ -34,28 +36,18 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
     private static final String PASSWORD_RESET_GENERIC_MESSAGE =
             "If an account with that email exists, a reset link has been sent.";
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
-
-    @Autowired
-    private PasswordResetNotificationService passwordResetNotificationService;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final AuthenticationManager authenticationManager;
+    private final UserDetailsService userDetailsService;
+    private final PasswordResetNotificationService passwordResetNotificationService;
 
     @Value("${app.base-url:http://localhost:5173}")
     private String appBaseUrl;
@@ -67,6 +59,8 @@ public class AuthService {
     private long resetRequestCooldownSeconds;
 
     private final SecureRandom secureRandom = new SecureRandom();
+
+
 
     public AuthResponse register(RegisterRequest request) {
         String normalizedEmail = normalizeEmail(request.getEmail());

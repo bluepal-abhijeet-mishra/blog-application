@@ -13,6 +13,7 @@ import com.blog.blogbackend.repository.CommentLikeRepository;
 import com.blog.blogbackend.repository.CommentRepository;
 import com.blog.blogbackend.repository.PostRepository;
 import com.blog.blogbackend.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,22 +26,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CommentService {
 
-    @Autowired
-    private CommentRepository commentRepository;
-
-    @Autowired
-    private PostRepository postRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private NotificationService notificationService;
-
-    @Autowired
-    private CommentLikeRepository commentLikeRepository;
+    private final CommentRepository commentRepository;
+    private final PostRepository postRepository;
+    private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final CommentLikeRepository commentLikeRepository;
 
     @Transactional
     public CommentResponse addComment(UUID postId, CommentRequest request) {

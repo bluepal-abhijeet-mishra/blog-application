@@ -8,6 +8,7 @@ import com.blog.blogbackend.dto.PostResponse;
 import com.blog.blogbackend.dto.TagDto;
 import com.blog.blogbackend.entity.*;
 import com.blog.blogbackend.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
@@ -24,28 +25,16 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class PostService {
 
-    @Autowired
-    private PostRepository postRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private TagRepository tagRepository;
-
-    @Autowired
-    private CommentRepository commentRepository;
-    
-    @Autowired
-    private SavedPostRepository savedPostRepository;
-
-    @Autowired
-    private SlugService slugService;
+    private final PostRepository postRepository;
+    private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
+    private final TagRepository tagRepository;
+    private final CommentRepository commentRepository;
+    private final SavedPostRepository savedPostRepository;
+    private final SlugService slugService;
 
     @Transactional
     @CacheEvict(value = "rss-feed", allEntries = true)

@@ -11,6 +11,7 @@ import com.blog.blogbackend.repository.FollowRepository;
 import com.blog.blogbackend.repository.PostRepository;
 import com.blog.blogbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,16 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private FollowRepository followRepository;
-    
-    @Autowired
-    private PostRepository postRepository;
+    private final UserRepository userRepository;
+    private final FollowRepository followRepository;
+    private final PostRepository postRepository;
 
     public UserProfileResponse getCurrentUserProfile() {
         User user = getCurrentUser();
