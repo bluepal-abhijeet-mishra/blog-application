@@ -5,6 +5,54 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 
+const CommentLikesPopover = ({ commentId, likeCount }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  const { data: likes, isLoading } = useQuery({
+    queryKey: ['commentLikes', commentId],
+    queryFn: () => commentService.getCommentLikes(commentId),
+    enabled: isOpen && likeCount > 0,
+    staleTime: 30000,
+  });
+
+  return (
+    <div 
+      className="relative flex items-center"
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+    >
+      <span className="cursor-default">{likeCount || 0}</span>
+      {isOpen && likeCount > 0 && (
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 px-2">Liked by</div>
+          {isLoading ? (
+            <div className="flex justify-center p-2"><span className="size-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span></div>
+          ) : likes?.length > 0 ? (
+            <div className="max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 hover:scrollbar-thumb-slate-500 space-y-1">
+              {likes.map(u => (
+                <div key={u.id} className="flex items-center gap-2 p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                  <div className="size-6 rounded-full overflow-hidden shrink-0">
+                    <img 
+                      src={u.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.displayName)}&background=10b981&color=fff&bold=true&size=30`}
+                      className="w-full h-full object-cover"
+                      alt={u.displayName}
+                    />
+                  </div>
+                  <span className="text-[10px] font-bold text-white truncate">{u.displayName}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-[10px] text-slate-400 px-2 pb-1">Could not load users.</div>
+          )}
+          {/* Arrow */}
+          <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 rotate-45 bg-slate-900 border-b border-r border-slate-800"></div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const CommentInput = ({ user, onSubmit, initialContent = '', replyTo = null, onCancel = null, isPending = false }) => {
   const [content, setContent] = useState(initialContent);
 
@@ -112,18 +160,22 @@ const CommentItem = ({ comment, user, postAuthorId, onReply, onDelete, onLike, r
                 {isReplying ? 'Cancel' : 'Reply'}
               </button>
 
-              <button 
-                onClick={() => onLike(comment.id)} 
-                className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all px-3 py-1.5 rounded-lg ${comment.likedByCurrentUser ? 'bg-rose-50 text-rose-500 dark:bg-rose-950/30' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
-              >
-                <span 
-                  className="material-symbols-outlined text-base transition-all active:scale-125"
-                  style={{ fontVariationSettings: comment.likedByCurrentUser ? "'FILL' 1" : "'FILL' 0" }}
+              <div className={`flex items-center gap-1 transition-all rounded-lg ${comment.likedByCurrentUser ? 'bg-rose-50 text-rose-500 dark:bg-rose-950/30' : 'text-slate-500 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700'}`}>
+                <button 
+                  onClick={() => onLike(comment.id)} 
+                  className="p-1.5 hover:scale-110 active:scale-95 transition-transform"
                 >
-                  favorite
-                </span>
-                {comment.likeCount || 0}
-              </button>
+                  <span 
+                    className="material-symbols-outlined text-base"
+                    style={{ fontVariationSettings: comment.likedByCurrentUser ? "'FILL' 1" : "'FILL' 0" }}
+                  >
+                    favorite
+                  </span>
+                </button>
+                <div className="pr-3 py-1.5 text-[10px] font-black uppercase tracking-widest">
+                  <CommentLikesPopover commentId={comment.id} likeCount={comment.likeCount} />
+                </div>
+              </div>
             </div>
           )}
 

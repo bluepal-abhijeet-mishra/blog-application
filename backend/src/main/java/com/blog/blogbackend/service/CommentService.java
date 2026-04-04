@@ -4,6 +4,7 @@ import com.blog.blogbackend.dto.CommentRequest;
 import com.blog.blogbackend.dto.CommentResponse;
 import com.blog.blogbackend.entity.Comment;
 import com.blog.blogbackend.entity.CommentLike;
+import com.blog.blogbackend.dto.UserSummaryResponse;
 import com.blog.blogbackend.entity.NotificationType;
 import com.blog.blogbackend.entity.Post;
 import com.blog.blogbackend.entity.PostStatus;
@@ -88,6 +89,16 @@ public class CommentService {
 
         return commentRepository.findByPostIdAndParentIsNull(postId, pageable)
                 .map(comment -> mapToResponseWithReplies(comment, currentUser));
+    }
+
+    public List<UserSummaryResponse> getCommentLikes(UUID commentId) {
+        return commentLikeRepository.findTop20ByCommentIdOrderByCreatedAtDesc(commentId).stream()
+                .map(like -> UserSummaryResponse.builder()
+                        .id(like.getUser().getId())
+                        .displayName(like.getUser().getDisplayName())
+                        .avatarUrl(like.getUser().getAvatarUrl())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     public void deleteComment(UUID id) {

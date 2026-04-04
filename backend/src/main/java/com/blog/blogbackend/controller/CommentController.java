@@ -13,7 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import com.blog.blogbackend.dto.UserSummaryResponse;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -50,6 +52,11 @@ public class CommentController {
     public ResponseEntity<Void> toggleLike(@PathVariable UUID id) {
         commentService.toggleLike(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/comments/{id}/likes")
+    public ResponseEntity<List<UserSummaryResponse>> getCommentLikes(@PathVariable UUID id) {
+        return ResponseEntity.ok(commentService.getCommentLikes(id));
     }
 
     @DeleteMapping("/comments/{id}")
