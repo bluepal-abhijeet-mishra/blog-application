@@ -1,5 +1,7 @@
 package com.blog.blogbackend.service;
 
+import org.springframework.web.server.ResponseStatusException;
+
 import com.blog.blogbackend.dto.CategoryRequestCreateRequest;
 import com.blog.blogbackend.dto.CategoryRequestDecisionRequest;
 import com.blog.blogbackend.dto.CategoryRequestDto;
@@ -87,7 +89,7 @@ class CategoryRequestServiceTest {
     @Test
     void submitRequest_InvalidName() {
         createRequest.setName("");
-        assertThrows(RuntimeException.class, () -> categoryRequestService.submitRequest(user, createRequest));
+        assertThrows(ResponseStatusException.class, () -> categoryRequestService.submitRequest(user, createRequest));
     }
 
     @Test
@@ -96,7 +98,7 @@ class CategoryRequestServiceTest {
         when(slugService.slugify(anyString())).thenReturn(slug);
         when(categoryRepository.findBySlug(slug)).thenReturn(Optional.of(new Category()));
 
-        assertThrows(RuntimeException.class, () -> categoryRequestService.submitRequest(user, createRequest));
+        assertThrows(ResponseStatusException.class, () -> categoryRequestService.submitRequest(user, createRequest));
     }
 
     @Test
@@ -152,16 +154,18 @@ class CategoryRequestServiceTest {
     void approveRequest_NotFound() {
         UUID requestId = UUID.randomUUID();
         when(categoryRequestRepository.findById(requestId)).thenReturn(Optional.empty());
+        CategoryRequestDecisionRequest decisionRequest = new CategoryRequestDecisionRequest();
 
-        assertThrows(RuntimeException.class, () -> categoryRequestService.approveRequest(user, requestId, new CategoryRequestDecisionRequest()));
+        assertThrows(ResponseStatusException.class, () -> categoryRequestService.approveRequest(user, requestId, decisionRequest));
     }
 
     @Test
     void rejectRequest_NotFound() {
         UUID requestId = UUID.randomUUID();
         when(categoryRequestRepository.findById(requestId)).thenReturn(Optional.empty());
+        CategoryRequestDecisionRequest decisionRequest = new CategoryRequestDecisionRequest();
 
-        assertThrows(RuntimeException.class, () -> categoryRequestService.rejectRequest(user, requestId, new CategoryRequestDecisionRequest()));
+        assertThrows(ResponseStatusException.class, () -> categoryRequestService.rejectRequest(user, requestId, decisionRequest));
     }
 
     @Test

@@ -9,8 +9,10 @@ import com.blog.blogbackend.entity.User;
 import com.blog.blogbackend.repository.AuthorApplicationRepository;
 import com.blog.blogbackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,7 +30,7 @@ public class AuthorApplicationService {
     @Transactional
     public void submitApplication(User user, AuthorApplicationDto dto) {
         if (applicationRepository.existsByUserIdAndStatus(user.getId(), AuthorApplicationStatus.PENDING)) {
-            throw new RuntimeException("You already have a pending application.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You already have a pending application.");
         }
 
         AuthorApplication application = AuthorApplication.builder()
@@ -50,7 +52,7 @@ public class AuthorApplicationService {
     public List<AuthorApplicationDto> getMyApplications(User user) {
         return applicationRepository.findByUserId(user.getId()).stream()
                 .map(this::mapToDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<AuthorApplicationDto> getAllApplications(AuthorApplicationStatus status) {
@@ -60,16 +62,16 @@ public class AuthorApplicationService {
 
         return applications.stream()
                 .map(this::mapToDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional
     public void approveApplication(UUID id) {
         AuthorApplication application = applicationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found"));
 
         if (application.getStatus() != AuthorApplicationStatus.PENDING) {
-            throw new RuntimeException("Application is already evaluated.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Application is already evaluated.");
         }
 
         application.setStatus(AuthorApplicationStatus.APPROVED);
@@ -93,10 +95,10 @@ public class AuthorApplicationService {
     @Transactional
     public void rejectApplication(UUID id, String reason) {
         AuthorApplication application = applicationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found"));
 
         if (application.getStatus() != AuthorApplicationStatus.PENDING) {
-            throw new RuntimeException("Application is already evaluated.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Application is already evaluated.");
         }
 
         application.setStatus(AuthorApplicationStatus.REJECTED);

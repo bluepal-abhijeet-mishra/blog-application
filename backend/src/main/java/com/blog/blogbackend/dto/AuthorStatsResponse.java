@@ -9,4 +9,5 @@ public class AuthorStatsResponse {
     private long totalPosts;
     private long publishedPosts;
     private long totalComments;
+    private long totalLikes;
 }

@@ -18,8 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -38,10 +40,10 @@ public class CommentService {
     @Transactional
     public CommentResponse addComment(UUID postId, CommentRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
         if (post.getStatus() != PostStatus.PUBLISHED) {
-            throw new RuntimeException("Cannot comment on unpublished post");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot comment on unpublished post");
         }
 
         Comment comment = Comment.builder()
@@ -51,9 +53,9 @@ public class CommentService {
                 .build();
 
         if (request.getParentId() != null) {
-            Comment parent = commentRepository.findById(request.getParentId()).orElseThrow(() -> new RuntimeException("Parent comment not found"));
+            Comment parent = commentRepository.findById(request.getParentId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Parent comment not found"));
             if (!parent.getPost().getId().equals(postId)) {
-                throw new RuntimeException("Parent comment does not belong to this post");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Parent comment does not belong to this post");
             }
             comment.setParent(parent);
         }
@@ -66,8 +68,8 @@ public class CommentService {
     @Transactional
     public void toggleLike(UUID commentId) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new RuntimeException("Comment not found"));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
 
         commentLikeRepository.findByCommentIdAndUserId(commentId, user.getId())
                 .ifPresentOrElse(
@@ -86,9 +88,9 @@ public class CommentService {
     }
 
     public void deleteComment(UUID id) {
-        Comment comment = commentRepository.findById(id).orElseThrow(() -> new RuntimeException("Comment not found"));
+        Comment comment = commentRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         boolean isAuthorOfPost = comment.getPost().getAuthor().getId().equals(currentUser.getId());
         boolean isAuthorOfComment = comment.getUser().getId().equals(currentUser.getId());
@@ -97,7 +99,7 @@ public class CommentService {
         if (isAuthorOfPost || isAuthorOfComment || isAdmin) {
             commentRepository.delete(comment);
         } else {
-            throw new RuntimeException("Unauthorized");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
     }
 
@@ -119,7 +121,7 @@ public class CommentService {
         List<Comment> replies = commentRepository.findByParentId(comment.getId());
         response.setReplies(replies.stream()
                 .map(reply -> mapToResponseWithReplies(reply, currentUser))
-                .collect(Collectors.toList()));
+                .toList());
         return response;
     }
 

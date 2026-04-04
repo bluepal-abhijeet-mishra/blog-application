@@ -14,8 +14,10 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -27,6 +29,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class PostService {
+    private static final String USER_NOT_FOUND = "User not found";
+    private static final String POST_NOT_FOUND = "Post not found";
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
@@ -40,7 +44,7 @@ public class PostService {
     @CacheEvict(value = "rss-feed", allEntries = true)
     public PostResponse createPost(PostRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User author = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        User author = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 
         Post post = Post.builder()
                 .title(request.getTitle())
@@ -74,7 +78,7 @@ public class PostService {
     @Transactional
     @CacheEvict(value = "rss-feed", allEntries = true)
     public PostResponse updatePost(UUID id, PostRequest request) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND));
         User currentUser = getCurrentUser();
         assertCanManagePost(post, currentUser);
 
@@ -108,7 +112,7 @@ public class PostService {
     @Transactional
     @CacheEvict(value = "rss-feed", allEntries = true)
     public PostResponse publishPost(UUID id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND));
         User currentUser = getCurrentUser();
         assertCanManagePost(post, currentUser);
 
@@ -120,7 +124,7 @@ public class PostService {
     @Transactional
     @CacheEvict(value = "rss-feed", allEntries = true)
     public PostResponse unpublishPost(UUID id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND));
         User currentUser = getCurrentUser();
         assertCanManagePost(post, currentUser);
 
@@ -131,14 +135,14 @@ public class PostService {
     @Transactional
     @CacheEvict(value = "rss-feed", allEntries = true)
     public void deletePost(UUID id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND));
         User currentUser = getCurrentUser();
         assertCanManagePost(post, currentUser);
         postRepository.delete(post);
     }
 
     public PostResponse getPostForEdit(UUID id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND));
         User currentUser = getCurrentUser();
         assertCanManagePost(post, currentUser);
         return mapToResponse(post, currentUser);
@@ -146,7 +150,7 @@ public class PostService {
 
     @Transactional
     public PostResponse getPostBySlug(String slug) {
-        Post post = postRepository.findBySlug(slug).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findBySlug(slug).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND));
         // Increment view count
         post.setViewCount(post.getViewCount() + 1);
         postRepository.save(post);
@@ -154,10 +158,10 @@ public class PostService {
         // If draft, only author/admin can see
         if (post.getStatus() == PostStatus.DRAFT) {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            if (email.equals("anonymousUser")) throw new RuntimeException("Post not found");
-            User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+            if (email.equals("anonymousUser")) throw new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND);
+            User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
             if (!post.getAuthor().getId().equals(currentUser.getId()) && currentUser.getRole() != Role.ADMIN) {
-                throw new RuntimeException("Post not found");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND);
             }
         }
         return mapToResponse(post);
@@ -189,23 +193,25 @@ public class PostService {
     
     public Page<PostResponse> getAuthorPosts(Pageable pageable) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User author = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        User author = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
         return postRepository.findByAuthorId(author.getId(), pageable)
                 .map(this::mapToResponse);
     }
 
     public AuthorStatsResponse getAuthorStats() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User author = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        User author = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
         
         long totalPosts = postRepository.countByAuthorId(author.getId());
         long publishedPosts = postRepository.countByAuthorIdAndStatus(author.getId(), PostStatus.PUBLISHED);
         long totalComments = commentRepository.countByAuthorId(author.getId());
+        long totalLikes = postRepository.sumLikesByAuthorId(author.getId());
 
         return AuthorStatsResponse.builder()
                 .totalPosts(totalPosts)
                 .publishedPosts(publishedPosts)
                 .totalComments(totalComments)
+                .totalLikes(totalLikes)
                 .build();
     }
 
@@ -378,21 +384,21 @@ public class PostService {
     }
 
     private Post getBookmarkablePost(UUID postId, User user) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND));
         if (post.getStatus() == PostStatus.PUBLISHED || canManagePost(post, user)) {
             return post;
         }
-        throw new RuntimeException("Post not found");
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND);
     }
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
     }
 
     private void assertCanManagePost(Post post, User currentUser) {
         if (!canManagePost(post, currentUser)) {
-            throw new RuntimeException("Unauthorized");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
     }
 

@@ -1,5 +1,7 @@
 package com.blog.blogbackend.service;
 
+import org.springframework.web.server.ResponseStatusException;
+
 import com.blog.blogbackend.dto.CommentRequest;
 import com.blog.blogbackend.dto.CommentResponse;
 import com.blog.blogbackend.entity.*;
@@ -79,6 +81,58 @@ class CommentServiceTest {
     }
 
     @Test
+    void addReplyShouldSucceed() {
+        UUID postId = UUID.randomUUID();
+        User user = testUser("user@example.com");
+        Post post = testPost(postId, PostStatus.PUBLISHED);
+        Comment parent = testComment(UUID.randomUUID(), post);
+        authenticate(user.getEmail());
+        CommentRequest request = new CommentRequest("This is a reply", parent.getId());
+
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+        when(commentRepository.findById(parent.getId())).thenReturn(Optional.of(parent));
+        when(commentRepository.save(any(Comment.class))).thenAnswer(i -> i.getArgument(0));
+
+        CommentResponse response = commentService.addComment(postId, request);
+
+        assertNotNull(response);
+        verify(commentRepository).save(any(Comment.class));
+    }
+
+    @Test
+    void addReplyShouldThrowIfParentNotFound() {
+        UUID postId = UUID.randomUUID();
+        User user = testUser("user@example.com");
+        Post post = testPost(postId, PostStatus.PUBLISHED);
+        UUID parentId = UUID.randomUUID();
+        authenticate(user.getEmail());
+        CommentRequest request = new CommentRequest("This is a reply", parentId);
+
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+        when(commentRepository.findById(parentId)).thenReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class, () -> commentService.addComment(postId, request));
+    }
+
+    @Test
+    void addReplyShouldThrowIfParentFromDifferentPost() {
+        UUID postId = UUID.randomUUID();
+        User user = testUser("user@example.com");
+        Post post = testPost(postId, PostStatus.PUBLISHED);
+        Comment parent = testComment(UUID.randomUUID(), testPost(UUID.randomUUID(), PostStatus.PUBLISHED));
+        authenticate(user.getEmail());
+        CommentRequest request = new CommentRequest("This is a reply", parent.getId());
+
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+        when(commentRepository.findById(parent.getId())).thenReturn(Optional.of(parent));
+
+        assertThrows(ResponseStatusException.class, () -> commentService.addComment(postId, request));
+    }
+
+    @Test
     void addCommentShouldThrowIfPostUnpublished() {
         UUID postId = UUID.randomUUID();
         User user = testUser("user@example.com");
@@ -89,8 +143,8 @@ class CommentServiceTest {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(postRepository.findById(postId)).thenReturn(Optional.of(post));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> commentService.addComment(postId, request));
-        assertEquals("Cannot comment on unpublished post", exception.getMessage());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> commentService.addComment(postId, request));
+        assertEquals("Cannot comment on unpublished post", exception.getReason());
     }
 
     @Test
@@ -143,6 +197,18 @@ class CommentServiceTest {
     }
 
     @Test
+    void getCommentsForPostShouldHandleAnonymous() {
+        UUID postId = UUID.randomUUID();
+        Pageable pageable = PageRequest.of(0, 10);
+        when(commentRepository.findByPostIdAndParentIsNull(postId, pageable)).thenReturn(Page.empty());
+
+        SecurityContextHolder.clearContext();
+        Page<CommentResponse> result = commentService.getCommentsForPost(postId, pageable);
+
+        assertNotNull(result);
+    }
+
+    @Test
     void deleteCommentShouldSucceedForAuthor() {
         UUID commentId = UUID.randomUUID();
         User user = testUser("user@example.com");
@@ -170,8 +236,41 @@ class CommentServiceTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> commentService.deleteComment(commentId));
-        assertEquals("Unauthorized", exception.getMessage());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> commentService.deleteComment(commentId));
+        assertEquals("Unauthorized", exception.getReason());
+    }
+
+    @Test
+    void deleteCommentShouldSucceedForPostAuthor() {
+        UUID commentId = UUID.randomUUID();
+        User postAuthor = testUser("author@example.com");
+        Post post = testPost(UUID.randomUUID(), PostStatus.PUBLISHED);
+        post.setAuthor(postAuthor);
+        Comment comment = testComment(commentId, post);
+        authenticate(postAuthor.getEmail());
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+        when(userRepository.findByEmail(postAuthor.getEmail())).thenReturn(Optional.of(postAuthor));
+
+        commentService.deleteComment(commentId);
+
+        verify(commentRepository).delete(comment);
+    }
+
+    @Test
+    void deleteCommentShouldSucceedForAdmin() {
+        UUID commentId = UUID.randomUUID();
+        User admin = testUser("admin@example.com");
+        admin.setRole(Role.ADMIN);
+        Comment comment = testComment(commentId, testPost(UUID.randomUUID(), PostStatus.PUBLISHED));
+        authenticate(admin.getEmail());
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+        when(userRepository.findByEmail(admin.getEmail())).thenReturn(Optional.of(admin));
+
+        commentService.deleteComment(commentId);
+
+        verify(commentRepository).delete(comment);
     }
 
     private void authenticate(String email) {

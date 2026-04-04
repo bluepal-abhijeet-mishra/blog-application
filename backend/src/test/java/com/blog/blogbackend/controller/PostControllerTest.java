@@ -148,6 +148,75 @@ public class PostControllerTest {
 
     @Test
     @WithMockUser
+    public void getPostByIdForEdit_ShouldReturnPost() throws Exception {
+        UUID postId = UUID.randomUUID();
+        PostResponse response = PostResponse.builder().id(postId).title("Edit Me").build();
+        when(postService.getPostForEdit(postId)).thenReturn(response);
+
+        mockMvc.perform(get("/api/posts/id/" + postId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Edit Me"));
+    }
+
+    @Test
+    @WithMockUser
+    public void incrementShare_ShouldReturnOk() throws Exception {
+        UUID postId = UUID.randomUUID();
+        mockMvc.perform(post("/api/posts/" + postId + "/share")
+                        .with(csrf()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser
+    public void updatePost_ShouldReturnUpdatedPost() throws Exception {
+        UUID postId = UUID.randomUUID();
+        PostRequest request = PostRequest.builder()
+                .title("Updated")
+                .content("Updated content")
+                .build();
+        PostResponse response = PostResponse.builder().id(postId).title("Updated").build();
+        when(postService.updatePost(eq(postId), any())).thenReturn(response);
+
+        mockMvc.perform(put("/api/posts/" + postId)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser
+    public void publishPost_ShouldReturnPublishedPost() throws Exception {
+        UUID postId = UUID.randomUUID();
+        when(postService.publishPost(postId)).thenReturn(PostResponse.builder().status(PostStatus.PUBLISHED).build());
+
+        mockMvc.perform(patch("/api/posts/" + postId + "/publish")
+                        .with(csrf()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser
+    public void searchPosts_ShouldReturnPage() throws Exception {
+        when(postService.searchPosts(anyString(), anyString(), any())).thenReturn(Page.empty());
+
+        mockMvc.perform(get("/api/posts/search")
+                        .param("q", "test"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser
+    public void getStats_ShouldReturnStats() throws Exception {
+        when(postService.getAuthorStats()).thenReturn(com.blog.blogbackend.dto.AuthorStatsResponse.builder().build());
+
+        mockMvc.perform(get("/api/posts/stats"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser
     public void addBookmark_ShouldReturnBookmarkState() throws Exception {
         UUID postId = UUID.randomUUID();
         BookmarkResponse response = BookmarkResponse.builder()

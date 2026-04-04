@@ -1,5 +1,7 @@
 package com.blog.blogbackend.service;
 
+import org.springframework.web.server.ResponseStatusException;
+
 import com.blog.blogbackend.dto.*;
 import com.blog.blogbackend.entity.Role;
 import com.blog.blogbackend.entity.User;
@@ -99,8 +101,8 @@ class AuthServiceTest {
         RegisterRequest request = new RegisterRequest("existing@example.com", "password", "Existing User");
         when(userRepository.existsByEmailIgnoreCase(anyString())).thenReturn(true);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> authService.register(request));
-        assertEquals("Email already exists", exception.getMessage());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> authService.register(request));
+        assertEquals("Email already exists", exception.getReason());
     }
 
     @Test
@@ -129,8 +131,8 @@ class AuthServiceTest {
         LoginRequest request = new LoginRequest("nonexistent@example.com", "password");
         when(userRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> authService.login(request));
-        assertEquals("User not found", exception.getMessage());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> authService.login(request));
+        assertEquals("User not found", exception.getReason());
     }
 
     @Test

@@ -15,9 +15,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.blog.blogbackend.dto.MonthlyTrend;
 import com.blog.blogbackend.entity.PostStatus;
@@ -54,7 +56,7 @@ public class AdminController {
 
     @PatchMapping("/users/{id}/role")
     public ResponseEntity<Void> updateUserRole(@PathVariable UUID id, @RequestBody Map<String, String> request) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         Role newRole = Role.valueOf(request.get("role"));
 
         if (newRole == Role.ADMIN) {
@@ -69,7 +71,7 @@ public class AdminController {
     @DeleteMapping("/comments/{id}")
     public ResponseEntity<Void> forceDeleteComment(@PathVariable UUID id) {
         if (!commentRepository.existsById(id)) {
-            throw new RuntimeException("Comment not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found");
         }
         commentRepository.deleteById(id);
         return ResponseEntity.noContent().build();

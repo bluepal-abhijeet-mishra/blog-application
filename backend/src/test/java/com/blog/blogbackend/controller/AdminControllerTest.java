@@ -1,6 +1,7 @@
 package com.blog.blogbackend.controller;
 
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -96,6 +97,22 @@ public class AdminControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
+    public void updateUserRole_UserNotFound_ShouldReturnNotFound() throws Exception {
+        UUID userId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        Map<String, String> request = new HashMap<>();
+        request.put("role", "AUTHOR");
+
+        mockMvc.perform(patch("/api/admin/users/" + userId + "/role")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
     public void getPlatformStats_ShouldReturnStats() throws Exception {
         when(userRepository.findAll()).thenReturn(Collections.emptyList());
         when(postRepository.findAll()).thenReturn(Collections.emptyList());
@@ -109,6 +126,31 @@ public class AdminControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
+    public void getPlatformStats_WithData_ShouldReturnStats() throws Exception {
+        User author = User.builder().id(UUID.randomUUID()).role(Role.AUTHOR).createdAt(LocalDateTime.now()).build();
+        com.blog.blogbackend.entity.Post post = com.blog.blogbackend.entity.Post.builder()
+                .id(UUID.randomUUID())
+                .status(com.blog.blogbackend.entity.PostStatus.PUBLISHED)
+                .publishedAt(LocalDateTime.now())
+                .category(com.blog.blogbackend.entity.Category.builder().name("Tech").build())
+                .author(author)
+                .tags(Collections.emptySet())
+                .build();
+
+        when(userRepository.findAll()).thenReturn(Collections.singletonList(author));
+        when(postRepository.findAll()).thenReturn(Collections.singletonList(post));
+        when(commentRepository.count()).thenReturn(1L);
+
+        mockMvc.perform(get("/api/admin/stats"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalUsers").value(1))
+                .andExpect(jsonPath("$.totalPosts").value(1))
+                .andExpect(jsonPath("$.totalComments").value(1))
+                .andExpect(jsonPath("$.categoryDistribution.Tech").value(1));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
     public void forceDeleteComment_ShouldReturnNoContent() throws Exception {
         UUID commentId = UUID.randomUUID();
         when(commentRepository.existsById(commentId)).thenReturn(true);
@@ -116,6 +158,37 @@ public class AdminControllerTest {
         mockMvc.perform(delete("/api/admin/comments/" + commentId)
                         .with(csrf()))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void forceDeleteComment_NotFound_ShouldReturnNotFound() throws Exception {
+        UUID commentId = UUID.randomUUID();
+        when(commentRepository.existsById(commentId)).thenReturn(false);
+
+        mockMvc.perform(delete("/api/admin/comments/" + commentId)
+                        .with(csrf()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void getAllPosts_ShouldReturnPage() throws Exception {
+        when(postRepository.findAll(any(org.springframework.data.domain.Pageable.class)))
+                .thenReturn(org.springframework.data.domain.Page.empty());
+
+        mockMvc.perform(get("/api/admin/posts"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void getAllComments_ShouldReturnPage() throws Exception {
+        when(commentRepository.findAll(any(org.springframework.data.domain.Pageable.class)))
+                .thenReturn(org.springframework.data.domain.Page.empty());
+
+        mockMvc.perform(get("/api/admin/comments"))
+                .andExpect(status().isOk());
     }
 
     @Test

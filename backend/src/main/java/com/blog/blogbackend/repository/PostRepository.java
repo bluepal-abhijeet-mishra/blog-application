@@ -58,4 +58,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
     long countByAuthorId(UUID authorId);
     long countByAuthorIdAndStatus(UUID authorId, PostStatus status);
+
+    @Query("SELECT COALESCE(SUM(p.likeCount), 0) FROM Post p WHERE p.author.id = :authorId")
+    long sumLikesByAuthorId(@Param("authorId") UUID authorId);
 }

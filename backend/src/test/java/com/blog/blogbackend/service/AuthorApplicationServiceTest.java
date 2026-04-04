@@ -1,5 +1,7 @@
 package com.blog.blogbackend.service;
 
+import org.springframework.web.server.ResponseStatusException;
+
 import com.blog.blogbackend.dto.AuthorApplicationDto;
 import com.blog.blogbackend.entity.AuthorApplication;
 import com.blog.blogbackend.entity.AuthorApplicationStatus;
@@ -70,7 +72,7 @@ class AuthorApplicationServiceTest {
     void submitApplication_AlreadyPending() {
         when(applicationRepository.existsByUserIdAndStatus(user.getId(), AuthorApplicationStatus.PENDING)).thenReturn(true);
 
-        assertThrows(RuntimeException.class, () -> applicationService.submitApplication(user, applicationDto));
+        assertThrows(ResponseStatusException.class, () -> applicationService.submitApplication(user, applicationDto));
         verify(applicationRepository, never()).save(any(AuthorApplication.class));
     }
 
@@ -118,7 +120,7 @@ class AuthorApplicationServiceTest {
         UUID appId = UUID.randomUUID();
         when(applicationRepository.findById(appId)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> applicationService.approveApplication(appId));
+        assertThrows(ResponseStatusException.class, () -> applicationService.approveApplication(appId));
     }
 
     @Test
@@ -126,7 +128,7 @@ class AuthorApplicationServiceTest {
         UUID appId = UUID.randomUUID();
         when(applicationRepository.findById(appId)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> applicationService.rejectApplication(appId, "reason"));
+        assertThrows(ResponseStatusException.class, () -> applicationService.rejectApplication(appId, "reason"));
     }
 
     @Test
@@ -147,9 +149,33 @@ class AuthorApplicationServiceTest {
 
     @Test
     void getMyApplications_Success() {
-        when(applicationRepository.findByUserId(user.getId())).thenReturn(Collections.emptyList());
+        AuthorApplication app = AuthorApplication.builder().id(UUID.randomUUID()).user(user).build();
+        when(applicationRepository.findByUserId(user.getId())).thenReturn(Collections.singletonList(app));
 
         List<AuthorApplicationDto> result = applicationService.getMyApplications(user);
-        assertTrue(result.isEmpty());
+        assertFalse(result.isEmpty());
+        assertEquals(user.getDisplayName(), result.get(0).getUserDisplayName());
+    }
+
+    @Test
+    void approveApplication_AlreadyEvaluated() {
+        UUID appId = UUID.randomUUID();
+        AuthorApplication application = AuthorApplication.builder()
+                .status(AuthorApplicationStatus.REJECTED)
+                .build();
+        when(applicationRepository.findById(appId)).thenReturn(Optional.of(application));
+
+        assertThrows(ResponseStatusException.class, () -> applicationService.approveApplication(appId));
+    }
+
+    @Test
+    void rejectApplication_AlreadyEvaluated() {
+        UUID appId = UUID.randomUUID();
+        AuthorApplication application = AuthorApplication.builder()
+                .status(AuthorApplicationStatus.APPROVED)
+                .build();
+        when(applicationRepository.findById(appId)).thenReturn(Optional.of(application));
+
+        assertThrows(ResponseStatusException.class, () -> applicationService.rejectApplication(appId, "reason"));
     }
 }
