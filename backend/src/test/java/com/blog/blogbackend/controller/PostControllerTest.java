@@ -1,6 +1,5 @@
 package com.blog.blogbackend.controller;
 
-import com.blog.blogbackend.dto.CategoryDto;
 import com.blog.blogbackend.dto.BookmarkResponse;
 import com.blog.blogbackend.dto.PostRequest;
 import com.blog.blogbackend.dto.PostResponse;
@@ -15,7 +14,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -51,7 +49,7 @@ public class PostControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    public void getAllPosts_ShouldReturnPageOfPosts() throws Exception {
+    void getAllPosts_ShouldReturnPageOfPosts() throws Exception {
         PostResponse postResponse = PostResponse.builder()
                 .id(UUID.randomUUID())
                 .title("Test Post")
@@ -71,7 +69,7 @@ public class PostControllerTest {
     }
 
     @Test
-    public void getPostBySlug_ShouldReturnPost() throws Exception {
+    void getPostBySlug_ShouldReturnPost() throws Exception {
         PostResponse postResponse = PostResponse.builder()
                 .id(UUID.randomUUID())
                 .title("Test Post")
@@ -88,7 +86,7 @@ public class PostControllerTest {
 
     @Test
     @WithMockUser(username = "test@example.com")
-    public void createPost_ShouldReturnCreatedPost() throws Exception {
+    void createPost_ShouldReturnCreatedPost() throws Exception {
         PostRequest request = PostRequest.builder()
                 .title("New Post")
                 .content("Content")
@@ -112,7 +110,7 @@ public class PostControllerTest {
 
     @Test
     @WithMockUser
-    public void exportJson_ShouldReturnByteArray() throws Exception {
+    void exportJson_ShouldReturnByteArray() throws Exception {
         byte[] data = "{\"posts\":[]}".getBytes();
         when(postService.exportAllPostsJson()).thenReturn(data);
 
@@ -125,7 +123,7 @@ public class PostControllerTest {
 
     @Test
     @WithMockUser
-    public void exportCsv_ShouldReturnByteArray() throws Exception {
+    void exportCsv_ShouldReturnByteArray() throws Exception {
         byte[] data = "Title,Views\nTest,0".getBytes();
         when(postService.generateEngagementCsv()).thenReturn(data);
 
@@ -138,7 +136,7 @@ public class PostControllerTest {
 
     @Test
     @WithMockUser(roles = "AUTHOR")
-    public void deletePost_ShouldReturnNoContent() throws Exception {
+    void deletePost_ShouldReturnNoContent() throws Exception {
         UUID postId = UUID.randomUUID();
 
         mockMvc.perform(delete("/api/posts/" + postId)
@@ -148,7 +146,7 @@ public class PostControllerTest {
 
     @Test
     @WithMockUser
-    public void getPostByIdForEdit_ShouldReturnPost() throws Exception {
+    void getPostByIdForEdit_ShouldReturnPost() throws Exception {
         UUID postId = UUID.randomUUID();
         PostResponse response = PostResponse.builder().id(postId).title("Edit Me").build();
         when(postService.getPostForEdit(postId)).thenReturn(response);
@@ -160,7 +158,7 @@ public class PostControllerTest {
 
     @Test
     @WithMockUser
-    public void incrementShare_ShouldReturnOk() throws Exception {
+    void incrementShare_ShouldReturnOk() throws Exception {
         UUID postId = UUID.randomUUID();
         mockMvc.perform(post("/api/posts/" + postId + "/share")
                         .with(csrf()))
@@ -169,7 +167,7 @@ public class PostControllerTest {
 
     @Test
     @WithMockUser
-    public void updatePost_ShouldReturnUpdatedPost() throws Exception {
+    void updatePost_ShouldReturnUpdatedPost() throws Exception {
         UUID postId = UUID.randomUUID();
         PostRequest request = PostRequest.builder()
                 .title("Updated")
@@ -187,7 +185,7 @@ public class PostControllerTest {
 
     @Test
     @WithMockUser
-    public void publishPost_ShouldReturnPublishedPost() throws Exception {
+    void publishPost_ShouldReturnPublishedPost() throws Exception {
         UUID postId = UUID.randomUUID();
         when(postService.publishPost(postId)).thenReturn(PostResponse.builder().status(PostStatus.PUBLISHED).build());
 
@@ -198,7 +196,7 @@ public class PostControllerTest {
 
     @Test
     @WithMockUser
-    public void searchPosts_ShouldReturnPage() throws Exception {
+    void searchPosts_ShouldReturnPage() throws Exception {
         when(postService.searchPosts(anyString(), anyString(), any())).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/posts/search")
@@ -208,7 +206,7 @@ public class PostControllerTest {
 
     @Test
     @WithMockUser
-    public void getStats_ShouldReturnStats() throws Exception {
+    void getStats_ShouldReturnStats() throws Exception {
         when(postService.getAuthorStats()).thenReturn(com.blog.blogbackend.dto.AuthorStatsResponse.builder().build());
 
         mockMvc.perform(get("/api/posts/stats"))
@@ -217,7 +215,7 @@ public class PostControllerTest {
 
     @Test
     @WithMockUser
-    public void addBookmark_ShouldReturnBookmarkState() throws Exception {
+    void addBookmark_ShouldReturnBookmarkState() throws Exception {
         UUID postId = UUID.randomUUID();
         BookmarkResponse response = BookmarkResponse.builder()
                 .saved(true)
@@ -237,7 +235,7 @@ public class PostControllerTest {
 
     @Test
     @WithMockUser
-    public void removeBookmark_ShouldReturnBookmarkState() throws Exception {
+    void removeBookmark_ShouldReturnBookmarkState() throws Exception {
         UUID postId = UUID.randomUUID();
         BookmarkResponse response = BookmarkResponse.builder()
                 .saved(false)

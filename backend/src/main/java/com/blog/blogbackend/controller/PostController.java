@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -82,12 +83,14 @@ public class PostController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
+    @CacheEvict(value = "rss-feed", allEntries = true)
     public ResponseEntity<PostResponse> createPost(@Valid @RequestBody PostRequest request) {
         return ResponseEntity.ok(postService.createPost(request));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
+    @CacheEvict(value = "rss-feed", allEntries = true)
     public ResponseEntity<PostResponse> updatePost(
             @PathVariable UUID id, 
             @Valid @RequestBody PostRequest request) {
@@ -96,18 +99,21 @@ public class PostController {
 
     @PatchMapping("/{id}/publish")
     @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
+    @CacheEvict(value = "rss-feed", allEntries = true)
     public ResponseEntity<PostResponse> publishPost(@PathVariable UUID id) {
         return ResponseEntity.ok(postService.publishPost(id));
     }
 
     @PatchMapping("/{id}/unpublish")
     @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
+    @CacheEvict(value = "rss-feed", allEntries = true)
     public ResponseEntity<PostResponse> unpublishPost(@PathVariable UUID id) {
         return ResponseEntity.ok(postService.unpublishPost(id));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
+    @CacheEvict(value = "rss-feed", allEntries = true)
     public ResponseEntity<Void> deletePost(@PathVariable UUID id) {
         postService.deletePost(id);
         return ResponseEntity.noContent().build();

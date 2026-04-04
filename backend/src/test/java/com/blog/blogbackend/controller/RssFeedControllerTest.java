@@ -37,7 +37,7 @@ public class RssFeedControllerTest {
     private CustomUserDetailsService userDetailsService;
 
     @Test
-    public void getRssFeed_ShouldReturnXml() throws Exception {
+    void getRssFeed_ShouldReturnXml() throws Exception {
         Post post = Post.builder()
                 .title("RSS Post")
                 .slug("rss-post")
@@ -53,5 +53,44 @@ public class RssFeedControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/rss+xml; charset=UTF-8"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("<title>RSS Post</title>")));
+    }
+
+    @Test
+    void getRssFeed_ShouldPreferForwardedHeaders() throws Exception {
+        Post post = Post.builder()
+                .title("RSS Post")
+                .slug("rss-post")
+                .excerpt("Excerpt")
+                .status(PostStatus.PUBLISHED)
+                .publishedAt(LocalDateTime.now())
+                .build();
+
+        when(postRepository.findTop20ByStatusOrderByPublishedAtDesc(PostStatus.PUBLISHED))
+                .thenReturn(Collections.singletonList(post));
+
+        mockMvc.perform(get("/api/feed.rss")
+                        .header("X-Forwarded-Host", "blog.example.com")
+                        .header("X-Forwarded-Proto", "https"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("<link>https://blog.example.com</link>")));
+    }
+
+    @Test
+    void getRssFeed_ShouldDefaultForwardedProtoToHttps() throws Exception {
+        Post post = Post.builder()
+                .title("RSS Post")
+                .slug("rss-post")
+                .excerpt("Excerpt")
+                .status(PostStatus.PUBLISHED)
+                .publishedAt(LocalDateTime.now())
+                .build();
+
+        when(postRepository.findTop20ByStatusOrderByPublishedAtDesc(PostStatus.PUBLISHED))
+                .thenReturn(Collections.singletonList(post));
+
+        mockMvc.perform(get("/api/feed.rss")
+                        .header("X-Forwarded-Host", "blog.example.com"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("<link>https://blog.example.com</link>")));
     }
 }

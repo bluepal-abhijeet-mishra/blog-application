@@ -34,6 +34,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -118,13 +119,17 @@ class PostServiceTest {
     void addBookmarkShouldRejectDraftPostForReader() {
         User reader = user("reader@example.com", Role.READER);
         Post draftPost = publishedPost();
+        UUID draftPostId = draftPost.getId();
         draftPost.setStatus(PostStatus.DRAFT);
 
         authenticate(reader.getEmail());
         when(userRepository.findByEmail(reader.getEmail())).thenReturn(Optional.of(reader));
-        when(postRepository.findById(draftPost.getId())).thenReturn(Optional.of(draftPost));
+        when(postRepository.findById(draftPostId)).thenReturn(Optional.of(draftPost));
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> postService.addBookmark(draftPost.getId()));
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> postService.addBookmark(draftPostId)
+        );
 
         verify(savedPostRepository, never()).save(any(SavedPost.class));
         verify(postRepository, never()).save(any(Post.class));
@@ -232,15 +237,18 @@ class PostServiceTest {
         User author = user("author@example.com", Role.AUTHOR);
         User otherUser = user("other@example.com", Role.READER);
         Post post = publishedPost();
+        UUID postId = post.getId();
         post.setAuthor(author);
         PostRequest request = PostRequest.builder().title("Title").build();
 
         authenticate(otherUser.getEmail());
         when(userRepository.findByEmail(otherUser.getEmail())).thenReturn(Optional.of(otherUser));
-        when(postRepository.findById(post.getId())).thenReturn(Optional.of(post));
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, 
-                () -> postService.updatePost(post.getId(), request));
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> postService.updatePost(postId, request)
+        );
 
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
     }
@@ -314,12 +322,13 @@ class PostServiceTest {
     @Test
     void getPostBySlugShouldRejectAnonymousForDraft() {
         Post post = publishedPost();
+        String slug = post.getSlug();
         post.setStatus(PostStatus.DRAFT);
         authenticate("anonymousUser");
 
-        when(postRepository.findBySlug(post.getSlug())).thenReturn(Optional.of(post));
+        when(postRepository.findBySlug(slug)).thenReturn(Optional.of(post));
 
-        assertThrows(ResponseStatusException.class, () -> postService.getPostBySlug(post.getSlug()));
+        assertThrows(ResponseStatusException.class, () -> postService.getPostBySlug(slug));
     }
 
     @Test
@@ -327,14 +336,48 @@ class PostServiceTest {
         User author = user("author@example.com", Role.AUTHOR);
         User reader = user("reader@example.com", Role.READER);
         Post post = publishedPost();
+        String slug = post.getSlug();
         post.setStatus(PostStatus.DRAFT);
         post.setAuthor(author);
 
         authenticate(reader.getEmail());
         when(userRepository.findByEmail(reader.getEmail())).thenReturn(Optional.of(reader));
-        when(postRepository.findBySlug(post.getSlug())).thenReturn(Optional.of(post));
+        when(postRepository.findBySlug(slug)).thenReturn(Optional.of(post));
 
-        assertThrows(ResponseStatusException.class, () -> postService.getPostBySlug(post.getSlug()));
+        assertThrows(ResponseStatusException.class, () -> postService.getPostBySlug(slug));
+    }
+
+    @Test
+    void getPostForEditShouldReturnMappedPostForAuthor() {
+        User author = user("author@example.com", Role.AUTHOR);
+        Post post = publishedPost();
+        post.setAuthor(author);
+
+        authenticate(author.getEmail());
+        when(userRepository.findByEmail(author.getEmail())).thenReturn(Optional.of(author));
+        when(postRepository.findById(post.getId())).thenReturn(Optional.of(post));
+
+        PostResponse response = postService.getPostForEdit(post.getId());
+
+        assertEquals(post.getId(), response.getId());
+        assertEquals(post.getTitle(), response.getTitle());
+    }
+
+    @Test
+    void getAuthorPostsShouldReturnMappedPosts() {
+        User author = user("author@example.com", Role.AUTHOR);
+        Post post = publishedPost();
+        post.setAuthor(author);
+
+        authenticate(author.getEmail());
+        when(userRepository.findByEmail(author.getEmail())).thenReturn(Optional.of(author));
+        when(postRepository.findByAuthorId(eq(author.getId()), any()))
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(Collections.singletonList(post)));
+
+        var posts = postService.getAuthorPosts(org.springframework.data.domain.Pageable.unpaged());
+
+        assertEquals(1, posts.getTotalElements());
+        assertEquals(post.getTitle(), posts.getContent().get(0).getTitle());
     }
 
     @Test

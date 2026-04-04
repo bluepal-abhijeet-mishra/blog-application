@@ -61,7 +61,7 @@ public class AdminControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void getAllUsers_ShouldReturnUserList() throws Exception {
+    void getAllUsers_ShouldReturnUserList() throws Exception {
         User user = User.builder()
                 .id(UUID.randomUUID())
                 .email("admin@test.com")
@@ -79,7 +79,7 @@ public class AdminControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void updateUserRole_ShouldReturnNoContent() throws Exception {
+    void updateUserRole_ShouldReturnNoContent() throws Exception {
         UUID userId = UUID.randomUUID();
         User user = User.builder().id(userId).role(Role.READER).build();
 
@@ -97,7 +97,7 @@ public class AdminControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void updateUserRole_UserNotFound_ShouldReturnNotFound() throws Exception {
+    void updateUserRole_UserNotFound_ShouldReturnNotFound() throws Exception {
         UUID userId = UUID.randomUUID();
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
@@ -113,7 +113,7 @@ public class AdminControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void getPlatformStats_ShouldReturnStats() throws Exception {
+    void getPlatformStats_ShouldReturnStats() throws Exception {
         when(userRepository.findAll()).thenReturn(Collections.emptyList());
         when(postRepository.findAll()).thenReturn(Collections.emptyList());
         when(commentRepository.count()).thenReturn(0L);
@@ -126,7 +126,7 @@ public class AdminControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void getPlatformStats_WithData_ShouldReturnStats() throws Exception {
+    void getPlatformStats_WithData_ShouldReturnStats() throws Exception {
         User author = User.builder().id(UUID.randomUUID()).role(Role.AUTHOR).createdAt(LocalDateTime.now()).build();
         com.blog.blogbackend.entity.Post post = com.blog.blogbackend.entity.Post.builder()
                 .id(UUID.randomUUID())
@@ -151,7 +151,7 @@ public class AdminControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void forceDeleteComment_ShouldReturnNoContent() throws Exception {
+    void forceDeleteComment_ShouldReturnNoContent() throws Exception {
         UUID commentId = UUID.randomUUID();
         when(commentRepository.existsById(commentId)).thenReturn(true);
 
@@ -162,7 +162,7 @@ public class AdminControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void forceDeleteComment_NotFound_ShouldReturnNotFound() throws Exception {
+    void forceDeleteComment_NotFound_ShouldReturnNotFound() throws Exception {
         UUID commentId = UUID.randomUUID();
         when(commentRepository.existsById(commentId)).thenReturn(false);
 
@@ -173,7 +173,7 @@ public class AdminControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void getAllPosts_ShouldReturnPage() throws Exception {
+    void getAllPosts_ShouldReturnPage() throws Exception {
         when(postRepository.findAll(any(org.springframework.data.domain.Pageable.class)))
                 .thenReturn(org.springframework.data.domain.Page.empty());
 
@@ -183,7 +183,7 @@ public class AdminControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void getAllComments_ShouldReturnPage() throws Exception {
+    void getAllComments_ShouldReturnPage() throws Exception {
         when(commentRepository.findAll(any(org.springframework.data.domain.Pageable.class)))
                 .thenReturn(org.springframework.data.domain.Page.empty());
 
@@ -193,7 +193,7 @@ public class AdminControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void updateUserRole_ToAdmin_ShouldReturnBadRequest() throws Exception {
+    void updateUserRole_ToAdmin_ShouldReturnBadRequest() throws Exception {
         UUID userId = UUID.randomUUID();
         User user = User.builder().id(userId).role(Role.AUTHOR).build();
 

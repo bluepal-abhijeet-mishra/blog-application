@@ -93,12 +93,39 @@ class CategoryRequestServiceTest {
     }
 
     @Test
+    void submitRequest_InvalidSlug() {
+        when(slugService.slugify(anyString())).thenReturn(" ");
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> categoryRequestService.submitRequest(user, createRequest)
+        );
+
+        assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    @Test
     void submitRequest_CategoryExists() {
         String slug = "tech-category";
         when(slugService.slugify(anyString())).thenReturn(slug);
         when(categoryRepository.findBySlug(slug)).thenReturn(Optional.of(new Category()));
 
         assertThrows(ResponseStatusException.class, () -> categoryRequestService.submitRequest(user, createRequest));
+    }
+
+    @Test
+    void submitRequest_PendingRequestExists() {
+        String slug = "tech-category";
+        when(slugService.slugify(anyString())).thenReturn(slug);
+        when(categoryRepository.findBySlug(slug)).thenReturn(Optional.empty());
+        when(categoryRequestRepository.existsBySlugAndStatusIn(eq(slug), any(Set.class))).thenReturn(true);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> categoryRequestService.submitRequest(user, createRequest)
+        );
+
+        assertEquals(org.springframework.http.HttpStatus.CONFLICT, exception.getStatusCode());
     }
 
     @Test
@@ -132,6 +159,28 @@ class CategoryRequestServiceTest {
     }
 
     @Test
+    void approveRequest_RejectedRequestShouldFail() {
+        UUID requestId = UUID.randomUUID();
+        CategoryRequestDecisionRequest decision = new CategoryRequestDecisionRequest();
+        CategoryRequest request = CategoryRequest.builder()
+                .id(requestId)
+                .name("Tech")
+                .slug("tech")
+                .requestedBy(user)
+                .status(CategoryRequestStatus.REJECTED)
+                .build();
+
+        when(categoryRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> categoryRequestService.approveRequest(user, requestId, decision)
+        );
+
+        assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    @Test
     void rejectRequest_Success() {
         UUID requestId = UUID.randomUUID();
         CategoryRequest request = CategoryRequest.builder()
@@ -148,6 +197,28 @@ class CategoryRequestServiceTest {
         CategoryRequestDto result = categoryRequestService.rejectRequest(user, requestId, new CategoryRequestDecisionRequest());
 
         assertEquals(CategoryRequestStatus.REJECTED, result.getStatus());
+    }
+
+    @Test
+    void rejectRequest_ApprovedRequestShouldFail() {
+        UUID requestId = UUID.randomUUID();
+        CategoryRequestDecisionRequest decision = new CategoryRequestDecisionRequest();
+        CategoryRequest request = CategoryRequest.builder()
+                .id(requestId)
+                .name("Tech")
+                .slug("tech")
+                .requestedBy(user)
+                .status(CategoryRequestStatus.APPROVED)
+                .build();
+
+        when(categoryRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> categoryRequestService.rejectRequest(user, requestId, decision)
+        );
+
+        assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, exception.getStatusCode());
     }
 
     @Test

@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -52,7 +51,7 @@ public class AuthorApplicationControllerTest {
 
     @Test
     @WithMockUser(username = "reader@test.com", roles = "READER")
-    public void submitApplication_ShouldReturnOk() throws Exception {
+    void submitApplication_ShouldReturnOk() throws Exception {
         User user = User.builder().email("reader@test.com").build();
         AuthorApplicationDto dto = new AuthorApplicationDto();
         dto.setBio("Test Bio");
@@ -69,7 +68,7 @@ public class AuthorApplicationControllerTest {
 
     @Test
     @WithMockUser(username = "reader@test.com", roles = "READER")
-    public void getMyApplications_ShouldReturnList() throws Exception {
+    void getMyApplications_ShouldReturnList() throws Exception {
         User user = User.builder().email("reader@test.com").build();
         AuthorApplicationDto dto = new AuthorApplicationDto();
         dto.setBio("Test Bio");
@@ -84,12 +83,25 @@ public class AuthorApplicationControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void approveApplication_ShouldReturnOk() throws Exception {
+    void approveApplication_ShouldReturnOk() throws Exception {
         UUID appId = UUID.randomUUID();
 
         mockMvc.perform(put("/api/applications/" + appId + "/approve")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Application approved. User is now an AUTHOR."));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void rejectApplication_ShouldReturnOk() throws Exception {
+        UUID appId = UUID.randomUUID();
+
+        mockMvc.perform(put("/api/applications/" + appId + "/reject")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString("Needs more detail")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Application rejected."));
     }
 }

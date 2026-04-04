@@ -4,16 +4,17 @@ import com.blog.blogbackend.entity.Post;
 import com.blog.blogbackend.entity.PostStatus;
 import com.blog.blogbackend.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -29,7 +30,6 @@ public class RssFeedController {
     private static final MediaType RSS_MEDIA_TYPE = MediaType.parseMediaType("application/rss+xml; charset=UTF-8");
 
     @GetMapping(value = "/api/feed.rss", produces = "application/rss+xml; charset=UTF-8")
-    @Cacheable(value = "rss-feed", key = "#request.getHeader('X-Forwarded-Host') ?: #request.getServerName()")
     public ResponseEntity<String> getRssFeed(HttpServletRequest request) {
         String requestBaseUrl = getRequestBaseUrl(request);
         var posts = postRepository.findTop20ByStatusOrderByPublishedAtDesc(PostStatus.PUBLISHED);
@@ -43,31 +43,24 @@ public class RssFeedController {
     }
 
     private String getRequestBaseUrl(HttpServletRequest request) {
-        // First check for X-Forwarded headers (common in proxies/ngrok)
-        String protocol = request.getHeader("X-Forwarded-Proto");
-        String host = request.getHeader("X-Forwarded-Host");
+        // Prefer ServletUriComponentsBuilder (works with server.forward-headers-strategy=framework)
+        String baseUrl = ServletUriComponentsBuilder.fromContextPath(request)
+                .toUriString();
 
-        if (protocol != null && host != null) {
-            return protocol + "://" + host;
+        // Extra fallback for ngrok/proxies if the builder still returns localhost
+        if (baseUrl.contains("localhost")) {
+            String forwardedHost = request.getHeader("X-Forwarded-Host");
+            String forwardedProto = request.getHeader("X-Forwarded-Proto");
+            if (forwardedHost != null && !forwardedHost.isEmpty()) {
+                String proto = (forwardedProto != null) ? forwardedProto : "https";
+                return proto + "://" + forwardedHost;
+            }
         }
-
-        // Fallback to the direct request URL if headers are missing
-        String scheme = request.getScheme();
-        String serverName = request.getServerName();
-        int serverPort = request.getServerPort();
-
-        StringBuilder url = new StringBuilder();
-        url.append(scheme).append("://").append(serverName);
-
-        if (("http".equals(scheme) && serverPort != 80) || ("https".equals(scheme) && serverPort != 443)) {
-            url.append(":").append(serverPort);
-        }
-
-        return url.toString();
+        return baseUrl;
     }
 
     private String buildRssXml(Iterable<Post> posts, String sanitizedBaseUrl) {
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        LocalDateTime now = LocalDateTime.now(); // Use local time, formatRfc822 will convert it to UTC
         String feedUrl = sanitizedBaseUrl + "/api/feed.rss";
         StringBuilder rss = new StringBuilder();
         rss.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
@@ -102,7 +95,9 @@ public class RssFeedController {
     }
 
     private String formatRfc822(LocalDateTime dateTime) {
-        return dateTime.atOffset(ZoneOffset.UTC).format(RFC_822_FORMATTER);
+        return dateTime.atZone(ZoneId.systemDefault())
+                .withZoneSameInstant(ZoneOffset.UTC)
+                .format(RFC_822_FORMATTER);
     }
 
     private String escapeXml(String input) {
