@@ -233,7 +233,7 @@ const Navbar = () => {
               className="size-10 rounded-xl overflow-hidden border-2 border-transparent hover:border-primary transition-all p-0.5"
             >
               <img
-                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=10b981&color=fff&bold=true&size=80`}
+                src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=10b981&color=fff&bold=true&size=80`}
                 alt="Profile"
                 className="w-full h-full object-cover rounded-lg"
               />

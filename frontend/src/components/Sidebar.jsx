@@ -210,7 +210,7 @@ const Sidebar = ({ isExpanded, setIsExpanded }) => {
           <div className="flex items-center gap-3 h-12 px-1">
             <div className="size-10 rounded-xl border-2 border-slate-100 dark:border-white/10 p-0.5 overflow-hidden shrink-0">
                <img
-                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.displayName || 'U')}&background=10b981&color=fff&bold=true&size=80`}
+                  src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.displayName || 'U')}&background=10b981&color=fff&bold=true&size=80`}
                   className="w-full h-full object-cover rounded-lg"
                   alt="Profile"
                 />

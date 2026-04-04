@@ -36,7 +36,7 @@ const Profile = () => {
       queryClient.setQueryData(['profile'], updatedProfile);
       
       // Update AuthContext user to sync with Navbar
-      const updatedUser = { ...user, displayName: updatedProfile.displayName };
+      const updatedUser = { ...user, displayName: updatedProfile.displayName, avatarUrl: updatedProfile.avatarUrl };
       updateUser(updatedUser);
       
       toast.success('Profile updated successfully.');
