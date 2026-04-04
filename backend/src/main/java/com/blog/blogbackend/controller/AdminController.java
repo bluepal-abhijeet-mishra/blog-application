@@ -11,13 +11,15 @@ import com.blog.blogbackend.entity.User;
 import com.blog.blogbackend.repository.CommentRepository;
 import com.blog.blogbackend.repository.PostRepository;
 import com.blog.blogbackend.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.blog.blogbackend.dto.MonthlyTrend;
 import com.blog.blogbackend.entity.PostStatus;
@@ -32,16 +34,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
+@RequiredArgsConstructor
 public class AdminController {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PostRepository postRepository;
-
-    @Autowired
-    private CommentRepository commentRepository;
+    private final UserRepository userRepository;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
 
     @GetMapping("/users")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
@@ -58,8 +56,14 @@ public class AdminController {
 
     @PatchMapping("/users/{id}/role")
     public ResponseEntity<Void> updateUserRole(@PathVariable UUID id, @RequestBody Map<String, String> request) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-        user.setRole(Role.valueOf(request.get("role")));
+        User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Role newRole = Role.valueOf(request.get("role"));
+
+        if (newRole == Role.ADMIN) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        user.setRole(newRole);
         userRepository.save(user);
         return ResponseEntity.noContent().build();
     }
@@ -67,7 +71,7 @@ public class AdminController {
     @DeleteMapping("/comments/{id}")
     public ResponseEntity<Void> forceDeleteComment(@PathVariable UUID id) {
         if (!commentRepository.existsById(id)) {
-            throw new RuntimeException("Comment not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found");
         }
         commentRepository.deleteById(id);
         return ResponseEntity.noContent().build();

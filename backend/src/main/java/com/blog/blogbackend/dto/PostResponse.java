@@ -28,4 +28,8 @@ public class PostResponse {
     private CategoryDto category;
     private Set<TagDto> tags;
     private LocalDateTime createdAt;
+    private boolean isSaved;
+    private long viewCount;
+    private long likeCount;
+    private long shareCount;
 }

@@ -1,23 +1,23 @@
 package com.blog.blogbackend.service;
 
 import com.blog.blogbackend.dto.AuthorStatsResponse;
+import com.blog.blogbackend.dto.BookmarkResponse;
 import com.blog.blogbackend.dto.CategoryDto;
 import com.blog.blogbackend.dto.PostRequest;
 import com.blog.blogbackend.dto.PostResponse;
 import com.blog.blogbackend.dto.TagDto;
 import com.blog.blogbackend.entity.*;
-import com.blog.blogbackend.repository.CategoryRepository;
-import com.blog.blogbackend.repository.CommentRepository;
-import com.blog.blogbackend.repository.PostRepository;
-import com.blog.blogbackend.repository.TagRepository;
-import com.blog.blogbackend.repository.UserRepository;
+import com.blog.blogbackend.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -27,31 +27,24 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class PostService {
+    private static final String USER_NOT_FOUND = "User not found";
+    private static final String POST_NOT_FOUND = "Post not found";
 
-    @Autowired
-    private PostRepository postRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private TagRepository tagRepository;
-
-    @Autowired
-    private CommentRepository commentRepository;
-
-    @Autowired
-    private SlugService slugService;
+    private final PostRepository postRepository;
+    private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
+    private final TagRepository tagRepository;
+    private final CommentRepository commentRepository;
+    private final SavedPostRepository savedPostRepository;
+    private final SlugService slugService;
 
     @Transactional
     @CacheEvict(value = "rss-feed", allEntries = true)
     public PostResponse createPost(PostRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User author = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        User author = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 
         Post post = Post.builder()
                 .title(request.getTitle())
@@ -85,7 +78,7 @@ public class PostService {
     @Transactional
     @CacheEvict(value = "rss-feed", allEntries = true)
     public PostResponse updatePost(UUID id, PostRequest request) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND));
         User currentUser = getCurrentUser();
         assertCanManagePost(post, currentUser);
 
@@ -119,7 +112,7 @@ public class PostService {
     @Transactional
     @CacheEvict(value = "rss-feed", allEntries = true)
     public PostResponse publishPost(UUID id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND));
         User currentUser = getCurrentUser();
         assertCanManagePost(post, currentUser);
 
@@ -131,49 +124,54 @@ public class PostService {
     @Transactional
     @CacheEvict(value = "rss-feed", allEntries = true)
     public PostResponse unpublishPost(UUID id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND));
         User currentUser = getCurrentUser();
         assertCanManagePost(post, currentUser);
 
         post.setStatus(PostStatus.DRAFT);
-        // We keep publishedAt as a record of when it was first/last published, or clear it. 
-        // PRD doesn't specify, but DRAFT usually means not publicly visible.
         return mapToResponse(postRepository.save(post));
     }
 
     @Transactional
     @CacheEvict(value = "rss-feed", allEntries = true)
     public void deletePost(UUID id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND));
         User currentUser = getCurrentUser();
         assertCanManagePost(post, currentUser);
         postRepository.delete(post);
     }
 
     public PostResponse getPostForEdit(UUID id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND));
         User currentUser = getCurrentUser();
         assertCanManagePost(post, currentUser);
-        return mapToResponse(post);
+        return mapToResponse(post, currentUser);
     }
 
+    @Transactional
     public PostResponse getPostBySlug(String slug) {
-        Post post = postRepository.findBySlug(slug).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findBySlug(slug).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND));
+        // Increment view count
+        post.setViewCount(post.getViewCount() + 1);
+        postRepository.save(post);
+
         // If draft, only author/admin can see
         if (post.getStatus() == PostStatus.DRAFT) {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            if (email.equals("anonymousUser")) throw new RuntimeException("Post not found");
-            User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+            if (email.equals("anonymousUser")) throw new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND);
+            User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
             if (!post.getAuthor().getId().equals(currentUser.getId()) && currentUser.getRole() != Role.ADMIN) {
-                throw new RuntimeException("Post not found");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND);
             }
         }
         return mapToResponse(post);
     }
 
-    public Page<PostResponse> getPublishedPosts(String tag, String category, Pageable pageable) {
+    public Page<PostResponse> getPublishedPosts(String tag, String category, UUID authorId, Pageable pageable) {
         Page<Post> posts;
-        if (tag != null) {
+        if (authorId != null) {
+            posts = postRepository.findByAuthorIdAndStatus(authorId, PostStatus.PUBLISHED, pageable);
+        } else if (tag != null) {
             posts = postRepository.findByTagSlug(tag, pageable);
         } else if (category != null) {
             posts = postRepository.findByCategorySlug(category, pageable);
@@ -192,29 +190,155 @@ public class PostService {
         };
         return posts.map(this::mapToResponse);
     }
+    
     public Page<PostResponse> getAuthorPosts(Pageable pageable) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User author = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        User author = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
         return postRepository.findByAuthorId(author.getId(), pageable)
                 .map(this::mapToResponse);
     }
 
     public AuthorStatsResponse getAuthorStats() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User author = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        User author = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
         
         long totalPosts = postRepository.countByAuthorId(author.getId());
         long publishedPosts = postRepository.countByAuthorIdAndStatus(author.getId(), PostStatus.PUBLISHED);
         long totalComments = commentRepository.countByAuthorId(author.getId());
+        long totalLikes = postRepository.sumLikesByAuthorId(author.getId());
 
         return AuthorStatsResponse.builder()
                 .totalPosts(totalPosts)
                 .publishedPosts(publishedPosts)
                 .totalComments(totalComments)
+                .totalLikes(totalLikes)
                 .build();
     }
 
+    public Page<PostResponse> getSavedPosts(Pageable pageable) {
+        User user = getCurrentUser();
+        return savedPostRepository.findVisibleSavedPosts(
+                        user,
+                        user.getId(),
+                        PostStatus.PUBLISHED,
+                        user.getRole() == Role.ADMIN,
+                        pageable
+                )
+                .map(savedPost -> mapToResponse(savedPost.getPost(), user));
+    }
+
+    @Transactional
+    public BookmarkResponse addBookmark(UUID postId) {
+        User user = getCurrentUser();
+        Post post = getBookmarkablePost(postId, user);
+
+        if (savedPostRepository.findByUserIdAndPostId(user.getId(), post.getId()).isPresent()) {
+            return buildBookmarkResponse(true, post, "Post already bookmarked");
+        }
+
+        savedPostRepository.save(SavedPost.builder().user(user).post(post).build());
+        post.setLikeCount(post.getLikeCount() + 1);
+        postRepository.save(post);
+
+        return buildBookmarkResponse(true, post, "Post added to bookmarks");
+    }
+
+    @Transactional
+    public BookmarkResponse removeBookmark(UUID postId) {
+        User user = getCurrentUser();
+        Post post = getBookmarkablePost(postId, user);
+
+        return savedPostRepository.findByUserIdAndPostId(user.getId(), post.getId())
+                .map(savedPost -> {
+                    savedPostRepository.delete(savedPost);
+                    post.setLikeCount(Math.max(0, post.getLikeCount() - 1));
+                    postRepository.save(post);
+                    return buildBookmarkResponse(false, post, "Post removed from bookmarks");
+                })
+                .orElseGet(() -> buildBookmarkResponse(false, post, "Post was not bookmarked"));
+    }
+
+    @Transactional
+    public BookmarkResponse toggleSave(UUID postId) {
+        User user = getCurrentUser();
+        Post post = getBookmarkablePost(postId, user);
+
+        if (savedPostRepository.findByUserIdAndPostId(user.getId(), post.getId()).isPresent()) {
+            return removeBookmark(postId);
+        }
+
+        return addBookmark(postId);
+    }
+
     private PostResponse mapToResponse(Post post) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = null;
+        if (!email.equals("anonymousUser")) {
+            currentUser = userRepository.findByEmail(email).orElse(null);
+        }
+        return mapToResponse(post, currentUser);
+    }
+
+    public byte[] exportAllPostsJson() {
+        User author = getCurrentUser();
+        List<Post> posts = postRepository.findAllByAuthorId(author.getId());
+        List<PostResponse> responses = posts.stream().map(this::mapToResponse).collect(Collectors.toList());
+        try {
+            return new com.fasterxml.jackson.databind.ObjectMapper()
+                    .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsBytes(responses);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to export posts to JSON", e);
+        }
+    }
+
+    public byte[] generateEngagementCsv() {
+        User author = getCurrentUser();
+        List<Post> posts = postRepository.findAllByAuthorId(author.getId());
+        
+        StringBuilder csv = new StringBuilder("Title,Status,Published At,Views,Likes (Saves),Comments,Shares\n");
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        
+        for (Post post : posts) {
+            long commentCount = commentRepository.countByPostId(post.getId());
+            long likeCount = savedPostRepository.countByPostId(post.getId());
+            
+            csv.append(String.format("\"%s\",%s,%s,%d,%d,%d,%d\n",
+                    post.getTitle().replace("\"", "\"\""),
+                    post.getStatus(),
+                    post.getPublishedAt() != null ? post.getPublishedAt().format(formatter) : "N/A",
+                    post.getViewCount(),
+                    likeCount,
+                    commentCount,
+                    post.getShareCount()
+            ));
+        }
+        return csv.toString().getBytes();
+    }
+
+    @Transactional
+    public void incrementViewCount(String slug) {
+        postRepository.findBySlug(slug).ifPresent(post -> {
+            post.setViewCount(post.getViewCount() + 1);
+            postRepository.save(post);
+        });
+    }
+
+    @Transactional
+    public void incrementShareCount(UUID id) {
+        postRepository.findById(id).ifPresent(post -> {
+            post.setShareCount(post.getShareCount() + 1);
+            postRepository.save(post);
+        });
+    }
+
+    private PostResponse mapToResponse(Post post, User user) {
+        boolean isSaved = false;
+        if (user != null) {
+            isSaved = savedPostRepository.existsByUserIdAndPostId(user.getId(), post.getId());
+        }
+
         return PostResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -227,6 +351,10 @@ public class PostService {
                 .authorId(post.getAuthor().getId())
                 .authorName(post.getAuthor().getDisplayName())
                 .createdAt(post.getCreatedAt())
+                .isSaved(isSaved)
+                .viewCount(post.getViewCount())
+                .likeCount(post.getLikeCount())
+                .shareCount(post.getShareCount())
                 .category(post.getCategory() != null ? CategoryDto.builder()
                         .id(post.getCategory().getId())
                         .name(post.getCategory().getName())
@@ -247,14 +375,34 @@ public class PostService {
         return trimmed.isEmpty() ? null : trimmed;
     }
 
+    private BookmarkResponse buildBookmarkResponse(boolean saved, Post post, String message) {
+        return BookmarkResponse.builder()
+                .saved(saved)
+                .bookmarkCount(post.getLikeCount())
+                .message(message)
+                .build();
+    }
+
+    private Post getBookmarkablePost(UUID postId, User user) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND));
+        if (post.getStatus() == PostStatus.PUBLISHED || canManagePost(post, user)) {
+            return post;
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, POST_NOT_FOUND);
+    }
+
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
     }
 
     private void assertCanManagePost(Post post, User currentUser) {
-        if (!post.getAuthor().getId().equals(currentUser.getId()) && currentUser.getRole() != Role.ADMIN) {
-            throw new RuntimeException("Unauthorized");
+        if (!canManagePost(post, currentUser)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
+    }
+
+    private boolean canManagePost(Post post, User currentUser) {
+        return post.getAuthor().getId().equals(currentUser.getId()) || currentUser.getRole() == Role.ADMIN;
     }
 }

@@ -1,5 +1,7 @@
 package com.blog.blogbackend.service;
 
+import lombok.RequiredArgsConstructor;
+
 import com.blog.blogbackend.dto.AuthResponse;
 import com.blog.blogbackend.dto.ForgotPasswordRequest;
 import com.blog.blogbackend.dto.LoginRequest;
@@ -17,9 +19,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -34,28 +38,18 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
-    private static final String PASSWORD_RESET_GENERIC_MESSAGE =
+    private static final String RESET_LINK_GENERIC_MESSAGE =
             "If an account with that email exists, a reset link has been sent.";
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
-
-    @Autowired
-    private PasswordResetNotificationService passwordResetNotificationService;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final AuthenticationManager authenticationManager;
+    private final UserDetailsService userDetailsService;
+    private final PasswordResetNotificationService passwordResetNotificationService;
 
     @Value("${app.base-url:http://localhost:5173}")
     private String appBaseUrl;
@@ -68,11 +62,13 @@ public class AuthService {
 
     private final SecureRandom secureRandom = new SecureRandom();
 
+
+
     public AuthResponse register(RegisterRequest request) {
         String normalizedEmail = normalizeEmail(request.getEmail());
 
         if (userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
-            throw new RuntimeException("Email already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
         }
 
         User user = User.builder()
@@ -113,7 +109,7 @@ public class AuthService {
         );
 
         User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
 
@@ -138,13 +134,13 @@ public class AuthService {
         Optional<User> optionalUser = userRepository.findByEmailIgnoreCase(normalizedEmail);
 
         if (optionalUser.isEmpty()) {
-            return MessageResponse.builder().message(PASSWORD_RESET_GENERIC_MESSAGE).build();
+            return MessageResponse.builder().message(RESET_LINK_GENERIC_MESSAGE).build();
         }
 
         User user = optionalUser.get();
         LocalDateTime now = LocalDateTime.now();
         if (isResetRequestOnCooldown(user, now)) {
-            return MessageResponse.builder().message(PASSWORD_RESET_GENERIC_MESSAGE).build();
+            return MessageResponse.builder().message(RESET_LINK_GENERIC_MESSAGE).build();
         }
 
         String rawResetToken = generateResetToken();
@@ -161,7 +157,7 @@ public class AuthService {
                 resetTokenExpiryMinutes
         );
 
-        return MessageResponse.builder().message(PASSWORD_RESET_GENERIC_MESSAGE).build();
+        return MessageResponse.builder().message(RESET_LINK_GENERIC_MESSAGE).build();
     }
 
     @Transactional(readOnly = true)

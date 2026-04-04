@@ -2,10 +2,14 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { getPostCoverImage } from '../utils/postMedia';
+import useBookmarkMutation from '../hooks/useBookmarkMutation';
 
-const PostCard = ({ post }) => {
+const PostCard = ({ post, bookmarkActionVariant = 'icon' }) => {
   const publishDate = post.publishedAt ? new Date(post.publishedAt) : new Date(post.createdAt);
   const coverImage = getPostCoverImage(post);
+  const showSavedLibraryActions = bookmarkActionVariant === 'saved-library';
+  const effectivePost = showSavedLibraryActions ? { ...post, isSaved: true } : post;
+  const { bookmarkMutation, handleBookmarkToggle } = useBookmarkMutation(effectivePost);
 
   return (
     <motion.article 
@@ -85,13 +89,65 @@ const PostCard = ({ post }) => {
             </div>
           </div>
           
-          <Link 
-            to={`/posts/${post.slug}`} 
-            className="flex items-center gap-2 text-primary text-[11px] font-black uppercase tracking-widest group/btn"
-          >
-            Full Insight
-            <span className="material-symbols-outlined text-lg group-hover/btn:translate-x-1 transition-transform">arrow_forward</span>
-          </Link>
+          {showSavedLibraryActions ? (
+            <div className="flex items-center gap-4">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleBookmarkToggle();
+                }}
+                disabled={bookmarkMutation.isPending}
+                className="size-8 flex items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 transition-all hover:bg-rose-100 dark:hover:bg-rose-500/20 active:scale-95 disabled:opacity-50 group/remove"
+                title="Remove from bookmarks"
+              >
+                <span className="material-symbols-outlined text-[18px] transition-transform group-hover/remove:scale-110">
+                  bookmark_remove
+                </span>
+              </button>
+
+              <Link
+                to={`/posts/${post.slug}`}
+                className="flex items-center gap-2 text-primary text-[11px] font-black uppercase tracking-widest group/btn"
+              >
+                Full Insight
+                <span className="material-symbols-outlined text-lg group-hover/btn:translate-x-1 transition-transform">arrow_forward</span>
+              </Link>
+            </div>
+
+          ) : (
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleBookmarkToggle();
+                }}
+                disabled={bookmarkMutation.isPending}
+                className={`size-8 flex items-center justify-center rounded-xl transition-all active:scale-95 ${
+                  post.isSaved 
+                    ? 'bg-primary/10 text-primary hover:bg-rose-500/10 hover:text-rose-500 group/save'
+                    : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary group/save'
+                }`}
+                title={post.isSaved ? 'Remove Bookmark' : 'Save this Post'}
+              >
+                <span 
+                  className="material-symbols-outlined text-[18px] transition-transform group-hover/save:scale-110"
+                  style={{ fontVariationSettings: post.isSaved ? "'FILL' 1" : "'FILL' 0" }}
+                >
+                  {post.isSaved ? 'bookmark' : 'bookmark_add'}
+                </span>
+              </button>
+
+              <Link 
+                to={`/posts/${post.slug}`} 
+                className="flex items-center gap-2 text-primary text-[11px] font-black uppercase tracking-widest group/btn"
+              >
+                Full Insight
+                <span className="material-symbols-outlined text-lg group-hover/btn:translate-x-1 transition-transform">arrow_forward</span>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </motion.article>

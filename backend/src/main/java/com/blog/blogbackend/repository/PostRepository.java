@@ -20,6 +20,8 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     List<Post> findTop20ByStatusOrderByPublishedAtDesc(PostStatus status);
 
     Page<Post> findByAuthorId(UUID authorId, Pageable pageable);
+    List<Post> findAllByAuthorId(UUID authorId);
+    Page<Post> findByAuthorIdAndStatus(UUID authorId, PostStatus status, Pageable pageable);
 
     @Query("SELECT p FROM Post p JOIN p.tags t WHERE t.slug = :tagSlug AND p.status = 'PUBLISHED'")
     Page<Post> findByTagSlug(@Param("tagSlug") String tagSlug, Pageable pageable);
@@ -56,4 +58,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
     long countByAuthorId(UUID authorId);
     long countByAuthorIdAndStatus(UUID authorId, PostStatus status);
+
+    @Query("SELECT COALESCE(SUM(p.likeCount), 0) FROM Post p WHERE p.author.id = :authorId")
+    long sumLikesByAuthorId(@Param("authorId") UUID authorId);
 }

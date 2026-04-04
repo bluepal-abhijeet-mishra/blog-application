@@ -53,6 +53,52 @@ const postService = {
   getStats: async () => {
     const response = await api.get('/posts/stats');
     return response.data;
+  },
+
+  addBookmark: async (id) => {
+    const response = await api.put(`/posts/${id}/bookmark`);
+    return response.data;
+  },
+
+  removeBookmark: async (id) => {
+    const response = await api.delete(`/posts/${id}/bookmark`);
+    return response.data;
+  },
+
+  toggleSave: async (id) => {
+    const response = await api.post(`/posts/${id}/save`);
+    return response.data;
+  },
+
+  getSavedPosts: async (params) => {
+    const response = await api.get('/posts/saved-posts', { params });
+    return response.data;
+  },
+
+  incrementShare: async (id) => {
+    await api.post(`/posts/${id}/share`);
+  },
+
+  exportPostsJson: async () => {
+    const response = await api.get('/posts/export/json', { responseType: 'blob' });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'my-posts.json');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  },
+
+  exportStatsCsv: async () => {
+    const response = await api.get('/posts/analytics/export/csv', { responseType: 'blob' });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'engagement-stats.csv');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   }
 };
 

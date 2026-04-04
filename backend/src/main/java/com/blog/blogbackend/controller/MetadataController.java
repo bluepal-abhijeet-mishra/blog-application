@@ -4,7 +4,7 @@ import com.blog.blogbackend.dto.CategoryDto;
 import com.blog.blogbackend.dto.TagDto;
 import com.blog.blogbackend.repository.CategoryRepository;
 import com.blog.blogbackend.repository.TagRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,13 +16,11 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class MetadataController {
 
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private TagRepository tagRepository;
+    private final CategoryRepository categoryRepository;
+    private final TagRepository tagRepository;
 
     @GetMapping("/categories")
     @Cacheable("categories")

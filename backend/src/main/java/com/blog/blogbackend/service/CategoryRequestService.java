@@ -12,14 +12,15 @@ import com.blog.blogbackend.repository.CategoryRepository;
 import com.blog.blogbackend.repository.CategoryRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,18 +36,18 @@ public class CategoryRequestService {
         String normalizedName = normalizeName(request.getName());
         String slug = slugService.slugify(normalizedName);
         if (slug == null || slug.isBlank()) {
-            throw new RuntimeException("Invalid category name");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid category name");
         }
 
         if (categoryRepository.findBySlug(slug).isPresent()) {
-            throw new RuntimeException("Category already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Category already exists");
         }
 
         boolean hasPending = categoryRequestRepository.existsBySlugAndStatusIn(
                 slug, Set.of(CategoryRequestStatus.PENDING)
         );
         if (hasPending) {
-            throw new RuntimeException("A request for this category is already pending review");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "A request for this category is already pending review");
         }
 
         CategoryRequest saved = categoryRequestRepository.save(CategoryRequest.builder()
@@ -72,7 +73,7 @@ public class CategoryRequestService {
         return categoryRequestRepository.findByRequestedByIdOrderByCreatedAtDesc(requester.getId())
                 .stream()
                 .map(this::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -80,17 +81,17 @@ public class CategoryRequestService {
         List<CategoryRequest> requests = status == null
                 ? categoryRequestRepository.findAllByOrderByCreatedAtDesc()
                 : categoryRequestRepository.findByStatusOrderByCreatedAtDesc(status);
-        return requests.stream().map(this::toDto).collect(Collectors.toList());
+        return requests.stream().map(this::toDto).toList();
     }
 
     @Transactional
     @CacheEvict(value = "categories", allEntries = true)
     public CategoryRequestDto approveRequest(User reviewer, java.util.UUID requestId, CategoryRequestDecisionRequest decision) {
         CategoryRequest request = categoryRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Category request not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category request not found"));
 
         if (request.getStatus() != CategoryRequestStatus.PENDING) {
-            throw new RuntimeException("Only pending requests can be approved");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending requests can be approved");
         }
 
         if (categoryRepository.findBySlug(request.getSlug()).isEmpty()) {
@@ -122,10 +123,10 @@ public class CategoryRequestService {
     @Transactional
     public CategoryRequestDto rejectRequest(User reviewer, java.util.UUID requestId, CategoryRequestDecisionRequest decision) {
         CategoryRequest request = categoryRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Category request not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category request not found"));
 
         if (request.getStatus() != CategoryRequestStatus.PENDING) {
-            throw new RuntimeException("Only pending requests can be rejected");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending requests can be rejected");
         }
 
         request.setStatus(CategoryRequestStatus.REJECTED);
@@ -167,7 +168,7 @@ public class CategoryRequestService {
     private String normalizeName(String input) {
         String trimmed = input == null ? "" : input.trim();
         if (trimmed.isEmpty()) {
-            throw new RuntimeException("Category name is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Category name is required");
         }
         String[] tokens = trimmed.replaceAll("\\s+", " ").split(" ");
         StringBuilder normalized = new StringBuilder();

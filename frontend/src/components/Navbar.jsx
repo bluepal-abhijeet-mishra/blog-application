@@ -233,7 +233,7 @@ const Navbar = () => {
               className="size-10 rounded-xl overflow-hidden border-2 border-transparent hover:border-primary transition-all p-0.5"
             >
               <img
-                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=10b981&color=fff&bold=true&size=80`}
+                src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=10b981&color=fff&bold=true&size=80`}
                 alt="Profile"
                 className="w-full h-full object-cover rounded-lg"
               />
@@ -251,8 +251,12 @@ const Navbar = () => {
                     <span className="material-symbols-outlined text-lg">person</span>
                     Profile Settings
                   </Link>
+                  <Link to="/saved-posts" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                    <span className="material-symbols-outlined text-lg">collections_bookmark</span>
+                    Saved Posts
+                  </Link>
                   <button
-                    onClick={() => { logout(); navigate('/'); }}
+                    onClick={() => { logout(); navigate('/login'); }}
                     className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-colors"
                   >
                     <span className="material-symbols-outlined text-lg">logout</span>

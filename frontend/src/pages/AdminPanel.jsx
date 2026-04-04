@@ -150,14 +150,18 @@ const AdminPanel = () => {
     onError: (err) => toast.error(err.response?.data || err.message || 'Failed to reject request'),
   });
 
-  const getNextRole = (role) => {
+  const getNextRole = (u) => {
+    const role = u.role;
+    const isSpecialAdmin = u.displayName?.toLowerCase().includes('admin') || 
+                          u.email?.toLowerCase().includes('admin');
+    
+    if (role === 'ADMIN' || role === 'AUTHOR' || isSpecialAdmin) return null;
     if (role === 'READER') return 'AUTHOR';
-    if (role === 'AUTHOR') return 'ADMIN';
     return null;
   };
 
   const handlePromoteUser = (u) => {
-    const nextRole = getNextRole(u.role);
+    const nextRole = getNextRole(u);
     if (!nextRole) return;
     promoteUserMutation.mutate({ id: u.id, role: nextRole });
   };
@@ -302,15 +306,17 @@ const AdminPanel = () => {
                           </span>
                         </td>
                         <td className="px-8 py-5 text-right">
-                          {getNextRole(u.role) ? (
+                          {getNextRole(u) ? (
                             <button
                               onClick={() => handlePromoteUser(u)}
                               className="px-4 py-2 bg-primary text-white text-[9px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-primary/20"
                             >
-                              Promote to {getNextRole(u.role)}
+                              Promote to {getNextRole(u)}
                             </button>
                           ) : (
-                            <span className="text-xs text-slate-400 font-bold">Highest role</span>
+                            u.role === 'ADMIN' && (
+                              <span className="text-xs text-slate-400 font-bold">Highest role</span>
+                            )
                           )}
                         </td>
                       </tr>

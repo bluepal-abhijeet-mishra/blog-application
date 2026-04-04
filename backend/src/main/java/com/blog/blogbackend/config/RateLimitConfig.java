@@ -32,7 +32,7 @@ public class RateLimitConfig implements WebMvcConfigurer {
 
     public static class RateLimitInterceptor implements HandlerInterceptor {
         private final ConcurrentHashMap<String, AtomicInteger> requestCounts = new ConcurrentHashMap<>();
-        private final int MAX_REQUESTS_PER_MINUTE = 60;
+        private static final int MAX_REQUESTS_PER_MINUTE = 60;
         private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
         public RateLimitInterceptor() {

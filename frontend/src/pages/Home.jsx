@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link, useLocation, useParams } from 'react-router-dom';
 import postService from '../api/services/postService';
+import userService from '../api/services/userService';
 import metadataService from '../api/services/metadataService';
 import toast from 'react-hot-toast';
 import PostCard from '../components/PostCard';
@@ -15,18 +16,25 @@ const Home = () => {
   const routeCategory = location.pathname.startsWith('/categories/') ? slug : null;
   const tag = routeTag || searchParams.get('tag');
   const category = routeCategory || searchParams.get('category');
+  const authorId = searchParams.get('authorId');
   const page = parseInt(searchParams.get('page') || '0');
 
   const { data: postsData, isLoading: isLoadingPosts, error: postsError } = useQuery({
-    queryKey: ['posts', tag, category, page],
+    queryKey: ['posts', tag, category, authorId, page],
     queryFn: async () => {
       try {
-        return await postService.getPosts({ tag, category, page, size: 6 });
+        return await postService.getPosts({ tag, category, authorId, page, size: 6 });
       } catch (err) {
         toast.error(err.message || 'Failed to load posts');
         throw err;
       }
     },
+  });
+
+  const { data: authorProfile } = useQuery({
+    queryKey: ['authorProfile', authorId],
+    queryFn: () => userService.getAuthorProfile(authorId),
+    enabled: !!authorId,
   });
 
   const { data: categories } = useQuery({
@@ -49,7 +57,7 @@ const Home = () => {
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-20">
         
         {/* Hero Section (Only on first page without filters) */}
-        {!tag && !category && page === 0 && (
+        {!tag && !category && !authorId && page === 0 && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -107,13 +115,13 @@ const Home = () => {
         )}
 
         {/* Filter View Header */}
-        {(tag || category || page > 0) && (
+        {(tag || category || authorId || page > 0) && (
           <div className="mb-12">
             <Link to="/feed" className="inline-flex items-center gap-2 text-primary text-xs font-black uppercase tracking-widest mb-4 hover:gap-3 transition-all">
               <span className="material-symbols-outlined text-sm">arrow_back</span> Back to Global Stream
             </Link>
             <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-              {category ? `Category: ${category}` : tag ? `Tag: #${tag}` : 'More Insights'}
+              {authorId ? (authorProfile ? `Intelligence by ${authorProfile.displayName}` : 'Author Feed') : category ? `Category: ${category}` : tag ? `Tag: #${tag}` : 'More Insights'}
             </h2>
           </div>
         )}

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.web.server.ResponseStatusException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -19,19 +20,29 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final String ERROR_KEY = "error";
+    private static final String STATUS_KEY = "status";
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatusException(ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatusCode()).body(Map.of(
+            ERROR_KEY, ex.getReason() != null ? ex.getReason() : "An error occurred",
+            STATUS_KEY, ex.getStatusCode().value()
+        ));
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
+        ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
         
         return ResponseEntity.badRequest().body(Map.of(
-            "error", "Validation failed",
-            "status", 400,
+            ERROR_KEY, "Validation failed",
+            STATUS_KEY, 400,
             "details", errors
         ));
     }
@@ -45,8 +56,8 @@ public class GlobalExceptionHandler {
             ));
         
         return ResponseEntity.badRequest().body(Map.of(
-            "error", "Validation failed",
-            "status", 400,
+            ERROR_KEY, "Validation failed",
+            STATUS_KEY, 400,
             "details", errors
         ));
     }
@@ -61,16 +72,16 @@ public class GlobalExceptionHandler {
             "Cannot comment on unpublished post".equals(message) ||
             "Parent comment does not belong to this post".equals(message)) {
             return ResponseEntity.badRequest().body(Map.of(
-                "error", message,
-                "status", 400
+                ERROR_KEY, message,
+                STATUS_KEY, 400
             ));
         }
         
         // Forbidden (403) errors
         if ("Unauthorized".equals(message)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
-                "error", message,
-                "status", 403
+                ERROR_KEY, message,
+                STATUS_KEY, 403
             ));
         }
         
@@ -81,55 +92,55 @@ public class GlobalExceptionHandler {
             "Parent comment not found".equals(message) ||
             "Notification not found".equals(message)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "error", message,
-                "status", 404
+                ERROR_KEY, message,
+                STATUS_KEY, 404
             ));
         }
         
         // Default to 500 for other runtime exceptions
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-            "error", "Internal server error",
-            "status", 500
+            ERROR_KEY, "Internal server error",
+            STATUS_KEY, 500
         ));
     }
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<Map<String, Object>> handleNotFound(NoSuchElementException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-            "error", "Resource not found",
-            "status", 404
+            ERROR_KEY, "Resource not found",
+            STATUS_KEY, 404
         ));
     }
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Map<String, Object>> handleAuthenticationException(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
-            "error", "Authentication failed",
-            "status", 401
+            ERROR_KEY, "Authentication failed",
+            STATUS_KEY, 401
         ));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
-            "error", "Invalid credentials",
-            "status", 401
+            ERROR_KEY, "Invalid credentials",
+            STATUS_KEY, 401
         ));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
-            "error", "Access denied",
-            "status", 403
+            ERROR_KEY, "Access denied",
+            STATUS_KEY, 403
         ));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity.badRequest().body(Map.of(
-            "error", ex.getMessage(),
-            "status", 400
+            ERROR_KEY, ex.getMessage(),
+            STATUS_KEY, 400
         ));
     }
 
@@ -139,8 +150,8 @@ public class GlobalExceptionHandler {
         ex.printStackTrace();
         
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-            "error", "An unexpected error occurred",
-            "status", 500
+            ERROR_KEY, "An unexpected error occurred",
+            STATUS_KEY, 500
         ));
     }
 }

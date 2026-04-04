@@ -7,21 +7,19 @@ import AuthorApplicationModal from './AuthorApplicationModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const navItems = [
-  { icon: 'home', label: 'Feed', path: '/feed', roles: ['READER', 'AUTHOR', 'ADMIN'] },
+  { icon: 'grid_view', label: 'Dashboard', path: '/dashboard', roles: ['AUTHOR', 'ADMIN'] },
+  { icon: 'home', label: 'Home Feed', path: '/feed', roles: ['READER', 'AUTHOR', 'ADMIN'] },
   { icon: 'explore', label: 'Explore', path: '/search', roles: ['READER', 'AUTHOR', 'ADMIN'] },
-  { icon: 'dashboard', label: 'Dashboard', path: '/dashboard', roles: ['AUTHOR', 'ADMIN'] },
-  { icon: 'edit_note', label: 'Write', path: '/editor', roles: ['AUTHOR', 'ADMIN'] },
-  { icon: 'admin_panel_settings', label: 'Admin', path: '/admin', roles: ['ADMIN'] },
+  { icon: 'edit_note', label: 'Create Post', path: '/editor', roles: ['AUTHOR', 'ADMIN'] },
+  { icon: 'admin_panel_settings', label: 'Admin Panel', path: '/admin', roles: ['ADMIN'] },
 ];
 
-const Sidebar = () => {
+const Sidebar = ({ isExpanded, setIsExpanded }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
-  const [hoveredItem, setHoveredItem] = useState(null);
 
-  // Fetch reader's application status
   const { data: myApplications, refetch: refetchApplications } = useQuery({
     queryKey: ['my-applications'],
     queryFn: () => applicationService.getMyApplications(),
@@ -61,189 +59,192 @@ const Sidebar = () => {
 
   return (
     <>
-      <aside className="fixed left-0 top-0 bottom-0 w-[72px] bg-slate-900 flex flex-col items-center z-50 border-r border-white/5 shadow-2xl">
-        {/* Premium Logo */}
-        <Link
-          to="/feed"
-          className="mt-6 mb-8 w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-xl shadow-primary/20 hover:scale-110 active:scale-95 transition-all duration-300 group"
-        >
-          <span className="material-symbols-outlined text-white text-2xl group-hover:rotate-12 transition-transform">edit_square</span>
-        </Link>
+      <motion.aside
+        initial={{ width: 72 }}
+        animate={{ width: isExpanded ? 240 : 72 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="fixed left-0 top-0 bottom-0 bg-white dark:bg-slate-900 flex flex-col z-50 border-r border-slate-100 dark:border-white/5 shadow-xl overflow-hidden"
+      >
+        {/* Top Header Section */}
+        <div className="h-20 flex items-center px-4 relative">
+          <AnimatePresence mode="wait">
+            {!isExpanded ? (
+              <motion.button
+                key="menu-btn"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsExpanded(true)}
+                className="size-10 flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors absolute left-4"
+              >
+                <span className="material-symbols-outlined text-2xl">menu</span>
+              </motion.button>
+            ) : (
+              <motion.div
+                key="expanded-header"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="flex items-center justify-between w-full"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="size-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <span className="material-symbols-outlined text-white text-xl">edit_square</span>
+                  </div>
+                  <span className="font-black text-slate-900 dark:text-white tracking-tight">BlogSpace</span>
+                </div>
+                <button
+                  onClick={() => setIsExpanded(false)}
+                  className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-xl">close</span>
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-        {/* Navigation Section */}
-        <nav className="flex-1 flex flex-col items-center gap-2 w-full px-3">
-          {visibleItems.map((item) => (
-            <div key={item.path} className="relative w-full">
+        {/* Navigation Items */}
+        <nav className="flex-1 px-3 space-y-1.5 mt-4">
+          {visibleItems.map((item) => {
+            const active = isActive(item.path);
+            return (
               <Link
+                key={item.path}
                 to={item.path}
-                onMouseEnter={() => setHoveredItem(item.path)}
-                onMouseLeave={() => setHoveredItem(null)}
-                className={`w-full h-12 rounded-2xl flex items-center justify-center transition-all duration-300 relative group ${
-                  isActive(item.path)
-                    ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105'
-                    : 'text-slate-500 hover:text-white hover:bg-white/5'
+                className={`flex items-center h-12 rounded-xl transition-all duration-200 group relative ${
+                  active
+                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                    : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <span className="material-symbols-outlined text-2xl font-light">{item.icon}</span>
+                <div className="size-12 shrink-0 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[23px]">{item.icon}</span>
+                </div>
                 
-                {isActive(item.path) && (
-                  <motion.div 
-                    layoutId="active-indicator"
-                    className="absolute left-0 w-1 h-6 bg-white rounded-r-full"
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  />
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.span
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      className="text-sm font-bold whitespace-nowrap"
+                    >
+                      {item.label}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+
+                {!isExpanded && (
+                   <div className="absolute left-full ml-4 px-3 py-1.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all pointer-events-none z-50 whitespace-nowrap shadow-xl border border-white/5">
+                    {item.label}
+                  </div>
                 )}
               </Link>
+            );
+          })}
+
+          {/* My Public Feed (Author/Admin Only) */}
+          {(user.role === 'AUTHOR' || user.role === 'ADMIN') && (
+            <Link
+              to={`/feed?authorId=${user.id}`}
+              className={`flex items-center h-12 rounded-xl transition-all duration-200 group relative ${
+                location.search.includes(`authorId=${user.id}`)
+                  ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                  : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <div className="size-12 shrink-0 flex items-center justify-center">
+                <span className="material-symbols-outlined text-[23px]">contact_page</span>
+              </div>
               
-              {/* Refined Tooltip */}
               <AnimatePresence>
-                {hoveredItem === item.path && (
-                  <motion.div
+                {isExpanded && (
+                  <motion.span
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10 }}
-                    className="absolute left-full ml-4 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-[11px] font-black uppercase tracking-widest px-4 py-2 rounded-xl shadow-2xl z-[100] pointer-events-none whitespace-nowrap border border-white/10"
+                    className="text-sm font-bold whitespace-nowrap"
                   >
-                    {item.label}
-                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-slate-800"></div>
-                  </motion.div>
+                    My Public Feed
+                  </motion.span>
                 )}
               </AnimatePresence>
-            </div>
-          ))}
 
-          {/* Role-Specific Special Actions */}
-          {user.role === 'READER' && (
-            <div className="w-8 h-px bg-white/5 my-2"></div>
+              {!isExpanded && (
+                 <div className="absolute left-full ml-4 px-3 py-1.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all pointer-events-none z-50 whitespace-nowrap shadow-xl border border-white/5">
+                  My Public Feed
+                </div>
+              )}
+            </Link>
           )}
 
+          {/* Special Actions (Reader Only) */}
           {user.role === 'READER' && (
-            <>
-              <div className="relative w-full">
-                <button
-                  onClick={handleBecomeAuthor}
-                  onMouseEnter={() => setHoveredItem('become-author')}
-                  onMouseLeave={() => setHoveredItem(null)}
-                  className={`w-full h-12 rounded-2xl flex items-center justify-center transition-all duration-300 relative group ${
-                    hasPendingApplication
-                      ? 'bg-amber-500/10 text-amber-500'
-                      : 'text-slate-500 hover:text-primary hover:bg-primary/10'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-2xl font-light">
+            <div className="pt-4 border-t border-slate-100 dark:border-white/5 mt-4 space-y-1.5">
+              <button
+                onClick={handleBecomeAuthor}
+                className={`flex items-center w-full h-12 rounded-xl transition-all duration-200 group relative ${
+                  hasPendingApplication
+                    ? 'bg-amber-500/10 text-amber-500'
+                    : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5'
+                }`}
+              >
+                <div className="size-12 shrink-0 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[23px]">
                     {hasPendingApplication ? 'hourglass_top' : 'badge'}
                   </span>
-                  {hasPendingApplication && (
-                    <span className="absolute top-2 right-3 size-2 bg-amber-500 rounded-full animate-pulse shadow-sm shadow-amber-500/50"></span>
-                  )}
-                </button>
-                <AnimatePresence>
-                  {hoveredItem === 'become-author' && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
-                      className="absolute left-full ml-4 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-[11px] font-black uppercase tracking-widest px-4 py-2 rounded-xl shadow-2xl z-[100] pointer-events-none whitespace-nowrap border border-white/10"
-                    >
-                      {hasPendingApplication ? 'Pending Review' : 'Become Author'}
-                      <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-slate-800"></div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              <div className="relative w-full">
-                <Link
-                  to="/my-applications"
-                  onMouseEnter={() => setHoveredItem('my-apps')}
-                  onMouseLeave={() => setHoveredItem(null)}
-                  className={`w-full h-12 rounded-2xl flex items-center justify-center transition-all duration-300 relative group ${
-                    isActive('/my-applications')
-                      ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105'
-                      : 'text-slate-500 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-2xl font-light">assignment</span>
-                </Link>
-                <AnimatePresence>
-                  {hoveredItem === 'my-apps' && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
-                      className="absolute left-full ml-4 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-[11px] font-black uppercase tracking-widest px-4 py-2 rounded-xl shadow-2xl z-[100] pointer-events-none whitespace-nowrap border border-white/10"
-                    >
-                      My Applications
-                      <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-slate-800"></div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </>
+                </div>
+                {isExpanded && (
+                  <span className="text-sm font-bold whitespace-nowrap">
+                    {hasPendingApplication ? 'Pending Review' : 'Become Author'}
+                  </span>
+                )}
+              </button>
+            </div>
           )}
         </nav>
 
-        {/* User & Settings Section */}
-        <div className="w-full flex flex-col items-center gap-4 p-3 mb-6">
-          <div className="w-8 h-px bg-white/5"></div>
-
-          {/* Profile Group */}
-          <div className="relative group w-full">
-            <div
-              className="w-full h-12 flex items-center justify-center cursor-pointer"
-              onMouseEnter={() => setHoveredItem('user-profile')}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              <div className="size-10 rounded-[14px] border-2 border-white/10 hover:border-primary transition-all p-0.5 group-hover:scale-105">
-                <img
-                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.displayName || 'U')}&background=10b981&color=fff&bold=true&size=80`}
-                  className="w-full h-full object-cover rounded-[10px]"
+        {/* Bottom Section */}
+        <div className="p-3 border-t border-slate-100 dark:border-white/5 space-y-4">
+          <div className="flex items-center gap-3 h-12 px-1">
+            <div className="size-10 rounded-xl border-2 border-slate-100 dark:border-white/10 p-0.5 overflow-hidden shrink-0">
+               <img
+                  src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.displayName || 'U')}&background=10b981&color=fff&bold=true&size=80`}
+                  className="w-full h-full object-cover rounded-lg"
                   alt="Profile"
                 />
-              </div>
             </div>
-            
-            <AnimatePresence>
-              {hoveredItem === 'user-profile' && (
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  className="absolute left-full ml-4 top-1/2 -translate-y-1/2 bg-slate-800 text-white p-4 rounded-2xl shadow-2xl z-[100] pointer-events-none border border-white/10 min-w-[160px]"
-                >
-                  <p className="font-black text-sm tracking-tight">{user?.displayName}</p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{user?.role}</p>
-                  <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-slate-800"></div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col min-w-0"
+              >
+                <span className="text-sm font-black text-slate-900 dark:text-white truncate tracking-tight">{user.displayName}</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">{user.role}</span>
+              </motion.div>
+            )}
           </div>
 
-          <div className="relative w-full flex justify-center">
-            <button
-              onClick={() => { logout(); navigate('/'); }}
-              onMouseEnter={() => setHoveredItem('logout')}
-              onMouseLeave={() => setHoveredItem(null)}
-              className="w-12 h-12 rounded-2xl flex items-center justify-center text-slate-500 hover:bg-rose-500/10 hover:text-rose-500 transition-all group"
-            >
-              <span className="material-symbols-outlined text-2xl font-light">logout</span>
-            </button>
-            <AnimatePresence>
-              {hoveredItem === 'logout' && (
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  className="absolute left-full ml-4 top-1/2 -translate-y-1/2 bg-rose-500 text-white text-[11px] font-black uppercase tracking-widest px-4 py-2 rounded-xl shadow-2xl z-[100] pointer-events-none whitespace-nowrap border border-white/10"
-                >
-                  Sign Out
-                  <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-rose-500"></div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <button
+            onClick={() => { logout(); navigate('/login'); }}
+            className="flex items-center w-full h-12 rounded-xl text-slate-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 transition-all group relative"
+          >
+            <div className="size-12 shrink-0 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[23px]">logout</span>
+            </div>
+            {isExpanded && (
+              <span className="text-sm font-bold whitespace-nowrap">Logout System</span>
+            )}
+            {!isExpanded && (
+               <div className="absolute left-full ml-4 px-3 py-1.5 bg-rose-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all pointer-events-none z-50 whitespace-nowrap shadow-xl">
+                Sign Out
+              </div>
+            )}
+          </button>
         </div>
-      </aside>
+      </motion.aside>
 
       <AuthorApplicationModal
         isOpen={isApplicationModalOpen}

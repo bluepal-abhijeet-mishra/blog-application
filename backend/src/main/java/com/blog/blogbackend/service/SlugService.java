@@ -1,7 +1,7 @@
 package com.blog.blogbackend.service;
 
 import com.blog.blogbackend.repository.PostRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
@@ -9,10 +9,10 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 @Service
+@RequiredArgsConstructor
 public class SlugService {
 
-    @Autowired
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
 
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s+]");

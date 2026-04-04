@@ -17,6 +17,11 @@ const commentService = {
   
   toggleLike: async (commentId) => {
     await api.post(`/comments/${commentId}/toggle-like`);
+  },
+  
+  getCommentLikes: async (commentId) => {
+    const response = await api.get(`/comments/${commentId}/likes`);
+    return response.data;
   }
 };
 

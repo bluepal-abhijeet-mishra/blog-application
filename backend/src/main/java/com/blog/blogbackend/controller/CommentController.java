@@ -5,7 +5,7 @@ import com.blog.blogbackend.dto.CommentResponse;
 import com.blog.blogbackend.service.CommentService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,16 +13,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import com.blog.blogbackend.dto.UserSummaryResponse;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
 @Validated
+@RequiredArgsConstructor
 public class CommentController {
 
-    @Autowired
-    private CommentService commentService;
+    private final CommentService commentService;
 
     @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<Page<CommentResponse>> getComments(
@@ -50,6 +52,11 @@ public class CommentController {
     public ResponseEntity<Void> toggleLike(@PathVariable UUID id) {
         commentService.toggleLike(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/comments/{id}/likes")
+    public ResponseEntity<List<UserSummaryResponse>> getCommentLikes(@PathVariable UUID id) {
+        return ResponseEntity.ok(commentService.getCommentLikes(id));
     }
 
     @DeleteMapping("/comments/{id}")

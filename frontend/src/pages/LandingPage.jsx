@@ -277,29 +277,126 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* STATS */}
-      <section className="bg-[var(--mint)] px-12 py-[4rem]">
-        <div className="max-w-[1280px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-[2rem] text-center">
-          {[
-            { n: 12000, suf: '+', l: 'Active Authors' },
-            { n: 480, suf: 'K', l: 'Posts Published' },
-            { n: 2.1, suf: 'M', l: 'Monthly Readers' },
-            { n: 99.9, suf: '%', l: 'Uptime' }
-          ].map((stat, i) => (
-            <motion.div 
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-            >
-              <div className="text-[clamp(1.75rem,3vw,2.5rem)] font-[900] text-[var(--navy)] tracking-[-1.5px] flex justify-center items-baseline gap-[2px]">
-                <CountUp value={stat.n} precision={stat.n % 1 !== 0 ? 1 : 0} />
-                <span className="text-[var(--green)]">{stat.suf}</span>
+      {/* ADVANCED ANALYTICS & BI - 3D Showcase */}
+      <section className="relative px-6 py-20 lg:py-32 bg-white overflow-hidden" id="analytics">
+        <div className="max-w-[1280px] mx-auto">
+          <div className="text-center mb-20 reveal">
+            <div className="inline-flex items-center gap-[6px] bg-[var(--mint)] border border-[rgba(16,185,129,0.2)] px-[14px] py-[5px] rounded-[999px] text-[0.72rem] font-[800] text-[var(--green)] tracking-[1px] uppercase mb-[1.25rem] justify-center shadow-sm">✦ Editorial Intelligence</div>
+            <h2 className="text-[clamp(2.5rem,5vw,4rem)] font-[900] text-[var(--navy)] tracking-[-2px] leading-[1] mb-6">Advanced <span className="text-[var(--green)]">Editorial BI</span></h2>
+            <p className="text-[1.1rem] text-[var(--gray)] leading-relaxed max-w-[640px] mx-auto">Master your content strategy with data-driven precision. Monitor reader retention, engagement trends, and SEO performance from one unified engine.</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left Column: 3D Visual */}
+            <div className="relative flex justify-center items-center h-[400px]">
+              {/* Decorative Rings */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="size-[320px] rounded-full border border-emerald-500/10" />
+                <div className="absolute size-[400px] rounded-full border border-emerald-500/5 animate-[pulse_4s_ease-in-out_infinite]" />
               </div>
-              <div className="text-[0.72rem] font-[700] text-[var(--gray)] uppercase tracking-[1px] mt-[4px]">{stat.l}</div>
-            </motion.div>
-          ))}
+
+              {/* 3D Cube Simulation */}
+              <motion.div
+                animate={{ 
+                  rotateY: [0, 360],
+                  rotateX: [0, 15, -15, 0]
+                }}
+                transition={{ 
+                  duration: 25, 
+                  repeat: Infinity, 
+                  ease: "linear" 
+                }}
+                style={{ transformStyle: "preserve-3d", perspective: "1000px" }}
+                className="relative size-48 md:size-64"
+              >
+                {/* Cube Faces */}
+                {[
+                  { r: "rotateY(0deg) translateZ(100px)", icon: "forum" }, // Comments
+                  { r: "rotateY(90deg) translateZ(100px)", icon: "visibility" }, // Views
+                  { r: "rotateY(180deg) translateZ(100px)", icon: "edit_note" }, // Drafts
+                  { r: "rotateY(270deg) translateZ(100px)", icon: "share" }, // Social
+                  { r: "rotateX(90deg) translateZ(100px)", icon: "search" }, // SEO
+                  { r: "rotateX(-90deg) translateZ(100px)", icon: "person_add" } // Subs
+                ].map((face, i) => (
+                  <div
+                    key={i}
+                    style={{ 
+                      transform: face.r,
+                      position: "absolute",
+                      width: "100%",
+                      height: "100%",
+                      background: i % 2 === 0 ? "rgba(16,185,129,0.95)" : "rgba(15, 23, 42, 0.95)",
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: "28px",
+                      backdropFilter: "blur(12px)",
+                      boxShadow: "0 20px 50px rgba(0,0,0,0.15), inset 0 0 20px rgba(255,255,255,0.1)"
+                    }}
+                  >
+                    <span className="material-symbols-outlined text-white text-5xl md:text-6xl">{face.icon}</span>
+                  </div>
+                ))}
+              </motion.div>
+
+              {/* Floating Floating Badges */}
+              <motion.div
+                animate={{ y: [0, -20, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute top-10 right-0 md:right-10 bg-white p-4 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.1)] border border-emerald-100 flex items-center gap-3 z-20"
+              >
+                <div className="size-10 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
+                  <span className="material-symbols-outlined text-xl">auto_graph</span>
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Engagement</div>
+                  <div className="text-lg font-black text-[var(--navy)]">+28.5%</div>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Right Column: List */}
+            <div className="space-y-12">
+              {[
+                { 
+                  i: "analytics", 
+                  t: "Live Engagement Hub", 
+                  d: "Track reader comments, likes, and thread depth in real-time. Understand what sparks the most conversation.",
+                  c: "bg-emerald-500" 
+                },
+                { 
+                  i: "import_contacts", 
+                  t: "Read-Depth Metrics", 
+                  d: "Measure how far readers scroll and where they drop off. Optimize your content for maximum retention.",
+                  c: "bg-blue-500" 
+                },
+                { 
+                  i: "search_check", 
+                  t: "Semantic SEO Intelligence", 
+                  d: "Automated insights into tag performance and search visibility to keep your publication ahead of trends.",
+                  c: "bg-indigo-500" 
+                }
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.2 }}
+                  className="flex gap-6 items-start group"
+                >
+                  <div className={`mt-1 size-14 shrink-0 rounded-2xl ${item.c} text-white flex items-center justify-center shadow-lg shadow-current/20 transition-transform group-hover:scale-110 group-hover:rotate-6`}>
+                    <span className="material-symbols-outlined text-3xl font-light">{item.i}</span>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-[var(--navy)] mb-2 tracking-tight group-hover:text-[var(--green)] transition-colors">{item.t}</h3>
+                    <p className="text-[1.05rem] text-[var(--gray)] leading-relaxed">{item.d}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -374,45 +471,118 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section className="px-12 py-[7rem] bg-[var(--mint)]" id="features">
+      {/* FEATURES - Animated Platform Intelligence */}
+      <section className="px-6 py-[7rem] bg-[var(--mint)] overflow-hidden" id="features">
         <div className="max-w-[1280px] mx-auto">
-          <div className="text-center reveal">
-            <div className="inline-flex items-center gap-[6px] bg-[var(--mint)] border border-[rgba(16,185,129,0.25)] px-[14px] py-[5px] rounded-[999px] text-[0.72rem] font-[800] text-[var(--green)] tracking-[1px] uppercase mb-[1.25rem] justify-center">✦ Everything You Need</div>
-            <h2 className="text-[clamp(2rem,3.5vw,3rem)] font-[900] text-[var(--navy)] tracking-[-1px] leading-[1.15] mb-[1rem]">Built for Writers Who<br /><span className="text-[var(--green)]">Mean Business</span></h2>
-            <p className="text-[1rem] text-[var(--gray)] leading-[1.7] max-w-[520px] mx-auto mt-[1rem]">Everything you need to run a high-traffic publication without the technical headaches.</p>
+          <div className="text-center mb-16 reveal">
+            <div className="inline-flex items-center gap-[6px] bg-white border border-[rgba(16,185,129,0.2)] px-[14px] py-[5px] rounded-[999px] text-[0.72rem] font-[800] text-[var(--green)] tracking-[1px] uppercase mb-[1.25rem] justify-center shadow-sm">✦ Platform Architecture</div>
+            <h2 className="text-[clamp(2.25rem,4vw,3.5rem)] font-[900] text-[var(--navy)] tracking-[-1.5px] leading-[1.1] mb-[1.25rem]">Enterprise Content<br /><span className="text-[var(--green)]">Infrastructure</span></h2>
+            <p className="text-[1.1rem] text-[var(--gray)] leading-[1.7] max-w-[580px] mx-auto">Built from the ground up for high-performance publishing. Manage complex workflows with a centralized, intelligent core.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1.5rem] mt-[4rem]">
-            {[
-              { i: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z', t: 'TipTap Rich Editor', d: 'Headings, bold, italic, inline code, code blocks, images and links — distraction-free canvas with live preview.' },
-              { i: 'M7 7h.01M7 11h.01M7 15h.01M13 7h.01M13 11h.01M13 15h.01M17 7h.01M17 11h.01M17 15h.01', t: 'Smart Tagging', d: 'Assign multiple tags and one category per post. Readers filter by tag or category — discovery made effortless.' },
-              { i: 'M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z', t: 'Nested Comments', d: 'Two-level threaded comments — readers comment, authors reply. Real conversations, not just noise.' },
-              { i: 'M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z', t: 'RSS 2.0 Feed', d: 'Auto-generated valid RSS feed for every blog. Readers subscribe in any feed reader, forever. Includes title, excerpt and pubDate.' },
-              { i: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z', t: 'Full-text Search', d: 'PostgreSQL tsvector + GIN index powers instant search across all post titles and content without loading everything into memory.' },
-              { i: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', t: 'JWT Role Security', d: 'READER · AUTHOR · ADMIN roles enforced via Spring Security. Protected routes return 401. All secrets in environment variables.' }
-            ].map((feature, i) => (
-              <motion.div 
-                key={i} 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1, ease: "easeOut" }}
-                whileHover={{ y: -10, scale: 1.02 }}
-                className="bg-white p-[2rem] rounded-[24px] border border-[var(--border)] transition-shadow duration-300 cursor-default relative overflow-hidden group hover:shadow-[0_40px_80px_rgba(16,185,129,0.12)]"
-              >
-                <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(16,185,129,0.04),transparent)] opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-                <div className="w-[56px] h-[56px] bg-[var(--mint)] text-[var(--green)] rounded-[16px] flex items-center justify-center mb-[1.5rem] transition-all duration-400 group-hover:bg-[var(--green)] group-hover:text-white group-hover:rotate-[8deg] group-hover:scale-110">
-                  <svg width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                    <path d={feature.i} />
-                  </svg>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left Column: Feature List */}
+            <div className="lg:col-span-4 space-y-4">
+              {[
+                { i: 'edit_note', t: 'Intelligent Editorial', d: 'TipTap rich editor with live preview, code blocks, and distraction-free canvas.', c: 'bg-emerald-500' },
+                { i: 'label', t: 'Semantic Discovery', d: 'Smart tagging and adaptive categorization for effortless content discovery.', c: 'bg-blue-500' },
+                { i: 'forum', t: 'Nested Engagement', d: 'High-signal threaded conversations and professional author reply systems.', c: 'bg-indigo-500' }
+              ].map((f, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.15 }}
+                  className="bg-white/60 backdrop-blur-sm p-6 rounded-[24px] border border-white shadow-sm hover:shadow-xl transition-all duration-300 group cursor-default"
+                >
+                  <div className={`size-10 rounded-xl ${f.c} text-white flex items-center justify-center mb-4 transition-transform group-hover:scale-110 shadow-lg shadow-current/20`}>
+                    <span className="material-symbols-outlined text-xl">{f.i}</span>
+                  </div>
+                  <h3 className="text-lg font-black text-[var(--navy)] mb-2 tracking-tight">{f.t}</h3>
+                  <p className="text-sm text-[var(--gray)] leading-relaxed">{f.d}</p>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Central Visual Column */}
+            <div className="lg:col-span-4 flex justify-center py-12 lg:py-0">
+              <div className="relative size-[320px] md:size-[400px]">
+                {/* Orbiting Ring 1 */}
+                <motion.div 
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 border-[1.5px] border-dashed border-emerald-500/20 rounded-full"
+                />
+                {/* Orbiting Ring 2 */}
+                <motion.div 
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-[40px] border-[1.5px] border-dashed border-blue-500/20 rounded-full"
+                />
+
+                {/* Orbiting Nodes */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0"
+                >
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 size-12 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-emerald-100">
+                    <span className="material-symbols-outlined text-emerald-500 text-xl">rss_feed</span>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-[40px]"
+                >
+                  <div className="absolute bottom-0 right-1/2 translate-x-1/2 size-10 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-blue-100">
+                    <span className="material-symbols-outlined text-blue-500 text-lg">search</span>
+                  </div>
+                </motion.div>
+
+                {/* System Core */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <motion.div 
+                    animate={{ scale: [1, 1.05, 1], rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                    className="relative z-10 size-[140px] md:size-[180px] bg-[var(--navy)] rounded-[40px] shadow-2xl shadow-emerald-500/20 flex flex-col items-center justify-center border border-white/10"
+                  >
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.3),transparent)] rounded-[40px]" />
+                    <span className="material-symbols-outlined text-white text-5xl mb-2 relative z-10">hub</span>
+                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] relative z-10">System Core</span>
+                    
+                    {/* Pulsing Aura */}
+                    <div className="absolute inset-0 -z-10 bg-emerald-500/20 rounded-[40px] blur-2xl animate-pulse" />
+                  </motion.div>
                 </div>
-                <div className="text-[1.2rem] font-[800] text-[var(--navy)] mb-[0.75rem] tracking-[-0.5px]">{feature.t}</div>
-                <p className="text-[0.95rem] text-[var(--gray)] leading-[1.65] mb-[1.5rem]">{feature.d}</p>
-                <Link to="#" className="text-[0.875rem] font-[700] text-[var(--green)] flex items-center gap-[6px] no-underline transition-all duration-200 group-hover:gap-[10px]">
-                  Learn more <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </Link>
-              </motion.div>
-            ))}
+              </div>
+            </div>
+
+            {/* Right Column: Feature List */}
+            <div className="lg:col-span-4 space-y-4">
+              {[
+                { i: 'rss_feed', t: 'Syndication Engine', d: 'Automated RSS 2.0 generation for every story and author feed instantly.', c: 'bg-amber-500' },
+                { i: 'manage_search', t: 'Neural Search', d: 'Full-text indexing powered by PostgreSQL for sub-millisecond discovery.', c: 'bg-cyan-500' },
+                { i: 'lock', t: 'JWT Protocol', d: 'Role-based access control with modern encrypted security tokens.', c: 'bg-rose-500' }
+              ].map((f, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.15 }}
+                  className="bg-white/60 backdrop-blur-sm p-6 rounded-[24px] border border-white shadow-sm hover:shadow-xl transition-all duration-300 group cursor-default"
+                >
+                  <div className={`size-10 rounded-xl ${f.c} text-white flex items-center justify-center mb-4 transition-transform group-hover:scale-110 shadow-lg shadow-current/20`}>
+                    <span className="material-symbols-outlined text-xl">{f.i}</span>
+                  </div>
+                  <h3 className="text-lg font-black text-[var(--navy)] mb-2 tracking-tight">{f.t}</h3>
+                  <p className="text-sm text-[var(--gray)] leading-relaxed">{f.d}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
