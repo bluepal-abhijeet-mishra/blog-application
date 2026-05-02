@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blog-backend
+  labels:
+    app: blog-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blog-backend
+  template:
+    metadata:
+      labels:
+        app: blog-backend
+    spec:
+      containers:
+        - name: blog-backend
+          image: abhijeetmishra369/blog-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blog-backend
+  labels:
+    app: blog-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: blog-backend
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
