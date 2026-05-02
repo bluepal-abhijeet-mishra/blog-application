@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blog-frontend
+  labels:
+    app: blog-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blog-frontend
+  template:
+    metadata:
+      labels:
+        app: blog-frontend
+    spec:
+      containers:
+        - name: blog-frontend
+          image: abhijeetmishra369/blog-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blog-frontend
+  labels:
+    app: blog-frontend
+spec:
+  type: LoadBalancer
+  selector:
+    app: blog-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
