@@ -12,6 +12,7 @@ RUN if [ -d dist ]; then cp -r dist /app/static; elif [ -d build ]; then cp -r b
 FROM nginx:alpine
 
 COPY --from=build /app/static /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
