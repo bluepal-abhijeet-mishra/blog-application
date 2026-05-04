@@ -18,6 +18,9 @@ spec:
         - name: blog-backend
           image: abhijeetmishra369/blog-backend:latest
           imagePullPolicy: Always
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://host.minikube.internal:5432/blogdb
           ports:
             - containerPort: 8080
 ---
